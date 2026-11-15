@@ -64,6 +64,17 @@ internet, and the reason an off-the-shelf adapter in mriscoc/Ender3V2S1 #462
 had to be re-pinned. Note it also explains why panel pins 9 and 10 read as
 "NC": they are board PC6/PB2, which the DWIN simply does not use.
 
+A third source agrees, in board-end numbering, and is DWIN-specific:
+[klipper-dwin-ui](https://github.com/andersevenrud/klipper-dwin-ui) gives
+10=5V, 9=GND, 3=RX, 4=TX, 8=A, 7=B, 5=ENT, 6=BEEP, 1-2 unused, and its Pico
+GPIO assignments match ours including BEEP on GP5.
+
+Beware when searching: the widely-linked povlhp gist
+(`1a5c200d79638afc3c2040f4335d44f1`) and `rfblock/ender3-lcd-arduino` are for
+the **old Ender 3 / CR-10 ST7920 12864 LCD**, which uses SID/SCLK/CS on the
+same style of 10-pin header. Applying that pinout to a DWIN panel puts SPI
+signals where the serial and power lines should be.
+
 ## Connections
 
 ```
@@ -92,20 +103,21 @@ differs (the Zero has a `5V` castellation where a Pico has VBUS on pin 40).
 
 - **Panel logic is 3.3 V**, so the RP2040 connects directly with no level
   shifting. The 5 V is for the panel's own supply and backlight only.
-- **Find pins 1 and 2 with a meter, not by counting.** The notch-to-pin-1
-  convention is documented inconsistently across sources, and 5 V on a signal
-  line destroys the panel. Knowing the signal order (above) does NOT tell you
-  which physical end it starts from - that depends on how the shrouded header
-  sits on the PCB. Procedure:
+- **Do not probe the panel's own shrouded header at all.** Knowing the signal
+  order does not tell you which physical end it starts from, and 5 V on a
+  signal line destroys the panel.
 
-  1. Panel unplugged, meter on continuity: find **GND**. It rings out to the
-     panel's ground plane, its mounting holes, and the large capacitor's
-     negative terminal. That is panel pin 2.
-  2. The pin beside it at the same end of the connector is **+5V** (pin 1).
-     The power pair sits together at one end.
-  3. Cross-check against the printer: plug the stock ribbon into the Creality
-     board's EXP3 and measure 5 V with the printer powered. The board is the
-     known-good reference.
+  Instead, do what `klipper-dwin-ui` recommends: **leave the stock ribbon
+  plugged into the display and wire to its other end** - the plug that
+  normally goes into the printer's mainboard. That end is the well-documented
+  one (Marlin's EXP3 numbering, below), so the ambiguity disappears entirely.
+
+  Then confirm before powering:
+
+  1. Continuity from mainboard-end **hole 9 to the display's GND**, and
+     **hole 10 to its VCC**.
+  2. Cross-check by plugging the ribbon into the Creality board's EXP3 and
+     measuring 5 V with the printer on - a known-good reference.
 - Do not trust the `open_uart` docstring in the `dwin-t5uic1` repo: it says to
   wire TX/RX to panel pins 3 and 4, which are the **encoder** lines. Pins 7
   and 8 are correct, per that repo's own `wiring.md`. Reported upstream.
