@@ -36,6 +36,34 @@ is the running one, `505431651893921C`, which equals `machine.unique_id()`.
  10   NC                                     brown
 ```
 
+## Corroboration from Marlin, and why the numbering confuses everyone
+
+Marlin's `Marlin/src/pins/stm32f1/pins_CREALITY_V4.h` documents the **board**
+side of this same ribbon, with an explicit diagram:
+
+```
+   Creality V4 EXP3              with HAS_DWIN_E3V2:
+        ------
+  PC6  | 1  2 | PB2             3  PB10  USART3 TX  -> panel RX
+  PB10 | 3  4 | PB11            4  PB11  USART3 RX  <- panel TX
+  PB14   5  6 | PB13            5  PB14  BTN_ENC    (button)
+  PB12 | 7  8 | PB15            6  PB13  BEEPER
+   GND | 9 10 | 5V              7  PB12  BTN_EN2    (encoder B)
+        ------                  8  PB15  BTN_EN1    (encoder A)
+```
+
+(`BOARD_LCD_SERIAL_PORT 3` -> USART3 -> PB10/PB11 = EXP3 pins 3 and 4.)
+
+**That is the board numbering. The table above is the panel numbering, and the
+two are mirror images** - two IDC headers facing each other through a straight
+ribbon. Reverse Marlin's (n -> 11-n) and every one of the ten lines matches,
+including which encoder channel is A and which is B.
+
+This mirroring is the reason TX/RX are documented wrongly all over the
+internet, and the reason an off-the-shelf adapter in mriscoc/Ender3V2S1 #462
+had to be re-pinned. Note it also explains why panel pins 9 and 10 read as
+"NC": they are board PC6/PB2, which the DWIN simply does not use.
+
 ## Connections
 
 ```
@@ -43,10 +71,16 @@ is the running one, `505431651893921C`, which equals `machine.unique_id()`.
  panel 2  (GND)      <-> GND
  panel 3  (enc A)    ->  GP2
  panel 4  (enc B)    ->  GP3
+ panel 5  (beeper)   <-  GP5          optional, see below
  panel 6  (button)   ->  GP4
  panel 7  (TX)       ->  GP1          UART0 RX
  panel 8  (RX)       <-  GP0          UART0 TX
 ```
+
+Panel pin 5 is a **beeper driven by the host** (board PB13 in Marlin). Not
+used by the stock example, but worth wiring: audible feedback on a pendant -
+jog detent, limit hit, cycle complete - is genuinely useful on a machine you
+are standing beside rather than looking at.
 
 Serial crosses over: host TX (GP0) goes to panel **RX, pin 8**; host RX (GP1)
 comes from panel **TX, pin 7**.
@@ -60,7 +94,18 @@ differs (the Zero has a `5V` castellation where a Pico has VBUS on pin 40).
   shifting. The 5 V is for the panel's own supply and backlight only.
 - **Find pins 1 and 2 with a meter, not by counting.** The notch-to-pin-1
   convention is documented inconsistently across sources, and 5 V on a signal
-  line destroys the panel.
+  line destroys the panel. Knowing the signal order (above) does NOT tell you
+  which physical end it starts from - that depends on how the shrouded header
+  sits on the PCB. Procedure:
+
+  1. Panel unplugged, meter on continuity: find **GND**. It rings out to the
+     panel's ground plane, its mounting holes, and the large capacitor's
+     negative terminal. That is panel pin 2.
+  2. The pin beside it at the same end of the connector is **+5V** (pin 1).
+     The power pair sits together at one end.
+  3. Cross-check against the printer: plug the stock ribbon into the Creality
+     board's EXP3 and measure 5 V with the printer powered. The board is the
+     known-good reference.
 - Do not trust the `open_uart` docstring in the `dwin-t5uic1` repo: it says to
   wire TX/RX to panel pins 3 and 4, which are the **encoder** lines. Pins 7
   and 8 are correct, per that repo's own `wiring.md`. Reported upstream.
