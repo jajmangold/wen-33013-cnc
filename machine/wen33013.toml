@@ -133,8 +133,17 @@ safety_inputs = true                  # limit switches + probe land here
 # things, it can never be the thing that stops the machine.
 transport     = "usb"
 role          = "hmi"
-usb_serial    = "TBD"                 # record during commissioning -> by-id path
+usb_serial    = "505431651893921C"    # Waveshare RP2040-Zero, MicroPython 1.29.0
+                                      # == machine.unique_id(); differs from the
+                                      # BOOTSEL mass-storage serial, which is NOT this
 screen        = "dwin-t5uic1"
+board         = "waveshare-rp2040-zero"
+runtime       = "micropython"
+# The stock panel CFG boots ROTATED 90deg, presenting the 480x272 LCD as a
+# 272x480 portrait frame. Our screens are drawn landscape, so the pendant
+# firmware must call set_orientation(0) at startup. A unit test asserts this
+# agrees with ui/dwinui - mismatch draws everything off-screen, silently.
+orientation   = "landscape"
 
 [spindle]
 # Stock WEN variable-speed head, manually set for now.

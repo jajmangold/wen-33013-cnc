@@ -36,6 +36,17 @@ Changelogs are for humans. Record what changed about the *machine* or the
 - Architecture decision records for the choices made so far.
 - `AGENTS.md` working standards, and project skills for the common workflows.
 
+- Pendant node brought up on a Waveshare RP2040-Zero: MicroPython 1.29.0
+  flashed, `dwin_t5uic1` driver deployed, and the protocol stack self-tested
+  against a loopback transport (frames encode correctly; no panel attached
+  yet). Its USB serial is recorded, so the generated udev rule now pins the
+  device instead of warning.
+- Panel orientation recorded explicitly: the stock CFG boots rotated, giving a
+  272x480 portrait frame, while our screens are landscape. The firmware must
+  call `set_orientation(0)` at startup, and a test now asserts the TOML and
+  `ui/dwinui` agree about which way up the panel is.
+- `hardware/electrical/pendant-wiring.md` with the RP2040-Zero pin mapping.
+
 ### Notes
 
 - Values marked PROVISIONAL in the machine description are starting points,
