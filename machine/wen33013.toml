@@ -1,0 +1,143 @@
+#
+# SINGLE SOURCE OF TRUTH for the WEN 33013 CNC conversion.
+#
+# Every derived number in this project - LinuxCNC INI scales and limits,
+# firmware step constants, documentation tables - is GENERATED from this file.
+# Never hand-edit a generated file; edit this and run `/regen`.
+#
+# Values marked PROVISIONAL are starting points that MUST be confirmed during
+# commissioning before the machine cuts anything. See docs/commissioning/.
+#
+
+[machine]
+name          = "wen-33013-cnc"
+base_machine  = "WEN 33013"
+description   = "WEN 33013 benchtop mill converted to CNC"
+# Stock machine reference (from WEN specs, for sanity-checking our travels):
+#   X 11-13/16in (300.0mm), Y 5-1/8in (130.2mm), Z 7in (177.8mm)
+#   R8 spindle, 100-1100 / 100-2500 RPM, 0.75HP, 130lb
+
+[control]
+# LinuxCNC host. See pi/provision/ for how this box is built.
+host          = "lcnc"
+servo_period_ns = 1_000_000          # 1 kHz servo thread
+transport     = "spi"                 # Pi 4 SPI -> RP2040. Pi 5 cannot do this (RRP1). ADR-0001.
+spi_clock_hz  = 10_000_000            # PROVISIONAL - raise only with a clean CRC error count
+
+[driver]
+# DM542T hard limits, from the StepperOnline DM542T(V4.0) manual.
+# These are PHYSICAL CONSTRAINTS, not preferences. constraints.py enforces them.
+model             = "DM542T"
+min_pulse_us      = 2.5               # minimum PUL low time
+min_dir_setup_us  = 5.0               # DIR must lead PUL by this much
+max_step_rate_hz  = 200_000
+current_min_a     = 1.0
+current_max_a     = 4.5
+current_a         = 2.8               # PROVISIONAL - set to motor rating, DIP SW1-SW3
+
+[motor]
+model             = "NEMA 23"
+steps_per_rev     = 200               # 1.8 deg/step
+# PROVISIONAL - fill in once motors are in hand:
+holding_torque_nm = 1.9
+rated_current_a   = 2.8
+
+# ---------------------------------------------------------------------------
+# Axes. steps_per_mm is DERIVED (steps_per_rev * microsteps / screw_pitch_mm)
+# and must never be written by hand anywhere in this repo.
+# ---------------------------------------------------------------------------
+
+[axis.x]
+travel_mm            = 300.0
+screw_pitch_mm       = 5.0            # 1605 ballscrew, 5mm lead
+microsteps           = 32             # -> 6400 steps/rev -> 1280 steps/mm
+max_velocity_mm_s    = 41.67          # PROVISIONAL ~2500 mm/min
+max_accel_mm_s2      = 400.0          # PROVISIONAL
+home_direction       = -1
+soft_limit_margin_mm = 2.0
+invert_direction     = false
+
+[axis.x.encoder]
+# 14-bit absolute, on a GT2 pulley belted to the axis so it measures REAL
+# table travel, not motor rotation. Resolution comes from the pulley, not
+# the ballscrew: 16384 counts / (20T * 2mm) = 409.6 counts/mm.
+bits          = 14
+interface     = "spi1"            # spi0 is the Pi link; encoders are spi1 master
+cs            = 0
+mount         = "belt"
+pulley_teeth  = 20
+belt_pitch_mm = 2.0               # GT2
+
+[axis.y]
+travel_mm            = 130.0
+screw_pitch_mm       = 5.0
+microsteps           = 32
+max_velocity_mm_s    = 41.67          # PROVISIONAL
+max_accel_mm_s2      = 400.0          # PROVISIONAL
+home_direction       = -1
+soft_limit_margin_mm = 2.0
+invert_direction     = false
+
+[axis.y.encoder]
+# 14-bit absolute, on a GT2 pulley belted to the axis so it measures REAL
+# table travel, not motor rotation. Resolution comes from the pulley, not
+# the ballscrew: 16384 counts / (20T * 2mm) = 409.6 counts/mm.
+bits          = 14
+interface     = "spi1"            # spi0 is the Pi link; encoders are spi1 master
+cs            = 1
+mount         = "belt"
+pulley_teeth  = 20
+belt_pitch_mm = 2.0               # GT2
+
+[axis.z]
+travel_mm            = 177.8          # 7in exactly
+screw_pitch_mm       = 5.0
+microsteps           = 32
+max_velocity_mm_s    = 25.0           # PROVISIONAL ~1500 mm/min, Z fights gravity
+max_accel_mm_s2      = 250.0          # PROVISIONAL
+home_direction       = 1              # Z homes UP. Never change without reading ADR-0006.
+soft_limit_margin_mm = 2.0
+invert_direction     = false
+
+[axis.z.encoder]
+# 14-bit absolute, on a GT2 pulley belted to the axis so it measures REAL
+# table travel, not motor rotation. Resolution comes from the pulley, not
+# the ballscrew: 16384 counts / (20T * 2mm) = 409.6 counts/mm.
+bits          = 14
+interface     = "spi1"            # spi0 is the Pi link; encoders are spi1 master
+cs            = 2
+mount         = "belt"
+pulley_teeth  = 20
+belt_pitch_mm = 2.0               # GT2
+
+# ---------------------------------------------------------------------------
+# Control nodes (RP2040s).
+#
+# HARD RULE, enforced by tools/machinegen/constraints.py:
+#   - motion and io roles MUST be on SPI. USB CDC has no latency guarantee.
+#   - safety inputs (limits, probe) MUST be on SPI.
+#   - E-stop is hardwired and kills driver power directly. Software only
+#     OBSERVES it; no node is permitted to be the only thing stopping the
+#     machine. See ADR-0007.
+# ---------------------------------------------------------------------------
+
+[node.motion0]
+transport     = "spi"
+role          = "motion"
+spi_cs        = 0
+axes          = ["x", "y", "z"]
+safety_inputs = true                  # limit switches + probe land here
+
+[node.pendant]
+# Ender 3 V2 DWIN T5UIC1 panel + its rotary encoder. HMI only: it can request
+# things, it can never be the thing that stops the machine.
+transport     = "usb"
+role          = "hmi"
+usb_serial    = "TBD"                 # record during commissioning -> by-id path
+screen        = "dwin-t5uic1"
+
+[spindle]
+# Stock WEN variable-speed head, manually set for now.
+min_rpm       = 100
+max_rpm       = 2500
+control       = "manual"              # no VFD yet; M3/M4 are operator prompts

@@ -1,0 +1,24 @@
+# This repo is edited on Windows and runs on a Raspberry Pi. Normalise to LF
+# in the repository so a shell script or a generated config does not arrive on
+# the Pi with CRLF - which fails in ways that look nothing like line endings
+# (`bad interpreter`, a HAL parse error on a line that reads fine).
+* text=auto eol=lf
+
+# Generated. Keep them LF: firstrun.sh style scripts and udev rules are read
+# by Linux, and the verify step compares bytes.
+*.ini   text eol=lf
+*.rules text eol=lf
+*.hal   text eol=lf
+*.sh    text eol=lf
+
+# Windows-only tooling stays CRLF - PowerShell is happier and these never
+# reach the Pi.
+*.ps1   text eol=crlf
+
+# Binary
+*.uf2   binary
+*.elf   binary
+*.bin   binary
+*.png   binary
+*.jpg   binary
+*.FCStd binary

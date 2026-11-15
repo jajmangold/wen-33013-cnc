@@ -1,0 +1,26 @@
+[project]
+name = "wen-33013-cnc"
+version = "0.1.0"
+description = "WEN 33013 benchtop mill CNC conversion: LinuxCNC + RP2040 nodes"
+requires-python = ">=3.11"          # tomllib
+dependencies = []                    # keep it so: this must run on a bare Pi
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+# `tools` on the path so `import machinegen` works without installing anything.
+pythonpath = ["tools", "ui"]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+markers = [
+    "integration: needs LinuxCNC installed (runs on the Pi, not a dev box)",
+    "hardware: needs the physical machine powered and homed - never runs in CI",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]

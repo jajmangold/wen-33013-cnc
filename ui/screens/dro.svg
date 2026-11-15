@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="272" data-background="#0d1117">
+  <title>DRO - main running screen</title>
+  <desc>
+    Designed against the T5UIC1's native primitives: solid rects, lines and
+    fixed-pitch text. No gradients, no transforms, no opacity - the panel
+    cannot render them and the compiler rejects them rather than dropping
+    them silently. Open this file in a browser to see the layout; run
+    `python -m dwinui preview` to see what the 16-bit panel will actually do
+    to the colours.
+  </desc>
+
+  <!-- header -->
+  <rect x="0" y="0" width="480" height="30" fill="#1b2430"/>
+  <line x1="0" y1="30" x2="479" y2="30" stroke="#2d3b4e"/>
+  <text x="10" y="7" font-size="16" fill="#8fb4d9">WEN 33013</text>
+  <text x="330" y="7" font-size="16" fill="#5ac57a">READY</text>
+
+  <!-- axis readouts: label left, value right, one row each -->
+  <text x="16"  y="48"  font-size="20" fill="#7d8a99">X</text>
+  <text x="120" y="42"  font-size="32" fill="#e6edf3">  0.000</text>
+  <line x1="16" y1="86" x2="463" y2="86" stroke="#222c38"/>
+
+  <text x="16"  y="110" font-size="20" fill="#7d8a99">Y</text>
+  <text x="120" y="104" font-size="32" fill="#e6edf3">  0.000</text>
+  <line x1="16" y1="148" x2="463" y2="148" stroke="#222c38"/>
+
+  <text x="16"  y="172" font-size="20" fill="#7d8a99">Z</text>
+  <text x="120" y="166" font-size="32" fill="#e6edf3">  0.000</text>
+
+  <!-- feedback health: filled when the encoder agrees with commanded -->
+  <circle cx="448" cy="58"  r="6" fill="#5ac57a"/>
+  <circle cx="448" cy="120" r="6" fill="#5ac57a"/>
+  <circle cx="448" cy="182" r="6" fill="#5ac57a"/>
+
+  <!-- footer -->
+  <line x1="0" y1="226" x2="479" y2="226" stroke="#2d3b4e"/>
+  <rect x="0" y="227" width="480" height="45" fill="#161d26"/>
+  <text x="10"  y="236" font-size="16" fill="#7d8a99">FEED</text>
+  <text x="10"  y="252" font-size="16" fill="#e6edf3">   0 mm/min</text>
+  <text x="250" y="236" font-size="16" fill="#7d8a99">SPINDLE</text>
+  <text x="250" y="252" font-size="16" fill="#e6edf3">   0 rpm</text>
+</svg>

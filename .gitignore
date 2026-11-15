@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+.venv/
+venv/
+
+# Pico SDK builds
+firmware/**/build/
+*.uf2
+*.elf
+*.bin
+*.map
+
+# LinuxCNC runtime droppings - these are machine state, not configuration
+linuxcnc/configs/**/linuxcnc.var
+linuxcnc/configs/**/linuxcnc.var.bak
+linuxcnc/configs/**/*.log
+linuxcnc/configs/**/position*.txt
+linuxcnc/configs/**/*.bak
+
+# FreeCAD
+hardware/cad/**/*.FCStd1
+hardware/cad/**/*.FCBak
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Never commit these: node-specific secrets or site-local overrides
+pi/provision/*.local
+*.secret
