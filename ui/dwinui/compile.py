@@ -51,10 +51,32 @@ class Op:
         return f"{self.method}{self.args}"
 
 
+@dataclass(frozen=True)
+class Widget:
+    """A named region the firmware redraws in place.
+
+    The panel is a 115200 baud serial device - about 11.5 KB/s. Redrawing a
+    whole screen at 10 Hz does not fit in that, so static chrome is drawn once
+    at screen entry and only these small bound regions are updated per frame.
+    That is a bandwidth requirement, not an optimisation.
+    """
+
+    name: str
+    kind: str                      # text | bar | lamp | region
+    spec: dict[str, Any]
+
+
 @dataclass
 class Compilation:
     ops: list[Op] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
+    widgets: list[Widget] = field(default_factory=list)
+
+    def widget(self, name: str) -> Widget:
+        for w in self.widgets:
+            if w.name == name:
+                return w
+        raise KeyError(name)
 
 
 def _num(el: ET.Element, attr: str, default: float | None = None) -> float:
@@ -114,6 +136,42 @@ def _compile_rect(el: ET.Element, out: Compilation) -> None:
         _note_quantisation(stroke, "<rect> stroke", out)
         out.ops.append(Op("draw_rectangle", (0, stroke.rgb565, x, y, x1, y1)))
 
+    name = _bind_name(el)
+    if name is None:
+        return
+
+    kind = el.get("data-widget", "region")
+    if kind == "bar":
+        track = _colour(el, "data-track", "#161d26")
+        value_colour = _colour(el, "data-fill", "#5ac57a")
+        assert track is not None and value_colour is not None
+        _add_widget(
+            out, name, "bar",
+            {
+                "x0": x, "y0": y, "x1": x1, "y1": y1,
+                "fg": value_colour.rgb565,
+                "bg": track.rgb565,
+                "min": _num(el, "data-min", 0.0),
+                "max": _num(el, "data-max", 100.0),
+                "orient": el.get("data-orient", "h"),
+                "centre": el.get("data-centre", "0") == "1",
+            },
+        )
+    elif kind == "region":
+        # The firmware owns everything inside: envelope map, spindle tick.
+        # We only guarantee the bounds and what to clear it to.
+        clear_to = _colour(el, "data-clear", "#0d1117")
+        assert clear_to is not None
+        _add_widget(
+            out, name, "region",
+            {"x0": x, "y0": y, "x1": x1, "y1": y1, "bg": clear_to.rgb565},
+        )
+    else:
+        raise UnsupportedDesign(
+            f"<rect data-widget={kind!r}> is not a known widget "
+            f"(bar, region)"
+        )
+
 
 def _compile_line(el: ET.Element, out: Compilation) -> None:
     x0, y0 = int(_num(el, "x1")), int(_num(el, "y1"))
@@ -140,6 +198,16 @@ def _compile_circle(el: ET.Element, out: Compilation) -> None:
     if fill is None and stroke is None:
         raise UnsupportedDesign("<circle> has neither fill nor stroke")
 
+    name = _bind_name(el)
+    if name is not None:
+        on = _colour(el, "data-on", "#5ac57a")
+        off = _colour(el, "data-off", "#2d3b4e")
+        assert on is not None and off is not None
+        _add_widget(
+            out, name, "lamp",
+            {"cx": cx, "cy": cy, "r": r, "on": on.rgb565, "off": off.rgb565},
+        )
+
 
 def _compile_polyline(el: ET.Element, out: Compilation) -> None:
     raw = el.get("points", "").replace(",", " ").split()
@@ -155,11 +223,52 @@ def _compile_polyline(el: ET.Element, out: Compilation) -> None:
     out.ops.append(Op("draw_polyline", (stroke.rgb565, tuple(pts))))
 
 
+def _bind_name(el: ET.Element) -> str | None:
+    name = el.get("data-bind")
+    if name is None:
+        return None
+    name = name.strip()
+    if not name:
+        raise UnsupportedDesign(f"<{_tag(el)}> has an empty data-bind")
+    return name
+
+
+def _add_widget(out: Compilation, name: str, kind: str, spec: dict) -> None:
+    if any(w.name == name for w in out.widgets):
+        raise UnsupportedDesign(
+            f"data-bind={name!r} is used more than once; a bound name must "
+            f"identify exactly one region or updates would be ambiguous"
+        )
+    out.widgets.append(Widget(name=name, kind=kind, spec=spec))
+
+
 def _compile_text(el: ET.Element, out: Compilation) -> None:
     x, y = int(_num(el, "x")), int(_num(el, "y"))
-    body = (el.text or "").strip()
-    if not body:
-        raise UnsupportedDesign("<text> is empty")
+    # Use the content VERBATIM. Leading and trailing spaces are not noise:
+    # for a bound field the placeholder's width IS the field width, so
+    # "   0.000" reserves eight characters and stripping it to "0.000" would
+    # silently truncate a DRO reading of -123.456 to five.
+    body = el.text or ""
+    if "\n" in body:
+        raise UnsupportedDesign(
+            "<text> spans multiple lines; keep the content on one line - "
+            "surrounding whitespace is significant because it sets the "
+            "field width of a bound widget"
+        )
+    if not body.strip():
+        # A blank BOUND field is legitimate: it reserves space for a value
+        # that arrives later, like an alarm's third advice line. A blank
+        # unbound one is invisible chrome and almost certainly a mistake.
+        if _bind_name(el) is None:
+            raise UnsupportedDesign(
+                "<text> is empty; add data-bind if the intent is to reserve "
+                "space for a value supplied at runtime"
+            )
+        if not body:
+            raise UnsupportedDesign(
+                "bound <text> has no content at all; use spaces to declare "
+                "how wide the field is"
+            )
 
     size = _num(el, "font-size", 16)
     font = font_for_height(size)
@@ -179,12 +288,30 @@ def _compile_text(el: ET.Element, out: Compilation) -> None:
             f"{FONTS[font][1]}px device font"
         )
 
+    bg_rgb = (bg or Color(0, 0, 0)).rgb565
     out.ops.append(
-        Op(
-            "draw_text",
-            (0, show_bg, font, fill.rgb565, (bg or Color(0, 0, 0)).rgb565, x, y, body),
-        )
+        Op("draw_text", (0, show_bg, font, fill.rgb565, bg_rgb, x, y, body))
     )
+
+    name = _bind_name(el)
+    if name is not None:
+        # The placeholder's length IS the field width. An update shorter than
+        # the placeholder is padded, so stale pixels from a longer previous
+        # value are overwritten rather than left on the glass.
+        _add_widget(
+            out,
+            name,
+            "text",
+            {
+                "x": x,
+                "y": y,
+                "font": font,
+                "fg": fill.rgb565,
+                "bg": bg_rgb,
+                "chars": len(body),
+                "align": el.get("data-align", "right"),
+            },
+        )
 
 
 COMPILERS = {

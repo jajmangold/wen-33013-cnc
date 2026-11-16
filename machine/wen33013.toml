@@ -146,6 +146,24 @@ runtime       = "micropython"
 # everything off-screen and the panel reports nothing.
 orientation   = "portrait"
 
+# ---------------------------------------------------------------------------
+# Gamepad. Plugs into the PI, not a node: LinuxCNC reads it with hal_input
+# (/usr/bin/hal_input, already present) into halui.axis.N.analog.
+#
+# Everything here is safety configuration, not preference. See docs/ui/README.md
+# section 3 and ADR-0008.
+# ---------------------------------------------------------------------------
+
+[input.gamepad]
+model          = "xbox"
+transport      = "usb"            # wireless is allowed but makes the watchdog essential
+deadman        = "LB"             # NO jog without this held
+deadzone       = 0.12             # PROVISIONAL - must exceed the real stick's resting drift
+watchdog_ms    = 150              # no pad events for this long -> drop the deadman
+jog_curve      = "squared"        # fine control near centre, rapid at full deflection
+# E-stop is NOT here and never will be: it is the hardwired contactor chain
+# (ADR-0007). A pad button that looks like an E-stop is worse than none.
+
 [spindle]
 # Stock WEN variable-speed head, manually set for now.
 min_rpm       = 100

@@ -8,7 +8,7 @@ being dropped, because a dropped element is a control that is not on the
 screen when the operator reaches for it.
 """
 
-from .compile import Compilation, Op, compile_svg, render_preview
+from .compile import Compilation, Op, Widget, compile_svg, render_preview
 from .device import FONTS, HEIGHT, WIDTH, Color, UnsupportedDesign, font_for_height, text_extent
 
 __all__ = [
@@ -18,6 +18,7 @@ __all__ = [
     "Color",
     "Compilation",
     "Op",
+    "Widget",
     "UnsupportedDesign",
     "compile_svg",
     "font_for_height",

@@ -158,6 +158,74 @@ class TestRejection:
             compile_svg("<html></html>")
 
 
+class TestBoundWidgets:
+    """data-bind marks a region the firmware redraws in place."""
+
+    def test_bound_text_becomes_a_widget(self):
+        out = compile_svg(
+            svg('<text x="0" y="0" font-size="16" fill="#fff" data-bind="dro.x">0.000</text>')
+        )
+        assert out.widget("dro.x").kind == "text"
+
+    def test_placeholder_padding_sets_the_field_width(self):
+        """The reason not to strip: '   0.000' reserves eight characters.
+
+        Stripping it to '0.000' would silently truncate a reading of
+        -123.456 to five characters on a live DRO.
+        """
+        out = compile_svg(
+            svg('<text x="0" y="0" font-size="16" fill="#fff" data-bind="v">   0.000</text>')
+        )
+        assert out.widget("v").spec["chars"] == 8
+
+    def test_multiline_text_is_rejected(self):
+        """Because surrounding whitespace is significant, it must be explicit."""
+        source = (
+            '<svg xmlns="http://www.w3.org/2000/svg" width="272" height="480">'
+            '<text x="0" y="0" font-size="16" fill="#fff" data-bind="v">\n  0.000\n</text>'
+            "</svg>"
+        )
+        with pytest.raises(UnsupportedDesign, match="one line"):
+            compile_svg(source)
+
+    def test_bound_bar_carries_its_range(self):
+        out = compile_svg(
+            svg('<rect x="0" y="0" width="40" height="8" fill="#161d26" '
+                'data-bind="ovr" data-widget="bar" data-min="0" data-max="120"/>')
+        )
+        spec = out.widget("ovr").spec
+        assert (spec["min"], spec["max"]) == (0.0, 120.0)
+
+    def test_bound_circle_becomes_a_lamp(self):
+        out = compile_svg(
+            svg('<circle cx="20" cy="20" r="5" fill="#000" data-bind="link" '
+                'data-on="#5ac57a" data-off="#2d3b4e"/>')
+        )
+        assert out.widget("link").kind == "lamp"
+
+    def test_duplicate_bind_names_are_rejected(self):
+        """Two regions under one name would make updates ambiguous."""
+        with pytest.raises(UnsupportedDesign, match="more than once"):
+            compile_svg(
+                svg('<text x="0" y="0" font-size="16" fill="#fff" data-bind="v">a</text>'
+                    '<text x="0" y="40" font-size="16" fill="#fff" data-bind="v">b</text>')
+            )
+
+    def test_unknown_widget_kind_is_rejected(self):
+        with pytest.raises(UnsupportedDesign, match="not a known widget"):
+            compile_svg(
+                svg('<rect x="0" y="0" width="10" height="10" fill="#fff" '
+                    'data-bind="x" data-widget="sparkline"/>')
+            )
+
+    def test_bound_elements_are_still_drawn_as_chrome(self):
+        """Entering a screen must show something before any update arrives."""
+        out = compile_svg(
+            svg('<text x="0" y="0" font-size="16" fill="#fff" data-bind="v">0.000</text>')
+        )
+        assert any(op.method == "draw_text" for op in out.ops)
+
+
 class TestWarnings:
     def test_font_snapping_is_reported(self):
         # 35px snaps to the 32px cell - a 3px shift, past the 2px tolerance.

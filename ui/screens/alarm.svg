@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="272" height="480" data-background="#1a0c0e">
+  <title>ALARM - takes the whole screen</title>
+  <desc>
+    Not part of the screen carousel. A fault you can flick past is a fault
+    you will miss, so this takes over and stays until acknowledged.
+
+    It states three things in order: WHAT failed, WHERE, and WHAT TO DO.
+    "Fault 17" tells an operator nothing at the moment they need it most.
+
+    The background is a dark red rather than full red: a screaming red panel
+    in a dim workshop destroys night vision and makes the text harder to
+    read, which is the opposite of the point.
+  </desc>
+
+  <!-- banner -->
+  <rect x="0" y="0" width="272" height="64" fill="#e5484d"/>
+  <text x="16" y="12" font-size="40" fill="#1a0c0e">ALARM</text>
+
+  <!-- what failed -->
+  <text x="16" y="86" font-size="12" fill="#f0a830">FAULT</text>
+  <text x="16" y="104" font-size="24" fill="#e6edf3"
+        data-bind="alarm.what" data-align="left">FOLLOWING ERROR</text>
+
+  <!-- where -->
+  <text x="16" y="146" font-size="12" fill="#f0a830">AXIS</text>
+  <text x="16" y="164" font-size="40" fill="#e6edf3"
+        data-bind="alarm.where" data-align="left">Z </text>
+
+  <!-- the measurement that triggered it, so it can be judged -->
+  <text x="16" y="218" font-size="12" fill="#f0a830">MEASURED</text>
+  <text x="16" y="236" font-size="24" fill="#e6edf3"
+        data-bind="alarm.value" data-align="left">0.000 mm      </text>
+  <text x="16" y="268" font-size="12" fill="#f0a830">LIMIT</text>
+  <text x="16" y="286" font-size="24" fill="#7d8a99"
+        data-bind="alarm.limit" data-align="left">0.000 mm      </text>
+
+  <line x1="16" y1="322" x2="255" y2="322" stroke="#e5484d"/>
+
+  <!-- what to do about it -->
+  <text x="16" y="332" font-size="12" fill="#f0a830">WHAT TO DO</text>
+  <text x="16" y="352" font-size="16" fill="#e6edf3"
+        data-bind="alarm.action1" data-align="left">Check the axis moves freely.</text>
+  <text x="16" y="374" font-size="16" fill="#e6edf3"
+        data-bind="alarm.action2" data-align="left">Re-home before cutting.     </text>
+  <text x="16" y="396" font-size="16" fill="#e6edf3"
+        data-bind="alarm.action3" data-align="left">                            </text>
+
+  <!-- a reminder that the real stop is not on this screen -->
+  <text x="16" y="424" font-size="12" fill="#7d8a99">E-STOP IS THE RED BUTTON, NOT A MENU</text>
+
+  <line x1="0" y1="448" x2="271" y2="448" stroke="#e5484d"/>
+  <rect x="0" y="449" width="272" height="31" fill="#2a1013"/>
+  <circle cx="18" cy="464" r="7" fill="#5ac57a"/>
+  <text x="14" y="457" font-size="16" fill="#0d1117">A</text>
+  <text x="30" y="457" font-size="16" fill="#e6edf3">ACKNOWLEDGE</text>
+</svg>

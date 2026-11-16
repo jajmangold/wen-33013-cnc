@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="272" height="480" data-background="#0d1117">
+  <title>RUN - program in progress</title>
+  <desc>
+    What someone standing at a running machine wants: how far through, how
+    long left, what tool, and - above all - the feed override, which must be
+    adjustable without navigating anywhere. It is on the right trigger and
+    shown here live.
+  </desc>
+
+  <rect x="0" y="0" width="272" height="30" fill="#161d26"/>
+  <line x1="0" y1="30" x2="271" y2="30" stroke="#2d3b4e"/>
+  <text x="10" y="7" font-size="16" fill="#5ac57a"
+        data-bind="state" data-align="left">RUNNING   </text>
+  <circle cx="252" cy="15" r="5" fill="#2d3b4e" data-bind="link" data-on="#4dd0e1" data-off="#e5484d"/>
+
+  <!-- what is running -->
+  <text x="16" y="42" font-size="12" fill="#7d8a99">PROGRAM</text>
+  <text x="16" y="58" font-size="16" fill="#e6edf3"
+        data-bind="prog.name" data-align="left">----------------------------</text>
+
+  <!-- progress: readable from across the shop -->
+  <rect x="16" y="86" width="240" height="18" fill="#161d26"
+        data-bind="prog.pct" data-widget="bar" data-track="#161d26"
+        data-fill="#5ac57a" data-min="0" data-max="100"/>
+  <rect x="16" y="86" width="240" height="18" fill="none" stroke="#2d3b4e"/>
+  <text x="16" y="110" font-size="24" fill="#e6edf3"
+        data-bind="prog.pct.text" data-align="left">  0%</text>
+  <text x="150" y="112" font-size="16" fill="#7d8a99">LINE</text>
+  <text x="196" y="112" font-size="16" fill="#e6edf3"
+        data-bind="prog.line">      0</text>
+
+  <line x1="16" y1="142" x2="255" y2="142" stroke="#222c38"/>
+
+  <!-- time -->
+  <text x="16" y="152" font-size="12" fill="#7d8a99">ELAPSED</text>
+  <text x="16" y="168" font-size="24" fill="#e6edf3"
+        data-bind="prog.elapsed" data-align="left">00:00:00</text>
+  <text x="150" y="152" font-size="12" fill="#7d8a99">REMAINING</text>
+  <text x="150" y="168" font-size="24" fill="#8fb4d9"
+        data-bind="prog.remaining" data-align="left">--:--:--</text>
+
+  <line x1="16" y1="204" x2="255" y2="204" stroke="#222c38"/>
+
+  <!-- live position, smaller than the DRO screen but still present -->
+  <text x="16" y="214" font-size="12" fill="#7d8a99">X</text>
+  <text x="34" y="212" font-size="24" fill="#e6edf3" data-bind="dro.x">   0.000</text>
+  <text x="16" y="242" font-size="12" fill="#7d8a99">Y</text>
+  <text x="34" y="240" font-size="24" fill="#e6edf3" data-bind="dro.y">   0.000</text>
+  <text x="16" y="270" font-size="12" fill="#7d8a99">Z</text>
+  <text x="34" y="268" font-size="24" fill="#e6edf3" data-bind="dro.z">   0.000</text>
+
+  <line x1="16" y1="300" x2="255" y2="300" stroke="#222c38"/>
+
+  <!-- tool -->
+  <text x="16" y="310" font-size="12" fill="#7d8a99">TOOL</text>
+  <text x="16" y="326" font-size="24" fill="#e6edf3"
+        data-bind="tool" data-align="left">T0        </text>
+
+  <!-- the control that matters mid-cut -->
+  <text x="16" y="364" font-size="16" fill="#7d8a99">FEED OVERRIDE</text>
+  <text x="200" y="364" font-size="16" fill="#e6edf3"
+        data-bind="feed.override.pct">100%</text>
+  <rect x="16" y="386" width="240" height="14" fill="#161d26"
+        data-bind="feed.override" data-widget="bar" data-track="#161d26"
+        data-fill="#5ac57a" data-min="0" data-max="120"/>
+  <text x="16" y="404" font-size="12" fill="#7d8a99">RT</text>
+
+  <text x="16" y="424" font-size="16" fill="#7d8a99">SPINDLE</text>
+  <text x="104" y="424" font-size="16" fill="#e6edf3"
+        data-bind="spindle">     0 rpm</text>
+  <circle cx="244" cy="428" r="7" fill="#2d3b4e"
+          data-bind="spindle.run" data-on="#f0a830" data-off="#2d3b4e"/>
+
+  <line x1="0" y1="448" x2="271" y2="448" stroke="#2d3b4e"/>
+  <rect x="0" y="449" width="272" height="31" fill="#161d26"/>
+  <circle cx="18" cy="464" r="7" fill="#f0a830"/>
+  <text x="12" y="457" font-size="16" fill="#0d1117">S</text>
+  <text x="30" y="457" font-size="16" fill="#7d8a99">PAUSE</text>
+  <circle cx="120" cy="464" r="7" fill="#e5484d"/>
+  <text x="116" y="457" font-size="16" fill="#0d1117">B</text>
+  <text x="132" y="457" font-size="16" fill="#7d8a99">STOP</text>
+</svg>

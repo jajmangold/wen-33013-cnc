@@ -52,11 +52,16 @@ Ordered by what blocks what. The first two block cutting anything.
    `remora-spi.hal` and `estop.hal`, none of which exist - the config cannot
    load until the SPI HAL component is written. The integration test that
    globs for HAL files currently passes vacuously.
-4. **Pendant inputs are untested.** The panel itself now works - wiring
+4. **Gamepad watchdog unproven.** ADR-0008 assumes `hal_input` pins freeze
+   rather than zero when a pad disconnects, and the watchdog is designed on
+   that pessimistic reading. Prove it by **pulling the batteries mid-jog**
+   and confirming motion stops within 150 ms. Do this with the spindle off
+   and plenty of travel ahead.
+5. **Pendant inputs are untested.** The panel itself now works - wiring
    verified, handshake succeeds, the DRO screen renders - but the encoder,
    its button and the beeper have not been exercised, and nothing yet talks
    to LinuxCNC (`hardware/electrical/pendant-wiring.md`).
-5. **VNC does not start** on the Pi, so there is no GUI fallback if the
+6. **VNC does not start** on the Pi, so there is no GUI fallback if the
    pendant is unavailable (`pi/provision/README.md`).
 
 Resolved:

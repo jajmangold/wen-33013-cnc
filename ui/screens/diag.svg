@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="272" height="480" data-background="#0d1117">
+  <title>DIAG - why won't it move</title>
+  <desc>
+    Exists to answer one question quickly: what is blocking the machine. So
+    it names the blocker rather than showing raw counters, and puts the
+    things that actually stop motion - E-stop, limits, comms, following
+    error - above the statistics.
+
+    The commanded-vs-encoder rows are what the belt encoders are for: lost
+    motion shows up here before it shows up in the part.
+  </desc>
+
+  <rect x="0" y="0" width="272" height="30" fill="#161d26"/>
+  <line x1="0" y1="30" x2="271" y2="30" stroke="#2d3b4e"/>
+  <text x="10" y="7" font-size="16" fill="#8fb4d9">DIAG</text>
+  <circle cx="252" cy="15" r="5" fill="#2d3b4e" data-bind="link" data-on="#4dd0e1" data-off="#e5484d"/>
+
+  <!-- the blocker, stated in words -->
+  <text x="16" y="42" font-size="12" fill="#7d8a99">BLOCKING</text>
+  <text x="16" y="58" font-size="24" fill="#f0a830"
+        data-bind="blocker" data-align="left">NOT HOMED     </text>
+
+  <line x1="16" y1="94" x2="255" y2="94" stroke="#222c38"/>
+
+  <!-- safety chain first: it outranks everything else -->
+  <text x="16" y="104" font-size="12" fill="#7d8a99">E-STOP CHAIN</text>
+  <circle cx="200" cy="112" r="7" fill="#2d3b4e"
+          data-bind="estop" data-on="#5ac57a" data-off="#e5484d"/>
+  <text x="216" y="106" font-size="12" fill="#7d8a99"
+        data-bind="estop.text" data-align="left">OK </text>
+
+  <!-- link health -->
+  <text x="16" y="132" font-size="12" fill="#7d8a99">SPI LINK</text>
+  <text x="112" y="132" font-size="12" fill="#e6edf3"
+        data-bind="link.rate">    0 Hz</text>
+  <text x="16" y="150" font-size="12" fill="#7d8a99">CRC ERRORS</text>
+  <text x="112" y="150" font-size="12" fill="#e6edf3"
+        data-bind="link.crc">       0</text>
+  <text x="16" y="168" font-size="12" fill="#7d8a99">SERVO JITTER</text>
+  <text x="112" y="168" font-size="12" fill="#e6edf3"
+        data-bind="jitter">    0 us</text>
+
+  <line x1="16" y1="190" x2="255" y2="190" stroke="#222c38"/>
+
+  <!-- commanded vs measured: the point of the encoders -->
+  <text x="16" y="200" font-size="12" fill="#7d8a99">FOLLOWING ERROR  um</text>
+
+  <text x="16" y="222" font-size="12" fill="#7d8a99">X</text>
+  <text x="30" y="222" font-size="12" fill="#e6edf3" data-bind="ferr.x.text">    0</text>
+  <rect x="96" y="220" width="160" height="10" fill="#161d26"
+        data-bind="ferror.x" data-widget="bar" data-track="#161d26"
+        data-fill="#4dd0e1" data-min="-50" data-max="50" data-centre="1"/>
+
+  <text x="16" y="246" font-size="12" fill="#7d8a99">Y</text>
+  <text x="30" y="246" font-size="12" fill="#e6edf3" data-bind="ferr.y.text">    0</text>
+  <rect x="96" y="244" width="160" height="10" fill="#161d26"
+        data-bind="ferror.y" data-widget="bar" data-track="#161d26"
+        data-fill="#4dd0e1" data-min="-50" data-max="50" data-centre="1"/>
+
+  <text x="16" y="270" font-size="12" fill="#7d8a99">Z</text>
+  <text x="30" y="270" font-size="12" fill="#e6edf3" data-bind="ferr.z.text">    0</text>
+  <rect x="96" y="268" width="160" height="10" fill="#161d26"
+        data-bind="ferror.z" data-widget="bar" data-track="#161d26"
+        data-fill="#4dd0e1" data-min="-50" data-max="50" data-centre="1"/>
+
+  <line x1="16" y1="292" x2="255" y2="292" stroke="#222c38"/>
+
+  <!-- raw feedback, for when the derived numbers are in doubt -->
+  <text x="16" y="302" font-size="12" fill="#7d8a99">ENCODER COUNTS</text>
+  <text x="16" y="322" font-size="12" fill="#7d8a99">X</text>
+  <text x="30" y="322" font-size="12" fill="#e6edf3" data-bind="enc.x">        0</text>
+  <text x="16" y="340" font-size="12" fill="#7d8a99">Y</text>
+  <text x="30" y="340" font-size="12" fill="#e6edf3" data-bind="enc.y">        0</text>
+  <text x="16" y="358" font-size="12" fill="#7d8a99">Z</text>
+  <text x="30" y="358" font-size="12" fill="#e6edf3" data-bind="enc.z">        0</text>
+
+  <!-- the pendant is on USB and can drop; say so here rather than guess -->
+  <text x="150" y="302" font-size="12" fill="#7d8a99">GAMEPAD</text>
+  <circle cx="226" cy="310" r="6" fill="#2d3b4e"
+          data-bind="pad" data-on="#5ac57a" data-off="#e5484d"/>
+  <text x="150" y="326" font-size="12" fill="#7d8a99">DEADMAN</text>
+  <circle cx="226" cy="334" r="6" fill="#2d3b4e"
+          data-bind="pad.deadman" data-on="#5ac57a" data-off="#2d3b4e"/>
+
+  <text x="16" y="386" font-size="12" fill="#7d8a99">CPU</text>
+  <text x="56" y="386" font-size="12" fill="#e6edf3" data-bind="cpu.temp">  0 C</text>
+  <text x="150" y="386" font-size="12" fill="#7d8a99">UPTIME</text>
+  <text x="206" y="386" font-size="12" fill="#e6edf3" data-bind="uptime">  0h</text>
+
+  <text x="16" y="412" font-size="12" fill="#7d8a99">LAST FAULT</text>
+  <text x="16" y="428" font-size="12" fill="#e6edf3"
+        data-bind="last.fault" data-align="left">none                      </text>
+
+  <line x1="0" y1="448" x2="271" y2="448" stroke="#2d3b4e"/>
+  <rect x="0" y="449" width="272" height="31" fill="#161d26"/>
+  <circle cx="18" cy="464" r="7" fill="#e5484d"/>
+  <text x="14" y="457" font-size="16" fill="#0d1117">B</text>
+  <text x="30" y="457" font-size="16" fill="#7d8a99">BACK</text>
+</svg>

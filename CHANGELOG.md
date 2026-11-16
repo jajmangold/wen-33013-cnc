@@ -69,6 +69,15 @@ Changelogs are for humans. Record what changed about the *machine* or the
   conditions in `docs/commissioning/latency.md`.
 - `pi/provision/cpu-governor.service` pins the CPU governor to `performance`.
 
+- Pendant UI system: user stories, input model and design system in
+  `docs/ui/README.md`, and five screens - DRO, JOG, RUN, DIAG and ALARM.
+- `data-bind` widgets in the SVG compiler. A screen now compiles to static
+  chrome plus named regions the firmware redraws in place, which is what
+  makes a live UI fit in the panel's 11.5 KB/s.
+- Xbox controller as the primary jog input, read natively by LinuxCNC's
+  `hal_input`. Its deadman, watchdog and deadzone are in the machine
+  description and asserted by tests (ADR-0008).
+
 ### Changed
 
 - **Panel orientation is portrait, not landscape.** Measured on the bench by
