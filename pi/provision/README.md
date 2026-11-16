@@ -100,10 +100,28 @@ Check after every update.
 `console=serial0,115200`. If the DWIN pendant is ever wired to the Pi's
 hardware UART rather than its own RP2040, that has to go first.
 
-**VNC does not come up.** `raspi-config nonint do_vnc 0` runs during first
-boot, but both `wayvnc` and `vncserver-x11-serviced` report `inactive` -
-Trixie is Wayland/labwc and wayvnc needs a headless output configured.
-Unresolved; the machine is driven over SSH and the pendant instead.
+**VNC: `raspi-config nonint do_vnc 0` silently does nothing.** It drives a
+RealVNC service that is not installed on this image, and reports success
+anyway. Easy to mistake for a configuration problem.
+
+This image is **X11 under lightdm**, not Wayland/labwc - `Xorg :0` on seat0,
+with both HDMI disconnected and a firmware fallback framebuffer at 1024x768.
+So the fix is simply to install a VNC server that attaches to the live
+display:
+
+```bash
+sudo apt-get install -y x11vnc
+sudo x11vnc -storepasswd '<password>' /etc/x11vnc.pass
+sudo cp x11vnc.service /etc/systemd/system/
+sudo systemctl enable --now x11vnc
+```
+
+`x11vnc.service` is in this directory. It attaches to `:0`, so you see the
+real desktop AXIS runs on rather than a separate virtual one.
+
+Unencrypted on the LAN; over Tailscale the transport is encrypted. For
+encryption on the LAN, tunnel it:
+`ssh -L 5900:localhost:5900 josh@lcnc`.
 
 ## Verification
 

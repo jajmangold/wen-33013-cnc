@@ -61,10 +61,13 @@ Ordered by what blocks what. The first two block cutting anything.
    verified, handshake succeeds, the DRO screen renders - but the encoder,
    its button and the beeper have not been exercised, and nothing yet talks
    to LinuxCNC (`hardware/electrical/pendant-wiring.md`).
-6. **VNC does not start** on the Pi, so there is no GUI fallback if the
-   pendant is unavailable (`pi/provision/README.md`).
+
 
 Resolved:
+
+- ~~VNC does not start~~ - fixed 2026-11-16. The image is X11 under lightdm,
+  not Wayland; nothing was installed. `x11vnc` on `:0` at 1024x768, enabled
+  as a service.
 
 - ~~Beeper unusable~~ - it is an edge-clicking element, loud low and weak
   high, so the chime palette was rewritten into 110-440 Hz. Audible and

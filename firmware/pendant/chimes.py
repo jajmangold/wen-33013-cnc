@@ -139,6 +139,20 @@ class Chimes:
     DUTY = 16000
 
     def __init__(self, pin, muted=False, categories=DEFAULT_ON):
+        # Reset the pin before claiming it. A previous program killed mid-run
+        # - which is what happens every time the host restarts the pendant -
+        # leaves its PWM slice configured, and inheriting that state produced
+        # a buzzer that was silently dead until the pin was driven as plain
+        # GPIO and reconfigured. Observed 2026-11-16; cheap to make
+        # impossible rather than rediscover.
+        try:
+            stale = PWM(Pin(pin))
+            stale.duty_u16(0)
+            stale.deinit()
+        except Exception:                     # noqa: BLE001 - best effort
+            pass
+        Pin(pin, Pin.OUT).value(0)
+
         self._pwm = PWM(Pin(pin))
         self._pwm.freq(2400)
         self._pwm.duty_u16(0)

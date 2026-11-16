@@ -55,6 +55,16 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Fixed
 
+- **Pendant beeper could be silently dead after a restart.** A MicroPython
+  program killed mid-tone leaves its PWM slice configured, and the next
+  program inherited that state - a buzzer that made no sound, with no error,
+  looking exactly like a broken wire. `Chimes` now resets the pin before
+  claiming it. Reproduced deliberately and verified to recover.
+- **VNC on the Pi.** `raspi-config nonint do_vnc 0` reports success while
+  driving a RealVNC service the image does not have. The image is X11 under
+  lightdm, not Wayland/labwc as assumed; `x11vnc` on the live `:0` display
+  fixes it and shows the same desktop AXIS will run on.
+
 - **Homing order.** The generator emitted `HOME_SEQUENCE` in XYZ order, which
   homes the table before Z retracts - with a tool in the spindle and a vise on
   the table, the first homing run of the day would crash the cutter. Z now
@@ -97,6 +107,11 @@ Changelogs are for humans. Record what changed about the *machine* or the
   case-sensitively against a descriptor that is lowercase, so the rule never
   fired - no error, no symlink, and the device left on a bare `/dev/ttyACM*`
   whose number depends on enumeration order. Now lowercased, with a test.
+
+- Pendant `main.py`: draws the DRO chrome and stands by showing NO HOST with
+  a heartbeat, so a powered board is never indistinguishable from a dead one.
+  It shows dashes rather than zeros - a pendant displaying plausible numbers
+  that nothing is measuring is worse than one showing none.
 
 ### Changed
 

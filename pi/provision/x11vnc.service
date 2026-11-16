@@ -1,0 +1,21 @@
+# VNC onto the REAL X session, so you see the desktop AXIS runs on rather
+# than a separate virtual one. See docs/commissioning/ and pi/provision/.
+#
+# Not encrypted on the LAN. Over Tailscale the transport is encrypted; on the
+# local network it is not, so for anything sensitive tunnel it:
+#   ssh -L 5900:localhost:5900 josh@lcnc
+[Unit]
+Description=x11vnc on the live X display
+After=lightdm.service network-online.target
+Wants=lightdm.service
+
+[Service]
+Type=simple
+# -auth guess finds lightdm's Xauthority; -forever survives client
+# disconnects; -loop reconnects if X restarts under it.
+ExecStart=/usr/bin/x11vnc -display :0 -auth guess -rfbauth /etc/x11vnc.pass           -rfbport 5900 -forever -shared -loop -noxdamage -repeat -quiet
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

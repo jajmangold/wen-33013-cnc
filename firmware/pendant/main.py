@@ -1,76 +1,88 @@
-"""Pendant node - MicroPython on a Waveshare RP2040-Zero.
+"""Pendant node - runs on every power-up.
 
-Drives the Ender 3 V2 DWIN T5UIC1 panel and reports the encoder to the Pi
-over USB CDC. HMI only: this node can ask LinuxCNC for things, and is never
-the thing that stops the machine (ADR-0007).
+Draws the DRO chrome immediately and sits in standby until the host takes
+over. Deliberately minimal: a blank panel is indistinguishable from a dead
+one, so the board's first duty is to prove it is alive and that the link to
+the glass works. It does NOT invent machine state - the zeros are clearly
+zeros and the status says NO HOST, because a pendant showing plausible
+numbers that nothing is measuring is worse than one showing none.
 
-Deploy with /deploy-pendant. Wiring in hardware/electrical/pendant-wiring.md -
-read it before applying power; 5 V on a signal line destroys the panel.
+The host (LinuxCNC on the Pi) interrupts this over the USB REPL and drives
+the same widgets, so there is no screen transition when it connects - the
+NO HOST text simply becomes a machine state.
 
-NOTE: nothing in this file is covered by the test suite. It cannot be - it
-only does anything with a panel attached. Keep the logic here thin and put
-anything with a right answer in ui/dwinui, which is tested.
+HMI only: this node can ask for things and can never be the thing that stops
+the machine (ADR-0007).
+
+Nothing here is covered by the test suite. It cannot be - it only does
+anything with a panel attached. Keep it thin; anything with a right answer
+belongs in ui/dwinui, which is tested.
 """
 
+import time
+
+import dro_screen as s
 from dwin_t5uic1 import T5UIC1Display
-from dwin_t5uic1.input.quadrature import Quadrature
 from dwin_t5uic1.transport import open_uart
 
-# Pin map - see hardware/electrical/pendant-wiring.md.
-# Panel pin numbering, NOT the mainboard-end numbering that Marlin documents.
+# See hardware/electrical/pendant-wiring.md. Panel pin numbering.
 UART_ID = 0
 PIN_TX = 0          # -> panel pin 8 (its RX)
 PIN_RX = 1          # <- panel pin 7 (its TX)
-PIN_ENC_A = 2       # <- panel pin 3
-PIN_ENC_B = 3       # <- panel pin 4
-PIN_BUTTON = 4      # <- panel pin 6
-PIN_BEEP = 5        # -> panel pin 5
 
-# Measured on the real panel: orientation 1 reads upright on this glass,
-# giving a 272x480 portrait frame. MUST be applied before drawing or
-# everything lands off-screen and the panel reports nothing.
-ORIENTATION_PORTRAIT = 1
+# The stock CFG boots rotated; our screens are drawn for orientation 1,
+# giving a 272x480 portrait frame. Measured, not assumed. Remove this and
+# everything lands off-screen with no error reported.
+ORIENTATION = 1
 
 BACKLIGHT = 0xC0
 
+# Slow enough to read as "alive", not as something demanding attention.
+HEARTBEAT_MS = 1000
+
 
 def open_panel():
-    """Bring the panel up in the orientation our screens are drawn for."""
-    panel = T5UIC1Display(open_uart(UART_ID, tx=PIN_TX, rx=PIN_RX))
-    panel.set_orientation(ORIENTATION_PORTRAIT)
+    panel = T5UIC1Display(open_uart(UART_ID, tx=PIN_TX, rx=PIN_RX),
+                          handshake=True)
+    panel.set_orientation(ORIENTATION)
     panel.set_backlight(BACKLIGHT)
     return panel
 
 
-def draw_screen(panel, module_name="dro_screen"):
-    """Replay an exported screen.
+def standby(panel):
+    """Chrome, honest zeros, and a heartbeat."""
+    s.draw(panel)
+    s.update(panel, 'link', False)
+    s.update(panel, 'wcs', '--- ')
+    for name in ('homed.x', 'homed.y', 'homed.z'):
+        s.update(panel, name, False)
+    for name in ('dro.x', 'dro.y', 'dro.z'):
+        s.update(panel, name, '   -----')
+    s.update(panel, 'feed', '    - mm/min')
+    s.update(panel, 'spindle', '    - rpm')
+    s.update(panel, 'spindle.run', False)
 
-    Screens are authored as SVG in ui/screens/ and exported with
-    `python -m dwinui export`. Nothing here knows about layout.
-    """
-    module = __import__(module_name)
-    module.draw(panel)
+    # A cycling ellipsis distinguishes "alive and waiting" from "frozen",
+    # which a static NO HOST cannot. One update a second is nothing on an
+    # 11.5 KB/s link.
+    phase = 0
+    while True:
+        s.update(panel, 'state', 'NO HOST' + ('.' * phase) + (' ' * (3 - phase)))
+        phase = (phase + 1) % 4
+        time.sleep_ms(HEARTBEAT_MS)
 
 
 def main():
-    panel = open_panel()
     try:
-        draw_screen(panel)
-    except ImportError:
-        # No screen exported yet - prove the link instead of failing silently.
-        from dwin_t5uic1 import rgb565
-        panel.clear(rgb565(32, 36, 44))
-        panel.draw_text(False, True, panel.FONT_8X16,
-                        rgb565(255, 176, 0), rgb565(32, 36, 44),
-                        8, 8, "no screen exported")
-
-    knob = Quadrature(a=PIN_ENC_A, b=PIN_ENC_B, button=PIN_BUTTON)
-    while True:
-        delta = knob.read()
-        if delta:
-            # TODO: forward to the Pi over USB CDC once the host side exists.
-            print("enc", delta)
+        panel = open_panel()
+    except Exception as exc:                 # noqa: BLE001
+        # No panel, or it is not answering. Say so on the USB console rather
+        # than failing silently - this is the message someone will be looking
+        # for when the screen is dark.
+        print('pendant: panel did not come up:', exc)
+        print('check wiring: GP0 -> panel pin 8, GP1 <- panel pin 7, 5V, GND')
+        return
+    standby(panel)
 
 
-if __name__ == "__main__":
-    main()
+main()
