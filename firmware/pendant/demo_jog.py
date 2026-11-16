@@ -12,10 +12,9 @@ Run with:
 import math
 import time
 
+import jog_screen as s
 from dwin_t5uic1 import T5UIC1Display, rgb565
 from dwin_t5uic1.transport import open_uart
-
-import jog_screen as s
 
 # Machine envelope, from machine/wen33013.toml.
 TRAVEL_X = 300.0
