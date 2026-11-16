@@ -239,7 +239,12 @@ def render_udev_rules(machine: Machine, fp: str = "unknown") -> str:
         "",
     ]
     for node in sorted(machine.usb_nodes, key=lambda n: n.name):
-        serial = node.usb_serial or "TBD"
+        # LOWERCASE, always. udev matching is case-sensitive, and the USB
+        # descriptor carries the serial in lowercase hex - while MicroPython's
+        # machine.unique_id() is usually printed uppercase. Emitting the
+        # uppercase form produces a rule that simply never matches: no error,
+        # no symlink, and nothing to suggest why.
+        serial = (node.usb_serial or "TBD").lower()
         lines += [
             f'# node {node.name} ({node.role})',
             f'SUBSYSTEM=="tty", ATTRS{{serial}}=="{serial}", '

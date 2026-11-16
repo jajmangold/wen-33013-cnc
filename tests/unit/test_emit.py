@@ -131,10 +131,24 @@ class TestUdevRules:
     def test_usb_node_gets_a_stable_symlink(self, machine):
         rules = render_udev_rules(machine)
         assert 'SYMLINK+="cnc/pendant"' in rules
-        assert 'ATTRS{serial}=="E6614103E72B4C21"' in rules
+        # lowercase: udev is case-sensitive and the descriptor is lowercase
+        assert 'ATTRS{serial}=="e6614103e72b4c21"' in rules
 
     def test_spi_nodes_are_not_listed(self, machine):
         assert "motion0" not in render_udev_rules(machine)
+
+    def test_serial_is_lowercased(self, machine_dict):
+        """udev matching is case-sensitive and the USB descriptor is lowercase.
+
+        MicroPython's machine.unique_id() is conventionally printed uppercase,
+        so an uppercase serial in the TOML is likely. Emitting it verbatim
+        gives a rule that never matches - with no error and no symlink, which
+        is the worst way for this to fail.
+        """
+        machine_dict["node"]["pendant"]["usb_serial"] = "ABCDEF0123456789"
+        rules = render_udev_rules(parse_machine(machine_dict))
+        assert 'ATTRS{serial}=="abcdef0123456789"' in rules
+        assert "ABCDEF0123456789" not in rules
 
 
 class TestDeterminism:

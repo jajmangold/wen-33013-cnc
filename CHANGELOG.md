@@ -85,6 +85,19 @@ Changelogs are for humans. Record what changed about the *machine* or the
 - Knob, button and beeper verified on hardware, including that the stock
   knob is 4 quadrature counts per detent.
 
+- Pendant board moved onto the Pi. `mpremote` installed there in a venv at
+  `/opt/cnc-tools`, udev rule installed, and `/dev/cnc/pendant` verified
+  driving the board end to end.
+
+### Fixed
+
+- **udev rules used the wrong case for USB serials.** The generator emitted
+  the serial as written in the TOML, which is conventionally uppercase
+  because that is how MicroPython prints `machine.unique_id()`. udev matches
+  case-sensitively against a descriptor that is lowercase, so the rule never
+  fired - no error, no symlink, and the device left on a bare `/dev/ttyACM*`
+  whose number depends on enumeration order. Now lowercased, with a test.
+
 ### Changed
 
 - **Panel orientation is portrait, not landscape.** Measured on the bench by

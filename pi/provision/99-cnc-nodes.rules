@@ -5,4 +5,4 @@
 #   sudo udevadm control --reload-rules && sudo udevadm trigger
 
 # node pendant (hmi)
-SUBSYSTEM=="tty", ATTRS{serial}=="505431651893921C", SYMLINK+="cnc/pendant", MODE="0660", GROUP="dialout"
+SUBSYSTEM=="tty", ATTRS{serial}=="505431651893921c", SYMLINK+="cnc/pendant", MODE="0660", GROUP="dialout"

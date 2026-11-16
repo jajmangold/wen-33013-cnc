@@ -38,7 +38,18 @@ for the motion node.
    SSH key, wifi and timezone, deletes the script, strips the cmdline entry
    and reboots itself. Allow two boot cycles before expecting SSH.
 
-4. **Install the udev rules** so USB nodes keep stable identity:
+4. **Install `mpremote`** for pushing firmware to USB nodes. It is not
+   packaged for trixie, and the system Python is externally managed
+   (PEP 668), so use a venv rather than `--break-system-packages`:
+
+   ```bash
+   sudo mkdir -p /opt/cnc-tools && sudo chown $USER /opt/cnc-tools
+   python3 -m venv /opt/cnc-tools/venv
+   /opt/cnc-tools/venv/bin/pip install mpremote
+   sudo ln -sf /opt/cnc-tools/venv/bin/mpremote /usr/local/bin/mpremote
+   ```
+
+5. **Install the udev rules** so USB nodes keep stable identity:
 
    ```bash
    sudo cp 99-cnc-nodes.rules /etc/udev/rules.d/
@@ -46,6 +57,18 @@ for the motion node.
    ```
 
    That file is generated - edit `machine/wen33013.toml` and `/regen`.
+
+   Verify the symlink actually appeared:
+
+   ```bash
+   ls -l /dev/cnc/        # pendant -> ../ttyACM0
+   ```
+
+   **If it did not, suspect case.** udev matches case-sensitively and the USB
+   descriptor carries the serial in lowercase, while MicroPython prints
+   `machine.unique_id()` uppercase. A rule with the uppercase form never
+   fires: no error, no symlink, nothing to indicate why. The generator
+   lowercases it for this reason.
 
 ## Traps
 
