@@ -45,8 +45,9 @@ Ordered by what blocks what. The first two block cutting anything.
    power drops the head. Needs a brake, counterbalance, or an explicit
    decision to accept it. Until then, do not leave a tool in the spindle over
    a workpiece (ADR-0007).
-2. **Latency never measured** - every timing value in the repo, including the
-   1 kHz servo period, is a guess until `/latency-check` has run under load.
+2. ~~Latency never measured~~ - **done 2026-11-15**: 231 us worst case under
+   load with the `performance` governor, 23% of the servo period. 1 kHz is
+   viable *because step generation is on the MCU*. See `latency.md`.
 3. **No HAL files yet.** The generated INI references `core.hal`,
    `remora-spi.hal` and `estop.hal`, none of which exist - the config cannot
    load until the SPI HAL component is written. The integration test that

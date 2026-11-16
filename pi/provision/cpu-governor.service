@@ -1,0 +1,26 @@
+# Pin the CPU governor to `performance` at boot.
+#
+# `ondemand` scales frequency and adds realtime jitter for no benefit on a
+# machine that does exactly one job. Measured 2026-11-15 under load:
+# ondemand 264 us worst case, performance 231 us. See docs/commissioning/latency.md.
+#
+# Install:
+#   sudo cp cpu-governor.service /etc/systemd/system/
+#   sudo systemctl enable --now cpu-governor.service
+#
+# Verify:
+#   cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
+[Unit]
+Description=Pin CPU governor to performance for realtime
+# Must run after cpufreq is up, or the write silently targets nothing.
+After=sysinit.target
+DefaultDependencies=no
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/sh -c 'for c in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo performance > "$c"; done'
+
+[Install]
+WantedBy=multi-user.target

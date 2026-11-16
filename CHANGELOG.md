@@ -64,6 +64,11 @@ Changelogs are for humans. Record what changed about the *machine* or the
 - Pendant panel verified on hardware: wiring correct, two-way comms, and the
   generated DRO screen rendering on the glass.
 
+- Realtime latency measured on the Pi: 231 us worst case under load
+  (`performance` governor), 23% of the 1 kHz servo period. Recorded with the
+  conditions in `docs/commissioning/latency.md`.
+- `pi/provision/cpu-governor.service` pins the CPU governor to `performance`.
+
 ### Changed
 
 - **Panel orientation is portrait, not landscape.** Measured on the bench by
