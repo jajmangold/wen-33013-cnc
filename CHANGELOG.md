@@ -78,6 +78,13 @@ Changelogs are for humans. Record what changed about the *machine* or the
   `hal_input`. Its deadman, watchdog and deadzone are in the machine
   description and asserted by tests (ADR-0008).
 
+- Pendant chimes (`firmware/pendant/chimes.py`): a non-blocking sequencer
+  and 14 cues, each written to scan like the words it stands for, with a
+  policy that keeps anything merely confirming a visible action silent by
+  default.
+- Knob, button and beeper verified on hardware, including that the stock
+  knob is 4 quadrature counts per detent.
+
 ### Changed
 
 - **Panel orientation is portrait, not landscape.** Measured on the bench by

@@ -108,10 +108,62 @@ pad.
  panel 8  (RX)       <-  GP0          UART0 TX
 ```
 
-Panel pin 5 is a **beeper driven by the host** (board PB13 in Marlin). Not
-used by the stock example, but worth wiring: audible feedback on a pendant -
-jog detent, limit hit, cycle complete - is genuinely useful on a machine you
-are standing beside rather than looking at.
+Panel pin 5 is a **beeper driven by the host** (board PB13 in Marlin).
+Audible feedback on a pendant - limit hit, job complete, fault - is genuinely
+useful on a machine you are standing beside rather than looking at.
+
+### The beeper does NOT work driven straight from GP5
+
+Measured 2026-11-15. Driving GP5 with PWM produces sound, but it is not a
+tone: every edge makes one identical click, and raising the frequency just
+delivers clicks faster. Evidence, in the order it was gathered:
+
+- Sweeping 400 Hz - 5 kHz: loudest at the *bottom* of the range, quieter all
+  the way up. No resonant peak, which a buzzer always has.
+- Sweeping 80 Hz - 800 Hz: still rising toward the bottom. The peak is below
+  80 Hz, i.e. there is no peak.
+- Duty 3% vs 50% at 200 Hz: barely any difference. Same edge count, very
+  different energy - so energy is not what is making the sound.
+- 5 Hz and 12 Hz: individually countable ticks, not low pitches.
+
+That is an element being snapped by edge transitions with too little energy
+to ring.
+
+**This is usable as-is, and needs no extra hardware.** Clicks fuse into
+perceived pitch above roughly 30 Hz, so it does produce notes - just with a
+loud bottom end and a weak top. The chime palette therefore lives in
+110-440 Hz (`firmware/pendant/chimes.py`) and uses contour and rhythm for
+distinction rather than timbre. Writing it at 523-1568 Hz, as the first
+version did, put half the set below audibility; that was a design error, not
+a hardware fault.
+
+A transistor driver would make it louder and is written up below as an
+**optional upgrade**. It is not required.
+
+**Two possible causes, needing opposite fixes.** Distinguish with a meter,
+panel unplugged, measuring panel pin 5 to pin 2 (GND):
+
+| Reading | Meaning | Fix |
+|---|---|---|
+| a few ohms to a few hundred | pin 5 IS the buzzer coil | NPN + 5 V, below |
+| ~1 kohm, or very high | panel has its own driver; pin 5 is a logic input | 3.3 V -> 5 V level shift |
+
+The logic-input case is quite likely: the Ender 3 V2 panel is driven from a
+5 V mainboard, and a 3.3 V signal into a 5 V-referenced transistor base turns
+it on only partially - which looks exactly like this. It is also what this
+repo's own note about driving it "via a driver" was pointing at.
+
+If pin 5 is the element directly:
+
+```
+  GP5 --[1k]--+ base
+               NPN (BC337 / 2N3904 / S8050)
+  GND --------+ emitter
+  +5V --- buzzer --- collector
+          +--|<--+   1N4148 flyback, cathode to +5V (magnetic buzzers only)
+```
+
+A magnetic buzzer wants 20-40 mA; an RP2040 GPIO sags above about 12 mA.
 
 Serial crosses over: host TX (GP0) goes to panel **RX, pin 8**; host RX (GP1)
 comes from panel **TX, pin 7**.

@@ -57,7 +57,7 @@ Ordered by what blocks what. The first two block cutting anything.
    that pessimistic reading. Prove it by **pulling the batteries mid-jog**
    and confirming motion stops within 150 ms. Do this with the spindle off
    and plenty of travel ahead.
-5. **Pendant inputs are untested.** The panel itself now works - wiring
+5. **Pendant inputs beyond the knob are untested.** The panel itself now works - wiring
    verified, handshake succeeds, the DRO screen renders - but the encoder,
    its button and the beeper have not been exercised, and nothing yet talks
    to LinuxCNC (`hardware/electrical/pendant-wiring.md`).
@@ -65,6 +65,11 @@ Ordered by what blocks what. The first two block cutting anything.
    pendant is unavailable (`pi/provision/README.md`).
 
 Resolved:
+
+- ~~Beeper unusable~~ - it is an edge-clicking element, loud low and weak
+  high, so the chime palette was rewritten into 110-440 Hz. Audible and
+  distinguishable without any added hardware. A transistor driver remains an
+  optional upgrade, not a requirement.
 
 - ~~`HOME_SEQUENCE` order~~ - fixed 2026-11-15, Z now homes first, with a
   constraint check preventing regression (ADR-0006).
