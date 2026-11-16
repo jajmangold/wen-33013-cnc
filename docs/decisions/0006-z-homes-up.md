@@ -37,16 +37,23 @@ is positive as a result.
   below.
 - Work offsets are referenced from a probe cycle, not from homing.
 
-## Open item
+## Homing order - resolved 2026-11-15
 
-The generator currently emits `HOME_SEQUENCE` in axis order (X=0, Y=1, Z=2),
-which homes X and Y *before* Z retracts. On a machine with a tool in the
-spindle and a vise on the table, that is the wrong order.
+Originally the generator emitted `HOME_SEQUENCE` in axis order (X=0, Y=1,
+Z=2), which homes X and Y *before* Z retracts - dragging the table under a
+tool that is still down.
 
-This must be fixed before the machine homes for the first time: Z should take
-sequence 0 and X/Y follow. It is recorded here rather than silently left
-because the generated file looks perfectly reasonable, and nothing would
-complain until the day something is clamped to the table.
+Fixed: `emit.home_sequence()` now assigns **Z sequence 0** and the remaining
+axes follow. The generated INI reads `HOME_SEQUENCE = 0` on the Z joint.
+
+Defended in two places, because this one is silent when wrong:
+
+- `tests/unit/test_homing.py` asserts Z is first in both the helper and the
+  rendered INI, that sequences are unique, and that an XY-only machine still
+  numbers from zero.
+- `constraints._check_homing_order` raises an ERROR if any axis would home at
+  or before Z, so a future change to the generator cannot reintroduce it
+  quietly.
 
 ## Evidence
 

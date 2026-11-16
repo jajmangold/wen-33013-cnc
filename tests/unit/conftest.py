@@ -8,6 +8,7 @@ one thing.
 from __future__ import annotations
 
 import copy
+import re
 
 import pytest
 from machinegen import parse_machine
@@ -67,6 +68,32 @@ BASE: dict = {
         }
     },
 }
+
+
+def _ini_value(ini: str, section: str, key: str) -> str:
+    """Pull one key out of one INI section."""
+    body = ini.split(f"[{section}]", 1)[1].split("\n[", 1)[0]
+    match = re.search(rf"^{key}\s*=\s*(.+)$", body, re.MULTILINE)
+    assert match, f"{key} not found in [{section}]"
+    return match.group(1).strip()
+
+
+def _define_value(header: str, name: str) -> str:
+    """Pull one #define out of a generated C header."""
+    match = re.search(rf"^#define {name}\s+(.+)$", header, re.MULTILINE)
+    assert match, f"#define {name} not found"
+    return match.group(1).strip()
+
+
+@pytest.fixture
+def ini_value():
+    """Shared as a fixture so test modules never import each other."""
+    return _ini_value
+
+
+@pytest.fixture
+def define_value():
+    return _define_value
 
 
 @pytest.fixture

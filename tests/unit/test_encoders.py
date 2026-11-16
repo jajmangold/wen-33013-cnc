@@ -132,10 +132,8 @@ class TestConstraints:
 
 
 class TestGeneratedOutput:
-    def test_ferror_clears_the_encoder_resolution(self):
+    def test_ferror_clears_the_encoder_resolution(self, ini_value):
         from machinegen import render_ini
-
-        from tests.unit.test_emit import ini_value  # noqa: PLC0415
 
         machine = load_machine(default_machine_path())
         ini = render_ini(machine)

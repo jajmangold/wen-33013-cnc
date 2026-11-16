@@ -38,6 +38,29 @@ def _ini_header(machine: Machine, fp: str) -> str:
     )
 
 
+def home_sequence(machine: Machine) -> dict[str, int]:
+    """Homing order: Z retracts FIRST, then the rest.
+
+    LinuxCNC homes in ascending HOME_SEQUENCE. Emitting the axes in XYZ order
+    - the obvious thing, and what this generator used to do - moves the table
+    under a tool that has not been lifted yet. With a vise or a workpiece
+    clamped down, the first homing run of the day crashes the cutter.
+
+    Z is always sequence 0. Everything else follows in canonical order. See
+    ADR-0006.
+    """
+    order: dict[str, int] = {}
+    rest = [a.name for a in machine.ordered_axes if a.name != "z"]
+    if any(a.name == "z" for a in machine.ordered_axes):
+        order["z"] = 0
+        start = 1
+    else:
+        start = 0
+    for offset, name in enumerate(rest):
+        order[name] = start + offset
+    return order
+
+
 def _ferror_lines(axis) -> list[str]:
     """Following-error limits, sized to the feedback that will police them.
 
@@ -105,6 +128,7 @@ def render_ini(machine: Machine, fp: str = "unknown") -> str:
         "",
     ]
 
+    sequences = home_sequence(m)
     for index, axis in enumerate(m.ordered_axes):
         upper = axis.name.upper()
         lines += [
@@ -130,7 +154,8 @@ def render_ini(machine: Machine, fp: str = "unknown") -> str:
             f"HOME_OFFSET = {0.0:.3f}",
             f"HOME_SEARCH_VEL = {axis.home_direction * min(5.0, axis.max_velocity_mm_s / 4):.3f}",
             f"HOME_LATCH_VEL = {axis.home_direction * 0.5:.3f}",
-            f"HOME_SEQUENCE = {index}",
+            "# Z retracts before the table moves under the tool - ADR-0006",
+            f"HOME_SEQUENCE = {sequences[axis.name]}",
             "",
         ]
 

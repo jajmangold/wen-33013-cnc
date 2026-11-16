@@ -328,9 +328,39 @@ def _check_encoders(machine: Machine) -> list[Violation]:
     return out
 
 
+def _check_homing_order(machine: Machine) -> list[Violation]:
+    """Z must retract before anything moves under the tool.
+
+    Checked here as well as generated, so that a hand-written override or a
+    future change to the generator cannot quietly reintroduce the XYZ order
+    that homes the table first.
+    """
+    from .emit import home_sequence
+
+    names = [a.name for a in machine.ordered_axes]
+    if "z" not in names:
+        return []
+
+    order = home_sequence(machine)
+    z_seq = order["z"]
+    late = [n for n in names if n != "z" and order[n] <= z_seq]
+    if late:
+        return [
+            Violation(
+                Severity.ERROR,
+                "homing",
+                f"{', '.join(sorted(late))} home at or before Z",
+                "Z must retract first or the table moves under an unlifted "
+                "tool. See ADR-0006.",
+            )
+        ]
+    return []
+
+
 CHECKS = (
     _check_node_topology,
     _check_encoders,
+    _check_homing_order,
     _check_step_rate,
     _check_pulse_width,
     _check_soft_limits,

@@ -47,6 +47,20 @@ Changelogs are for humans. Record what changed about the *machine* or the
   `ui/dwinui` agree about which way up the panel is.
 - `hardware/electrical/pendant-wiring.md` with the RP2040-Zero pin mapping.
 
+- `dwinui` command line: `check`, `preview`, `ops` and `export`. `export`
+  turns a screen into a MicroPython module the pendant replays, so the browser
+  preview and the panel are driven from one SVG.
+- Pendant firmware skeleton (`firmware/pendant/main.py`) and a
+  `/deploy-pendant` skill.
+
+### Fixed
+
+- **Homing order.** The generator emitted `HOME_SEQUENCE` in XYZ order, which
+  homes the table before Z retracts - with a tool in the spindle and a vise on
+  the table, the first homing run of the day would crash the cutter. Z now
+  takes sequence 0, asserted in both the helper and the rendered INI, and a
+  constraint check refuses any config where another axis homes at or before Z.
+
 ### Notes
 
 - Values marked PROVISIONAL in the machine description are starting points,
