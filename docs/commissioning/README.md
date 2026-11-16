@@ -39,11 +39,25 @@ Files in this directory:
 
 ## Known open items
 
-- **`HOME_SEQUENCE` order is wrong.** The generator emits sequences in XYZ
-  order, so X and Y home before Z retracts. With a tool in the spindle and a
-  vise on the table that is the wrong order. Fix before first homing
-  (ADR-0006).
-- **Z drop on E-stop** - no brake, counterbalance or decision yet (ADR-0007).
-- **VNC does not start** on the Pi, so there is no GUI fallback if the
-  pendant is unavailable (`pi/provision/README.md`).
-- **Latency never measured** - every timing value in the repo is provisional.
+Ordered by what blocks what. The first two block cutting anything.
+
+1. **Z drop on E-stop** - a 1605 ballscrew back-drives, so removing driver
+   power drops the head. Needs a brake, counterbalance, or an explicit
+   decision to accept it. Until then, do not leave a tool in the spindle over
+   a workpiece (ADR-0007).
+2. **Latency never measured** - every timing value in the repo, including the
+   1 kHz servo period, is a guess until `/latency-check` has run under load.
+3. **No HAL files yet.** The generated INI references `core.hal`,
+   `remora-spi.hal` and `estop.hal`, none of which exist - the config cannot
+   load until the SPI HAL component is written. The integration test that
+   globs for HAL files currently passes vacuously.
+4. **The physical panel is untested.** The pendant board runs and its protocol
+   stack self-tests against a loopback, but no panel has been connected
+   (`hardware/electrical/pendant-wiring.md`).
+5. **VNC does not start** on the Pi, so there is no GUI fallback if the
+   pendant is unavailable (`pi/provision/README.md`).
+
+Resolved:
+
+- ~~`HOME_SEQUENCE` order~~ - fixed 2026-11-15, Z now homes first, with a
+  constraint check preventing regression (ADR-0006).
