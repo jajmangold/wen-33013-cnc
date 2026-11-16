@@ -26,10 +26,10 @@ PIN_ENC_B = 3       # <- panel pin 4
 PIN_BUTTON = 4      # <- panel pin 6
 PIN_BEEP = 5        # -> panel pin 5
 
-# The stock panel CFG boots rotated, presenting the 480x272 LCD as 272x480.
-# Our screens are drawn landscape, so this MUST be applied before drawing or
+# Measured on the real panel: orientation 1 reads upright on this glass,
+# giving a 272x480 portrait frame. MUST be applied before drawing or
 # everything lands off-screen and the panel reports nothing.
-ORIENTATION_LANDSCAPE = 0
+ORIENTATION_PORTRAIT = 1
 
 BACKLIGHT = 0xC0
 
@@ -37,7 +37,7 @@ BACKLIGHT = 0xC0
 def open_panel():
     """Bring the panel up in the orientation our screens are drawn for."""
     panel = T5UIC1Display(open_uart(UART_ID, tx=PIN_TX, rx=PIN_RX))
-    panel.set_orientation(ORIENTATION_LANDSCAPE)
+    panel.set_orientation(ORIENTATION_PORTRAIT)
     panel.set_backlight(BACKLIGHT)
     return panel
 

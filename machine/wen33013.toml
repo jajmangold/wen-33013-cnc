@@ -139,11 +139,12 @@ usb_serial    = "505431651893921C"    # Waveshare RP2040-Zero, MicroPython 1.29.
 screen        = "dwin-t5uic1"
 board         = "waveshare-rp2040-zero"
 runtime       = "micropython"
-# The stock panel CFG boots ROTATED 90deg, presenting the 480x272 LCD as a
-# 272x480 portrait frame. Our screens are drawn landscape, so the pendant
-# firmware must call set_orientation(0) at startup. A unit test asserts this
-# agrees with ui/dwinui - mismatch draws everything off-screen, silently.
-orientation   = "landscape"
+# Confirmed against the physical panel 2026-11-15: orientation 1 is the one
+# that reads upright on this glass, giving a 272x480 PORTRAIT frame (the
+# stock CFG default). The firmware must call set_orientation(1) before
+# drawing. A unit test asserts this agrees with ui/dwinui - a mismatch draws
+# everything off-screen and the panel reports nothing.
+orientation   = "portrait"
 
 [spindle]
 # Stock WEN variable-speed head, manually set for now.

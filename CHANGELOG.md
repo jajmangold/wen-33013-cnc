@@ -61,6 +61,17 @@ Changelogs are for humans. Record what changed about the *machine* or the
   takes sequence 0, asserted in both the helper and the rendered INI, and a
   constraint check refuses any config where another axis homes at or before Z.
 
+- Pendant panel verified on hardware: wiring correct, two-way comms, and the
+  generated DRO screen rendering on the glass.
+
+### Changed
+
+- **Panel orientation is portrait, not landscape.** Measured on the bench by
+  sweeping all four orientations: 1 reads upright, giving a 272x480 frame.
+  `ui/dwinui`, the DRO screen and the pendant firmware were all built around
+  480x272 landscape and have been flipped. The cross-check test between the
+  TOML and the compiler caught every place that disagreed.
+
 ### Notes
 
 - Values marked PROVISIONAL in the machine description are starting points,

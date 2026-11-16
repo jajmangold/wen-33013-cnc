@@ -18,7 +18,7 @@ def screen(tmp_path):
     """A valid minimal screen on disk."""
     path = tmp_path / "test.svg"
     path.write_text(
-        '<svg xmlns="http://www.w3.org/2000/svg" width="480" height="272" '
+        '<svg xmlns="http://www.w3.org/2000/svg" width="272" height="480" '
         'data-background="#000">'
         '<rect x="0" y="0" width="40" height="20" fill="#fff"/>'
         '<text x="0" y="40" font-size="16" fill="#fff">HI</text>'
@@ -105,7 +105,7 @@ class TestFailureModes:
     def test_a_broken_screen_exits_nonzero(self, tmp_path):
         bad = tmp_path / "bad.svg"
         bad.write_text(
-            '<svg xmlns="http://www.w3.org/2000/svg" width="480" height="272">'
+            '<svg xmlns="http://www.w3.org/2000/svg" width="272" height="480">'
             '<path d="M0 0"/></svg>',
             encoding="utf-8",
         )

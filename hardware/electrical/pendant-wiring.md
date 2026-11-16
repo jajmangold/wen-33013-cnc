@@ -142,18 +142,24 @@ differs (the Zero has a `5V` castellation where a Pico has VBUS on pin 40).
   3 and 4, which are the **encoder** lines. Fixed upstream 2026-11-15; if you
   are reading an older checkout, pins 7 and 8 are correct.
 
-## Orientation
+## Orientation - measured, not assumed
 
-The stock panel CFG boots **rotated 90 degrees**, presenting the 480x272 LCD
-as a **272x480 portrait** frame - which is why the driver defaults to
-`WIDTH=272, HEIGHT=480`.
+**Orientation 1, giving a 272x480 PORTRAIT frame.** Determined on the bench by
+sweeping all four orientations and asking which read upright with its
+top-left marker in the top-left; 1 won, and corner markers at (271, 0) and
+(0, 479) landed on-glass with no clipping.
 
-Our screens in `ui/screens/` are designed **landscape 480x272**, so the
-pendant firmware MUST call `set_orientation(0)` during startup, before drawing
-anything. `machine/wen33013.toml` records this as
-`node.pendant.orientation = "landscape"`, and a unit test asserts the compiler
-and that setting agree - get this wrong and every element is drawn off-screen
-or rotated, with no error reported.
+This is the stock CFG default, and it is what the driver's own
+`WIDTH=272, HEIGHT=480` already assumed. An earlier guess here had the screens
+drawn landscape 480x272, which was wrong.
+
+The firmware MUST call `set_orientation(1)` before drawing.
+`machine/wen33013.toml` records it as `node.pendant.orientation = "portrait"`,
+and a unit test asserts the TOML and `ui/dwinui` agree - a mismatch draws
+everything off-screen and the panel reports nothing.
+
+Portrait suits a DRO anyway: three big axis rows stacked, readable across a
+shop.
 
 ## Deploying
 
@@ -167,9 +173,20 @@ python -m mpremote connect port:COM20 fs cp examples/pico_hello.py :pico_hello.p
 should auto-run and drive an unwired or mis-wired panel. Promote it to
 `main.py` only after the wiring above is verified with a meter.
 
-## Verified so far
+## Verified on hardware (2026-11-15)
 
-- MicroPython boots, driver imports, protocol frames encode correctly
-  (header `0xAA`, correct tail) against the loopback transport.
-- **Not yet verified:** anything involving the physical panel. No panel has
-  been connected.
+- Wiring as above is correct: the panel draws what we send.
+- **Handshake succeeds** - two-way comms, so the RX wire and pin 7/8
+  orientation are both right. `set_orientation(..., wait_ack=True)` is acked.
+- Orientation 1 confirmed upright, 272x480 frame confirmed by corner markers.
+- The generated `dro_screen.py` renders on the glass, 24 draw calls.
+
+Getting there needed a driver fix: `protocol.take_response()` trimmed its RX
+buffer with `del buffer[:n]` and `buffer.clear()`, neither of which exists on
+MicroPython's bytearray, so every read path raised on the first inbound byte.
+The symptom - draws fine, never answers - looks exactly like TX/RX swapped,
+which is a good reason to test the handshake separately from drawing. Fixed
+upstream in `dwin-t5uic1` with a regression test.
+
+Not yet done: encoder and button inputs, the beeper, and anything that talks
+to LinuxCNC.

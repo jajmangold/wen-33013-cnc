@@ -10,8 +10,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-WIDTH = 480
-HEIGHT = 272
+# Confirmed on the bench, not inferred: the stock CFG boots rotated and
+# orientation 1 is the one that reads upright on this glass. The firmware
+# applies it before drawing - see firmware/pendant/main.py.
+WIDTH = 272
+HEIGHT = 480
 
 # T5UIC1 built-in font table: id -> (cell width, cell height) in pixels.
 FONTS: dict[int, tuple[int, int]] = {

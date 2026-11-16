@@ -24,3 +24,11 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+# firmware/pendant/ is MicroPython, not CPython 3.11. Ruff's pyupgrade rules
+# assume the host target and would push idioms that are either unsupported or
+# unnecessarily risky on a microcontroller - MicroPython's f-string support
+# is real but has gaps, so %-formatting stays. Bare excepts in the bring-up
+# diagnostic are deliberate too: it must report a failure, not raise on it.
+"firmware/pendant/*.py" = ["UP031", "UP032", "BLE001", "E722"]

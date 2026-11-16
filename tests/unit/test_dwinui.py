@@ -20,7 +20,7 @@ SCREENS = Path(__file__).resolve().parents[2] / "ui" / "screens"
 def svg(body: str, **attrs: str) -> str:
     extra = " ".join(f'{k.replace("_", "-")}="{v}"' for k, v in attrs.items())
     return (
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="480" height="272" {extra}>'
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="272" height="480" {extra}>'
         f"{body}</svg>"
     )
 
@@ -116,16 +116,16 @@ class TestRejection:
     """Each of these would otherwise vanish silently on the panel."""
 
     def test_offscreen_rect_is_rejected(self):
-        with pytest.raises(UnsupportedDesign, match="outside the 480x272"):
-            compile_svg(svg('<rect x="470" y="0" width="50" height="10" fill="#fff"/>'))
+        with pytest.raises(UnsupportedDesign, match="outside the 272x480"):
+            compile_svg(svg('<rect x="262" y="0" width="50" height="10" fill="#fff"/>'))
 
     def test_negative_coordinates_are_rejected(self):
-        with pytest.raises(UnsupportedDesign, match="outside the 480x272"):
+        with pytest.raises(UnsupportedDesign, match="outside the 272x480"):
             compile_svg(svg('<rect x="-5" y="0" width="10" height="10" fill="#fff"/>'))
 
     def test_text_running_off_the_edge_is_rejected(self):
-        long = "X" * 60      # 60 * 8px = 480px starting at x=10
-        with pytest.raises(UnsupportedDesign, match="outside the 480x272"):
+        long = "X" * 40      # 40 * 8px = 320px starting at x=10, past 272
+        with pytest.raises(UnsupportedDesign, match="outside the 272x480"):
             compile_svg(svg(f'<text x="10" y="10" font-size="16" fill="#fff">{long}</text>'))
 
     def test_transform_is_rejected(self):
@@ -145,7 +145,7 @@ class TestRejection:
             compile_svg(svg('<path d="M0 0 L4 4"/>'))
 
     def test_wrong_canvas_size_is_rejected(self):
-        bad = '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="480"></svg>'
+        bad = '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"></svg>'
         with pytest.raises(UnsupportedDesign, match="must match the panel"):
             compile_svg(bad)
 
@@ -179,7 +179,7 @@ class TestPreview:
         out = compile_svg(svg('<rect x="0" y="0" width="10" height="10" fill="#fff"/>'))
         preview = render_preview(out)
         assert preview.startswith("<svg")
-        assert 'width="480"' in preview and 'height="272"' in preview
+        assert 'width="272"' in preview and 'height="480"' in preview
 
     def test_preview_shows_quantised_colour_not_the_source(self):
         """The point of the preview: what the panel does, not what you drew."""
