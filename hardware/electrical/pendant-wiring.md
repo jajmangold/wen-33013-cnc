@@ -77,8 +77,28 @@ signals where the serial and power lines should be.
 
 ## Connections
 
+RP2040-Zero pads are numbered **anticlockwise from the USB connector**
+(confirmed against Apache NuttX's board docs): pads 1-3 are 5V / GND / 3V3 at
+the USB end of one side rail, and pads 18-23 are GP5..GP0 at the USB end of
+the other. So everything we need is two short runs, both nearest the USB end.
+
+| Signal | GPIO | Zero pad | Panel pin |
+|---|---|---|---|
+| +5V | - | **1** | 1 |
+| GND | - | **2** | 2 |
+| UART0 TX -> panel RX | GP0 | **23** | 8 |
+| UART0 RX <- panel TX | GP1 | **22** | 7 |
+| Encoder A | GP2 | **21** | 3 |
+| Encoder B | GP3 | **20** | 4 |
+| Encoder button | GP4 | **19** | 6 |
+| Beeper | GP5 | **18** | 5 |
+
+GP0/GP1 are the RP2040's **default UART0** pins, so no remapping is involved.
+The WS2812 status LED is on GP16, which is internal and not brought out to a
+pad.
+
 ```
- panel 1  (+5V)      <-  5V pad      (USB VBUS on the Zero)
+ panel 1  (+5V)      <-  5V pad      (pad 1, USB VBUS on the Zero)
  panel 2  (GND)      <-> GND
  panel 3  (enc A)    ->  GP2
  panel 4  (enc B)    ->  GP3
@@ -118,9 +138,9 @@ differs (the Zero has a `5V` castellation where a Pico has VBUS on pin 40).
      **hole 10 to its VCC**.
   2. Cross-check by plugging the ribbon into the Creality board's EXP3 and
      measuring 5 V with the printer on - a known-good reference.
-- Do not trust the `open_uart` docstring in the `dwin-t5uic1` repo: it says to
-  wire TX/RX to panel pins 3 and 4, which are the **encoder** lines. Pins 7
-  and 8 are correct, per that repo's own `wiring.md`. Reported upstream.
+- The `open_uart` docstring in `dwin-t5uic1` used to point TX/RX at panel pins
+  3 and 4, which are the **encoder** lines. Fixed upstream 2026-11-15; if you
+  are reading an older checkout, pins 7 and 8 are correct.
 
 ## Orientation
 
