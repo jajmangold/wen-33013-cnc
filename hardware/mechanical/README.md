@@ -53,3 +53,35 @@ mesh that is not solid, is non-manifold, or self-intersects.
 That matters more than it sounds: a boolean that severs a part returns a
 perfectly *valid* shape with two solids, and nothing complains until the STL
 is already on the bed.
+
+## Measuring the machine
+
+Dimensions taken off an uncalibrated photograph got the X bracket wrong
+twice - once by 25 mm, and once by deleting a boss that was really there.
+So photos now carry their own scale.
+
+```bash
+pip install -e ".[measure]"
+python lib/charuco.py board docs/charuco_board.png   # print at 100%
+python lib/charuco.py rectify photo.jpg out.png      # square-on, metric
+python lib/charuco.py probe   photo.jpg x1 y1 x2 y2  # distance in mm
+```
+
+Print the board **at 100%, no fit-to-page** - it carries a 100 mm bar so you
+can check with a rule - and tape it flat on the surface being measured. The
+board is 110 x 40 mm, which fits the X end plate with the boss free to cover
+the middle; ChArUco reads whatever corners it can see, so occlusion is fine.
+
+`rectify` warps the photo into a square-on view where one pixel is a known
+fraction of a millimetre, and overlays a 10 mm grid. Anything **coplanar
+with the board** can then be measured straight off it. Features standing
+proud - a boss face, a pulley - are in a different plane and still need
+their own board or a caliper.
+
+Every run prints a reprojection error. Under ~0.05 mm the mapping is sound;
+a large one means the board was not flat and the millimetres are a lie.
+Tested against a synthetic oblique view in `tests/unit/test_charuco.py`,
+where a 92 mm span measures true to 12 um.
+
+`opencv-contrib-python` is a **dev-only** extra. Nothing on the Pi imports
+it and the runtime stays dependency-free.

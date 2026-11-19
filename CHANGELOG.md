@@ -37,8 +37,15 @@ Changelogs are for humans. Record what changed about the *machine* or the
 - Plate dimensions are now recorded as measured - from the plate's edges -
   rather than as centres derived from a model, so correcting one is one edit.
 
-### Added
-
+### Added
+
+- **Photogrammetry for machine dimensions** (`hardware/mechanical/lib/charuco.py`).
+  Tape a printed ChArUco board on the surface, photograph it, and the tool
+  recovers the homography and rectifies the picture into a square-on metric
+  view where a pixel is a known fraction of a millimetre. It reports a
+  reprojection error, so a bad photo says so rather than returning a
+  confident wrong number. Against a synthetic oblique view a 92 mm span
+  measures true to 12 um. `opencv-contrib-python` is a dev-only extra.
 - `gauge.py`: a 12 cm3 flat gauge to print, hold against the plate and
   photograph. It carries the bolt pattern, a scribed line where the plate's
   top edge should fall, and a fan of fingers reaching to known radii, so the

@@ -13,7 +13,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"      # tomllib; also what the Pi runs
-      - run: pip install pytest ruff
+      # opencv is a dev-only extra, but the photogrammetry tests are only
+      # worth having if they actually run somewhere.
+      - run: pip install pytest ruff opencv-contrib-python numpy
       # verify first: a stale generated file means the machine description and
       # the configs disagree, and that is the bug class this repo exists to stop.
       - run: python tasks.py verify

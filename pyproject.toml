@@ -7,6 +7,10 @@ dependencies = []                    # keep it so: this must run on a bare Pi
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+# Photogrammetry for hardware/mechanical: reading a dimension off a photo of
+# a ChArUco board. Dev-only and deliberately so - nothing on the Pi imports
+# it, and the runtime stays dependency-free.
+measure = ["opencv-contrib-python>=4.8", "numpy>=1.24"]
 
 [tool.pytest.ini_options]
 # `tools` on the path so `import machinegen` works without installing anything.
