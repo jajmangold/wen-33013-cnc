@@ -103,12 +103,17 @@ BOLT_ABOVE = SCREW_BELOW_TOP - HOLE_BELOW_TOP        # 1.0 above the screw axis
 PLATE_TOP_ABOVE = SCREW_BELOW_TOP                    # 22.5
 PLATE_BOT_BELOW = PLATE_H - SCREW_BELOW_TOP          # 22.5
 
-BOSS_D = 38.0            # ASSUMED   bearing boss OD - this is the REGISTER
-BOSS_PROUD = 16.0        # MEASURED  the 16 mm bump
-LAND_START_X = 20.0      # ASSUMED   plate face to the start of the d10 land;
-                         # must clear the 16 proud boss, so it cannot be the 10
-                         # originally guessed. Sets the belt plane.
-REGISTER_FIT = 0.15
+# There is NO raised boss. The photo gauge settled it: all eight fingers,
+# sitting on the plate face at r = 16 to 23, are visible with the casting
+# recessed behind them. Nothing stands proud within Ø46. So the bracket
+# bolts FLAT and the bolts locate it - the register bore is gone, and with
+# it the only dimension that could have made the part refuse to go on.
+RETAINER_D = 36.0        # PHOTO     steel retainer ring around the screw, ~Ø36
+CLEARANCE_D = 46.0       # bore in the backplate: clears the retainer and the
+                         # 40T pulley's Ø28.4 flange with room to spare
+LAND_START_X = 14.0      # ASSUMED   plate face to the inner face of the 40T
+                         # pulley. Only shifts the belt plane, and the motor
+                         # pulley slides on its shaft to take up the error.
 
 # ---------------------------------------------------------------- NEMA 23
 NEMA_FRAME = 56.4

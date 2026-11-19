@@ -10,8 +10,15 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ## [Unreleased]
 
-### Fixed
-
+### Fixed
+
+- **The register bore is gone - there is no raised boss to register on.**
+  The photo gauge settled it: all eight fingers, which sit on the plate face
+  at r = 16 to 23, are visible with the casting recessed behind them. Nothing
+  stands proud within Ø46. The backplate now bolts flat with a Ø46 clearance
+  for the retainer and the pulley flange, the bolts locate it, and face
+  contact over a 45 mm-tall plate takes the moment from the motor's overhang.
+  That also removes the last dimension that could make the part refuse to fit.
 - **The X bracket's register bore was 25 mm out of position.** It was placed
   from a third-party STEP model that put the bolt line 26.3 above the screw;
   the screw actually runs on the end plate's centreline, which makes it 1.0.
