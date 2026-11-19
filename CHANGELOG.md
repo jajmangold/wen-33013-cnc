@@ -12,6 +12,22 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Fixed
 
+- **The X bracket's register bore was 25 mm out of position.** It was placed
+  from a third-party STEP model that put the bolt line 26.3 above the screw;
+  the screw actually runs on the end plate's centreline, which makes it 1.0.
+  Found by printing the bracket and offering it up. The plate is 115 wide,
+  not 120, and its Ø10 holes are clearance for M5s that thread into the table.
+- Plate dimensions are now recorded as measured - from the plate's edges -
+  rather than as centres derived from a model, so correcting one is one edit.
+
+### Added
+
+- `gauge.py`: a 22 cm3 fit check for the bracket's mounting face, printed
+  instead of the 148 cm3 bracket. Its register is a staircase of diameters,
+  so how far it stands proud reads off the boss OD.
+
+### Fixed
+
 - The source fingerprint hashed raw bytes, so the same machine description
   fingerprinted differently on Windows (CRLF working copy) and Linux (LF in
   git). Every generated file then looked stale on whichever machine had not

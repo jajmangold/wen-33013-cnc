@@ -17,14 +17,26 @@ import FreeCAD as App
 import MeshPart
 
 OURS = ("Pulley_40T", "Bracket")
+GAUGE = ("FitGauge",)
 OUTDIR = os.path.join(_HERE, "stl")
 
 
 def main() -> None:
     os.makedirs(OUTDIR, exist_ok=True)
-    doc = App.openDocument(os.path.join(_HERE, "wen_x_drive.FCStd"))
+    jobs = [("wen_x_drive.FCStd", OURS), ("wen_x_gauge.FCStd", GAUGE)]
     failures = []
-    for name in OURS:
+    for fname, names in jobs:
+        path = os.path.join(_HERE, fname)
+        if not os.path.exists(path):
+            continue
+        failures += _export(App.openDocument(path), names)
+    if failures:
+        raise SystemExit(f"unprintable mesh: {failures}")
+
+
+def _export(doc, names):
+    failures = []
+    for name in names:
         mesh = MeshPart.meshFromShape(
             Shape=doc.getObject(name).Shape,
             LinearDeflection=0.02,
@@ -46,8 +58,7 @@ def main() -> None:
         if bad:
             failures.append((name, bad))
     App.closeDocument(doc.Name)
-    if failures:
-        raise SystemExit(f"unprintable mesh: {failures}")
+    return failures
 
 
 main()

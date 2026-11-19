@@ -45,7 +45,7 @@ the nut holds it on. Use a nyloc or a jam nut.
 
 ## What locates it
 
-The bracket's **Ø38.15 register bore drops over the bearing boss**, not over
+The bracket's **register bore drops over the bearing boss**, not over
 the bolts. Two M5s on one horizontal line cannot resist the motor hanging
 outboard - that couple has no lever arm between them - so the boss takes it
 and sets the pulleys concentric at the same time.
@@ -69,20 +69,60 @@ than a moment.
 | 4 | M5 for the motor | ±5 mm tension slots |
 | 1 | M8 nut + washer | **reuse the stock ones** off the handwheel |
 
+## The mounting face
+
+Measured off the machine, all from the plate's top-left corner:
+
+```
+        <------------- 115 ------------->
+   ---  +------------------------------+   ---
+   21.5 |                              |
+   ---  |  (o) Ø10      72      Ø10 (o)|    45     bolt line, 1.0 above the screw
+    1.0 |        \     boss      /     |
+   ---  |         \___(  )___ __/      |           screw on the centreline
+        |              16 proud        |
+        +------------------------------+   ---
+```
+
+The two Ø10 holes are **clearance** - the stock M5s pass through them into
+the table casting, so the bracket bolts into the same tapped holes and the
+72 mm pitch is what has to be right.
+
+Three independent routes gave the same hole position, which is why it is
+trusted: 16 to the hole's top edge plus a 5 radius; 21.5 measured to the
+centre; and a 30 across the corner, which is sqrt(21.5^2 + 21.5^2) = 30.4.
+
+## Check the fit before printing the bracket
+
+```bash
+FreeCADCmd gauge.py      # -> stl/FitGauge.stl, 22 cm3
+```
+
+The bracket is 148 cm3 and the first one did not fit, so there is a 22 cm3
+version of just the mounting face: the same two bolt holes, the same register.
+If it drops over the boss and the bolts line up, the bracket will too.
+
+Its register is a staircase rather than one bore, so it measures the boss at
+the same time - the boss jams at the step that matches it:
+
+| Gauge sits | Boss OD is |
+|---|---|
+| flush | 34-36 |
+| 1.5 proud | 36-38 |
+| 3.0 proud | 38-40 |
+| 4.5 proud | 40-42 |
+
 ## Before you cut metal
 
-Four dimensions in `params.py` are still `ASSUMED`:
+Two dimensions in `params.py` are still `ASSUMED`:
 
 | Param | Guess | Measure |
 |---|---|---|
-| `BOSS_D` | 38.0 | OD of the round bearing boss - this is the register fit |
-| `BOSS_PROUD` | 10.0 | how far it stands off the plate face |
-| `LAND_START_X` | 10.0 | plate face → shoulder where the Ø10 land starts |
-| `PLATE_TOP_ABOVE` | 34.5 | bolt centres → top edge of the plate |
+| `BOSS_D` | 38.0 | OD of the bearing boss - the gauge above reads it |
+| `LAND_START_X` | 20.0 | plate face to the inner face of the 40T pulley |
 
-`BOSS_D` and `LAND_START_X` are the ones that matter: the first sets the
-register fit, the second shifts the entire axial stack including the belt
-plane. Change them and re-run the build loop.
+`LAND_START_X` sets the belt plane, and therefore where the motor plate sits.
+Everything else on this page is measured.
 
 ## A different belt
 

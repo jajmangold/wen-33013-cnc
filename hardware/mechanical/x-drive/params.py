@@ -74,14 +74,40 @@ SETSCREW_TAP_D = 3.3     # M4 tapping drill
 # Origin: X = 0 at the plate's OUTER face, Z = 0 on the screw centreline,
 # +X outboard, +Z up.
 PLATE_T = 12.0           # MEASURED
-BOLT_PITCH = 72.0        # STEP      (Josh's tape read 70; the model is finer)
-BOLT_ABOVE = 26.3        # STEP      bolt line above the screw centreline
-BOLT_CLEAR_D = 5.5       # M5 clearance
-PLATE_TOP_ABOVE = 34.5   # ASSUMED   45 tall, bolts 26.3 up
-PLATE_BOT_BELOW = 10.5   # ASSUMED
+PLATE_W = 115.0          # MEASURED  21.5 + 72 + 21.5; the original 120 was a tape read
+PLATE_H = 45.0           # MEASURED  (rough)
+
+# Holes are given the way they were MEASURED - from the plate's edges - rather
+# than as centres someone derived. Four rounds of tape measurements disagreed
+# with each other until the 30 turned out to be a corner diagonal:
+# sqrt(21.5^2 + 21.5^2) = 30.4.
+HOLE_D = 10.0            # MEASURED  clearance holes; the M5s thread into the table
+HOLE_FROM_TOP_EDGE = 16.0    # MEASURED  top edge of the hole to the top of the plate
+HOLE_FROM_SIDE_EDGE = 16.5   # MEASURED  21.5 centre - 5 radius
+BOLT_PITCH = 72.0        # MEASURED + STEP  centre to centre, and 82.39 across the
+                         # outer edges = 72 + 10. Three routes, one number.
+BOLT_CLEAR_D = 5.5       # M5 clearance in our parts
+
+# Centres, measured directly. The edge readings above corroborate them to
+# within 0.5 mm (16 + 5 = 21.0 against 21.5), and the corner diagonal is the
+# third route: sqrt(21.5^2 + 21.5^2) = 30.4, which is the 30 that was measured.
+HOLE_BELOW_TOP = 21.5    # MEASURED  hole centre below the top edge
+HOLE_FROM_SIDE = 21.5    # MEASURED  hole centre in from each side edge
+
+# The screw runs on the plate's centreline - the boss is cast in the middle of
+# it. That makes the bolt line just 1.0 mm above the screw axis, not the 26.3
+# a third-party STEP model suggested. Building on that 26.3 put the register
+# bore 25 mm out of position, which is why the first bracket did not fit.
+SCREW_BELOW_TOP = PLATE_H / 2.0                      # 22.5, screw on the centreline
+BOLT_ABOVE = SCREW_BELOW_TOP - HOLE_BELOW_TOP        # 1.0 above the screw axis
+PLATE_TOP_ABOVE = SCREW_BELOW_TOP                    # 22.5
+PLATE_BOT_BELOW = PLATE_H - SCREW_BELOW_TOP          # 22.5
+
 BOSS_D = 38.0            # ASSUMED   bearing boss OD - this is the REGISTER
-BOSS_PROUD = 10.0        # ASSUMED   how far it stands off the plate face
-LAND_START_X = 10.0      # ASSUMED   plate face to the start of the d10 land
+BOSS_PROUD = 16.0        # MEASURED  the 16 mm bump
+LAND_START_X = 20.0      # ASSUMED   plate face to the start of the d10 land;
+                         # must clear the 16 proud boss, so it cannot be the 10
+                         # originally guessed. Sets the belt plane.
 REGISTER_FIT = 0.15
 
 # ---------------------------------------------------------------- NEMA 23

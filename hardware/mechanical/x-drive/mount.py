@@ -122,7 +122,8 @@ def make_nema23():
 
 # ------------------------------------------- reference: the mill's end plate
 def make_end_plate():
-    p = _box(-P.PLATE_T, 0, -60, 60, -P.PLATE_BOT_BELOW, P.PLATE_TOP_ABOVE)
+    half = P.PLATE_W / 2.0
+    p = _box(-P.PLATE_T, 0, -half, half, -P.PLATE_BOT_BELOW, P.PLATE_TOP_ABOVE)
     p = p.fuse(_xcyl(P.BOSS_D, 0, P.BOSS_PROUD))
     p = p.cut(_xcyl(26.0, -P.PLATE_T - 1, P.BOSS_PROUD + 1))
     for s in (+1, -1):
