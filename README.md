@@ -15,8 +15,8 @@ LinuxCNC (Raspberry Pi 4 "lcnc", PREEMPT_RT kernel)
 |---|---|
 | Base machine | WEN 33013, R8 spindle, 100-2500 RPM, 130 lb |
 | Travels | X 300 mm, Y 130 mm, Z 177.8 mm |
-| Drives | DM542T at 32x microstepping, NEMA 23 |
-| Resolution | 1280 steps/mm (0.78 um per microstep) |
+| Drives | NEMA 23 on DM542T; X belted 2:1 onto the **stock** lead screw (ADR-0009) |
+| Resolution | X 3200 steps/mm (0.31 um); Y/Z 1280 steps/mm (0.78 um) |
 | Feedback | 14-bit absolute encoders, GT2 belt driven, 409.6 counts/mm (2.44 um) |
 | Controller | LinuxCNC 2.9.8 on Pi 4, 1 kHz servo thread |
 
@@ -64,10 +64,34 @@ No runtime dependencies - stdlib only, so it runs on a bare Pi. `pytest` and
 | `firmware/pico-spi/` | RP2040 SPI slave + PIO step generation |
 | `ui/` | SVG -> DWIN panel compiler, screen designs |
 | `pi/provision/` | how the Pi is built, from blank card to running |
-| `hardware/` | wiring, DIP settings, BOM, CAD |
+| `hardware/electrical/` | wiring, DIP settings, BOM |
+| `hardware/mechanical/` | printed and machined parts, built from scripts |
 | `docs/decisions/` | ADRs - why things are the way they are |
 | `docs/commissioning/` | procedures for bringing the machine up safely |
 | `tests/` | `unit` (always), `integration` (needs LinuxCNC), `hardware` (needs the mill) |
+
+## The mechanical side
+
+Parts are scripts too. The X axis is driven by a NEMA 23 through a 2:1 GT2
+belt onto the **stock** lead screw, bolted to the mill's existing bearing-seat
+plate - nothing on the machine is drilled or modified.
+
+![X-axis belt drive](docs/renders/x-drive-assembly.png)
+
+The pulley tooth counts live in `machine/wen33013.toml`, not in the CAD,
+because they decide `steps_per_mm`. Change the reduction and the pulley, the
+LinuxCNC INI and the firmware header all move together.
+
+```bash
+cd hardware/mechanical/x-drive
+FreeCADCmd build.py && FreeCADCmd verify.py && FreeCADCmd export.py
+```
+
+Nothing is checked by eye: `build.py` fails on interference between parts,
+`verify.py` probes all 40 tooth grooves and checks they sit at the computed
+root and land radii, and `export.py` refuses a mesh that is not solid,
+non-manifold, or self-intersecting. See
+[`hardware/mechanical/`](hardware/mechanical/).
 
 ## Safety
 
@@ -79,9 +103,20 @@ screen, which is never in the stop path. These rules are enforced by
 
 ## Status
 
-Early. The Pi is provisioned and on the network; the machine description,
-generators and constraint checks are working and tested. The RP2040 firmware
-and the mechanical conversion are not started.
+Early, and honest about it.
+
+| | |
+|---|---|
+| Machine model, generators, constraint checks | working, tested |
+| Pi 4 provisioned and on the network | done |
+| Pendant panel brought up | done |
+| X-axis belt drive | designed, 4 dimensions still to measure |
+| RP2040 SPI firmware | not started |
+| Y and Z drives | not started |
+
+**Nothing here has cut metal yet.** Values marked `PROVISIONAL` in
+`machine/wen33013.toml` are guesses until commissioning confirms them - in
+particular the stock X screw's lead, which every X scale depends on.
 
 See `CHANGELOG.md` for what has actually been done, and `AGENTS.md` for the
 working standards.

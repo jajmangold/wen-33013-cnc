@@ -12,6 +12,47 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Added
 
+- **X-axis belt drive** (`hardware/mechanical/x-drive/`): a NEMA 23 driving
+  the stock X lead screw through a 2:1 GT2 belt, bolted to the mill's existing
+  bearing-seat plate with no drilling or modification. A 40T pulley takes the
+  place of the dial and handwheel on the screw's keyed stub and is held by the
+  stock M8 nut; the bracket registers on the bearing boss rather than on its
+  two M5s, which share one line and so cannot resist the motor's overhang.
+- Mechanical parts are built from scripts (`build.py`), not saved documents.
+  Geometry is audited numerically - interference between parts fails the
+  build, all 40 tooth grooves are probed against their computed root and land
+  radii, and an STL that is not solid, is non-manifold or self-intersects is
+  refused.
+- `Drive` in the machine model: a belt reduction between motor and screw now
+  multiplies `steps_per_mm`. The CAD reads its tooth counts from the TOML, so
+  the reduction cannot drift between the model and the metal.
+- Measured reference dimensions for the stock X lead screw end and the X-axis
+  end plate, with the WEN parts list corroborating each one.
+- CI: `verify`, `lint` and `test` on every push and pull request, and a
+  changelog gate so AGENTS.md section 8 is enforced rather than merely stated.
+- `freecad-part` skill for building, verifying, rendering and exporting a
+  mechanical part.
+
+### Changed
+
+- **X is on the stock lead screw, not a 1605 ballscrew.** The screw end was
+  measured and is unmistakably stock. `screw_pitch_mm` for X is now a
+  PROVISIONAL 2.0 and is the most dangerous unmeasured number in the project:
+  every X scale and feed derives from it. See ADR-0009.
+- X microstepping 32x -> 16x and max velocity 41.67 -> 10 mm/s. The 2:1
+  reduction on a 2 mm lead demanded 266,688 Hz at the old figures, past the
+  DM542T's 200 kHz ceiling; the constraint checker refused to generate, which
+  is what it is for. X is now 3200 steps/mm at 32 kHz, and the ceiling is the
+  motor (600 rpm) rather than the driver.
+
+### Fixed
+
+- The pulley's tooth-profile audit probed a plane the assembled part no longer
+  occupied, so every groove read as empty material. Probe coordinates now come
+  from `params.py` instead of being written as literals.
+
+### Added
+
 - Machine description (`machine/wen33013.toml`) as the single source of truth
   for the WEN 33013 conversion: travels, ballscrew leads, microstepping,
   driver limits, control nodes and encoder feedback.

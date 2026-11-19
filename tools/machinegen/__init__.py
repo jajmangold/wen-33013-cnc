@@ -21,6 +21,7 @@ from .emit import (
 from .model import (
     ALLOWED_MICROSTEPS,
     Axis,
+    Drive,
     Driver,
     Machine,
     MachineConfigError,
@@ -34,6 +35,7 @@ from .model import (
 __all__ = [
     "ALLOWED_MICROSTEPS",
     "Axis",
+    "Drive",
     "Driver",
     "Machine",
     "MachineConfigError",

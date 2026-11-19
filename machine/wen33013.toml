@@ -49,13 +49,33 @@ rated_current_a   = 2.8
 
 [axis.x]
 travel_mm            = 300.0
-screw_pitch_mm       = 5.0            # 1605 ballscrew, 5mm lead
-microsteps           = 32             # -> 6400 steps/rev -> 1280 steps/mm
-max_velocity_mm_s    = 41.67          # PROVISIONAL ~2500 mm/min
+# PROVISIONAL, and the most dangerous number in this file. This is the STOCK
+# lead screw, not the 1605 ballscrew that was planned here - the screw end was
+# measured 2026-11-19 and is unmistakably stock (d10 land, 4x16 key, 8200
+# thrust bearing, M8 nut). Its lead has NOT been measured yet.
+# MEASURE IT: crank X ten full turns, divide the table travel by ten.
+# Until then every X scale, feed and limit downstream of here is a guess.
+screw_pitch_mm       = 2.0
+microsteps           = 16
+# PROVISIONAL. The ceiling here is the MOTOR, not the driver: a 2 mm lead
+# through a 2:1 reduction means 10 mm/s already asks 600 motor rpm, which is
+# about where a NEMA 23 on a DM542T still has useful torque. The old 41.67
+# (2500 mm/min) was a ballscrew figure and would need 2500 rpm.
+max_velocity_mm_s    = 10.0
 max_accel_mm_s2      = 400.0          # PROVISIONAL
 home_direction       = -1
 soft_limit_margin_mm = 2.0
 invert_direction     = false
+
+[axis.x.drive]
+# 2:1 GT2 belt reduction onto the stock screw, so one motor turn is half a
+# screw turn. This DOUBLES steps_per_mm. The CAD that builds these two
+# pulleys is hardware/mechanical/x-drive and reads the tooth counts from here.
+kind          = "belt"
+motor_teeth   = 20
+screw_teeth   = 40
+belt_pitch_mm = 2.0               # GT2
+belt_width_mm = 15.0
 
 [axis.x.encoder]
 # 14-bit absolute, on a GT2 pulley belted to the axis so it measures REAL

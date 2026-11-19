@@ -75,6 +75,60 @@ class Motor:
             raise MachineConfigError(f"{ctx}: steps_per_rev must be > 0")
 
 
+DRIVE_KINDS: tuple[str, ...] = ("direct", "belt")
+
+
+@dataclass(frozen=True)
+class Drive:
+    """What sits between the motor shaft and the screw.
+
+    "direct" - a coupling. One motor turn is one screw turn.
+    "belt"   - a GT2 reduction. One motor turn is motor_teeth/screw_teeth of a
+        screw turn, so `reduction` MULTIPLIES steps_per_mm and divides rapids.
+
+    This exists because the reduction is invisible to every other file. A
+    missing 2:1 does not raise anywhere - it just cuts everything at half
+    size, which is the whole reason AGENTS.md section 2 is written the way
+    it is.
+    """
+
+    kind: str = "direct"
+    motor_teeth: int | None = None
+    screw_teeth: int | None = None
+    belt_pitch_mm: float | None = None
+    belt_width_mm: float | None = None
+
+    def __post_init__(self) -> None:
+        ctx = "drive"
+        if self.kind not in DRIVE_KINDS:
+            raise MachineConfigError(
+                f"{ctx}: kind must be one of {', '.join(DRIVE_KINDS)}, got {self.kind!r}"
+            )
+        if self.kind == "belt":
+            if not self.motor_teeth or not self.screw_teeth:
+                raise MachineConfigError(
+                    f"{ctx}: a belt drive needs motor_teeth and screw_teeth - "
+                    f"the reduction between them multiplies steps_per_mm"
+                )
+            for label, teeth in (("motor_teeth", self.motor_teeth),
+                                 ("screw_teeth", self.screw_teeth)):
+                if teeth <= 0:
+                    raise MachineConfigError(f"{ctx}: {label} must be > 0, got {teeth}")
+        elif self.motor_teeth or self.screw_teeth or self.belt_pitch_mm:
+            raise MachineConfigError(
+                f"{ctx}: a direct drive must not declare belt teeth or pitch - "
+                f"either set kind = \"belt\" or remove them"
+            )
+
+    @property
+    def reduction(self) -> float:
+        """Screw turns per motor turn, inverted: > 1 means torque multiplied."""
+        if self.kind != "belt":
+            return 1.0
+        assert self.motor_teeth and self.screw_teeth  # guaranteed by __post_init__
+        return self.screw_teeth / self.motor_teeth
+
+
 ENCODER_INTERFACES: tuple[str, ...] = ("spi1", "pio")
 ENCODER_MOUNTS: tuple[str, ...] = ("motor", "belt")
 
@@ -167,6 +221,7 @@ class Axis:
     soft_limit_margin_mm: float
     invert_direction: bool
     motor_steps_per_rev: int
+    drive: Drive = Drive()
     encoder: Encoder | None = None
 
     def __post_init__(self) -> None:
@@ -200,7 +255,12 @@ class Axis:
     @property
     def steps_per_mm(self) -> float:
         """THE derived number. Everything scales from this."""
-        return self.steps_per_rev / self.screw_pitch_mm
+        return self.steps_per_rev * self.drive.reduction / self.screw_pitch_mm
+
+    @property
+    def travel_per_motor_rev_mm(self) -> float:
+        """How far the table moves for one turn of the MOTOR."""
+        return self.screw_pitch_mm / self.drive.reduction
 
     @property
     def max_step_rate_hz(self) -> float:
@@ -394,6 +454,17 @@ def parse_machine(data: dict) -> Machine:
             soft_limit_margin_mm=a["soft_limit_margin_mm"],
             invert_direction=a["invert_direction"],
             motor_steps_per_rev=motor_obj.steps_per_rev,
+            drive=(
+                Drive(
+                    kind=a["drive"].get("kind", "direct"),
+                    motor_teeth=a["drive"].get("motor_teeth"),
+                    screw_teeth=a["drive"].get("screw_teeth"),
+                    belt_pitch_mm=a["drive"].get("belt_pitch_mm"),
+                    belt_width_mm=a["drive"].get("belt_width_mm"),
+                )
+                if "drive" in a
+                else Drive()
+            ),
             encoder=(
                 Encoder(
                     bits=a["encoder"]["bits"],

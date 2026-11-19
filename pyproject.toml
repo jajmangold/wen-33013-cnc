@@ -32,3 +32,7 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 # is real but has gaps, so %-formatting stays. Bare excepts in the bring-up
 # diagnostic are deliberate too: it must report a failure, not raise on it.
 "firmware/pendant/*.py" = ["UP031", "UP032", "BLE001", "E722"]
+# hardware/mechanical/ runs inside FreeCAD's interpreter, which does not have
+# this repo on its path. Each script bootstraps sys.path before importing
+# FreeCAD, machinegen and its siblings, so those imports cannot be at the top.
+"hardware/mechanical/**/*.py" = ["E402"]

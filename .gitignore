@@ -21,9 +21,12 @@ linuxcnc/configs/**/*.log
 linuxcnc/configs/**/position*.txt
 linuxcnc/configs/**/*.bak
 
-# FreeCAD
-hardware/cad/**/*.FCStd1
-hardware/cad/**/*.FCBak
+# FreeCAD. The .FCStd is a BUILD ARTIFACT - build.py is the source. Committing
+# one invites someone to edit it in the GUI, which the next build silently
+# overwrites. STLs are committed, so the parts can be printed without FreeCAD.
+hardware/mechanical/**/*.FCStd
+hardware/mechanical/**/*.FCStd1
+hardware/mechanical/**/*.FCBak
 
 # OS
 .DS_Store

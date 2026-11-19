@@ -12,7 +12,7 @@ the ones that actually bit, recorded so they only cost time once.
 | Kernel | `6.12.34+rpt-rpi-v8-rt` (`SMP PREEMPT_RT`) |
 | Card | 32 GB (see "card size" below) |
 | Hostname | `lcnc`, user `josh`, SSH key auth |
-| Network | eth0 + wlan0, both DHCP; Tailscale `lcnc.python-bull.ts.net` |
+| Network | eth0 + wlan0, both DHCP; Tailscale (`lcnc` on your own tailnet) |
 
 SPI is already enabled in the stock image: `dtparam=spi=on` is in
 `config.txt` and `/dev/spidev0.0` + `0.1` exist. No boot-config work needed
