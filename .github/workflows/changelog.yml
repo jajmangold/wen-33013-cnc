@@ -1,0 +1,45 @@
+name: changelog
+
+# AGENTS.md section 8 requires a CHANGELOG entry for every user-visible
+# change. This turns that from a convention into a gate, because the one
+# thing nobody remembers is the changelog.
+#
+# Escape hatch: add the `skip-changelog` label for a pull request that
+# genuinely changes nothing a user would notice.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+jobs:
+  entry:
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-changelog') }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: CHANGELOG.md must be updated
+        run: |
+          base="origin/${{ github.base_ref }}"
+          changed=$(git diff --name-only "$base"...HEAD)
+
+          # Generated files and the changelog itself do not count as source.
+          source=$(echo "$changed" | grep -vE '^(CHANGELOG\.md|linuxcnc/configs/.*\.ini|pi/provision/99-cnc-nodes\.rules|firmware/pico-spi/include/machine_config_.*\.h)$' || true)
+
+          if [ -z "$source" ]; then
+            echo "no source changes - nothing to record"
+            exit 0
+          fi
+
+          if echo "$changed" | grep -qx 'CHANGELOG\.md'; then
+            echo "CHANGELOG.md updated"
+            exit 0
+          fi
+
+          echo "::error::This PR changes source but not CHANGELOG.md."
+          echo "Add a line under '## [Unreleased]' describing what changed about"
+          echo "the machine or the workflow, or label the PR 'skip-changelog'."
+          echo "Changed files:"
+          echo "$source" | sed 's/^/  /'
+          exit 1
