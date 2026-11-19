@@ -125,9 +125,28 @@ def main():
              ("Bracket", bracket, "EndPlate",   plate),
              ("Pulley_40T", pulley, "EndPlate", plate),
              ("NEMA23", nema, "Pulley_40T", pulley)]
-    clashes = [(an, bn) for an, a, bn, b in pairs if clearance(a, an, b, bn) > 1e-6]
-    if clashes:
-        raise AssertionError(f"parts interfere: {clashes}")
+    clashes = [(an, bn) for an, a, bn, b in pairs if clearance(a, an, b, bn) > 1e-6]
+    if clashes:
+        raise AssertionError(f"parts interfere: {clashes}")
+
+    # The register must FIT the boss, not merely avoid it. A part mirrored or
+    # rotated wrongly also fails to overlap, and an oversized bore locates
+    # nothing. So: the real boss must pass, and a boss half a millimetre
+    # fatter must NOT - that is what proves the bore is sized to it.
+    import Part as _Part
+    from FreeCAD import Vector as _V
+
+    for extra, want_clash in ((0.0, False), (0.5, True)):
+        probe = _Part.makeCylinder((P.BOSS_D + extra) / 2.0, P.BOSS_PROUD,
+                                   _V(0, 0, 0), _V(1, 0, 0))
+        hits = bracket.common(probe).Volume > 1e-6
+        if hits != want_clash:
+            raise AssertionError(
+                f"register bore is wrong: a boss of "
+                f"Ø{P.BOSS_D + extra:.1f} {'clashes' if hits else 'passes'}, "
+                f"expected {'clash' if want_clash else 'pass'}")
+    print(f"  register     Ø{P.BOSS_D + P.REGISTER_FIT:.2f} bore fits the Ø{P.BOSS_D:.0f}"
+          f" boss, engages {P.MOUNT_T:.0f} of its {P.BOSS_PROUD:.0f} mm")
 
     print("")
     hub_w = X_HUB[1] - X_HUB[0]

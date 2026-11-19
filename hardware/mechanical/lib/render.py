@@ -29,7 +29,13 @@ COLOURS: dict[str, tuple[float, float, float]] = {
 
 SETUP = r'''
 import FreeCAD as App, FreeCADGui as Gui
+# Save before closing. Setting ShapeColor marks the document modified, and
+# closing a modified document pops a save prompt that blocks the GUI thread
+# - after which every execute_code times out and the instance looks hung.
 for d in list(App.listDocuments()):
+    doc = App.getDocument(d)
+    if doc.FileName:
+        doc.save()
     App.closeDocument(d)
 doc = App.openDocument(r"%(doc)s")
 

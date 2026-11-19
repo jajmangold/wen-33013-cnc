@@ -103,17 +103,20 @@ BOLT_ABOVE = SCREW_BELOW_TOP - HOLE_BELOW_TOP        # 1.0 above the screw axis
 PLATE_TOP_ABOVE = SCREW_BELOW_TOP                    # 22.5
 PLATE_BOT_BELOW = PLATE_H - SCREW_BELOW_TOP          # 22.5
 
-# There is NO raised boss. The photo gauge settled it: all eight fingers,
-# sitting on the plate face at r = 16 to 23, are visible with the casting
-# recessed behind them. Nothing stands proud within Ø46. So the bracket
-# bolts FLAT and the bolts locate it - the register bore is gone, and with
-# it the only dimension that could have made the part refuse to go on.
-RETAINER_D = 36.0        # PHOTO     steel retainer ring around the screw, ~Ø36
-CLEARANCE_D = 46.0       # bore in the backplate: clears the retainer and the
-                         # 40T pulley's Ø28.4 flange with room to spare
-LAND_START_X = 14.0      # ASSUMED   plate face to the inner face of the 40T
-                         # pulley. Only shifts the belt plane, and the motor
-                         # pulley slides on its shaft to take up the error.
+# The boss is real and it is the register. A first photo looked as though the
+# casting was recessed behind the gauge's fingers and the register bore was
+# removed on that reading; a side-on shot showed it plainly protruding, with
+# the steel retainer on its face and the pulley hard up against it.
+# Measure, do not infer from a photograph.
+BOSS_D = 35.0            # MEASURED  bearing boss OD - this is the REGISTER
+BOSS_PROUD = 16.0        # MEASURED  how far it stands off the plate face
+REGISTER_FIT = 0.15
+
+# The pulley seats against the BOSS face, not the plate face, so these are the
+# same number. Confirmed in the side-on photo: scaling off the pulley's known
+# 28.4 flange OD gave its width as 21.4 against the modelled 21.8, so that
+# photo's scale is good to about 2%.
+LAND_START_X = BOSS_PROUD
 
 # ---------------------------------------------------------------- NEMA 23
 NEMA_FRAME = 56.4

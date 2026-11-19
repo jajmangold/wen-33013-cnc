@@ -36,7 +36,7 @@ MOTOR_FACE_X = MPUL_X1 + P.MOTOR_HUB_ALLOW                    # motor front face
 MPLATE_X0    = MOTOR_FACE_X - P.MOTOR_PLATE_T
 WALL_X1      = MPLATE_X0
 BRACKET_TOP  = MOTOR_Z + P.MOTOR_PLATE_H / 2.0
-BRACKET_BOT  = -(P.CLEARANCE_D / 2.0 + 5.0)
+BRACKET_BOT  = -(P.BOSS_D / 2.0 + 7.0)
 
 
 
@@ -90,11 +90,11 @@ def make_bracket():
     b = b.removeSplitter()
 
     # --- cuts
-    # Clearance for the retainer and the pulley flange - NOT a register.
-    # There is no raised boss to register on, so the bolts locate the
-    # bracket and the backplate bearing flat on the plate takes the moment
-    # from the motor hanging outboard.
-    b = b.cut(_xcyl(P.CLEARANCE_D, -1.0, P.MOUNT_T + 1.0))
+    # Register bore over the Ø35 boss. The backplate is 8 thick and the boss
+    # stands 16 proud, so the plate bears on the casting's FACE while the bore
+    # takes the moment from the motor hanging outboard - two M5s on one
+    # horizontal line cannot, there is no lever arm between them.
+    b = b.cut(_xcyl(P.BOSS_D + P.REGISTER_FIT, -1.0, P.MOUNT_T + 1.0))
     # the two stock M5s, clearance - they thread into the table casting
     for s in (+1, -1):
         b = b.cut(_xcyl(P.BOLT_CLEAR_D, -1.0, P.MOUNT_T + 1.0,
@@ -127,8 +127,8 @@ def make_nema23():
 def make_end_plate():
     half = P.PLATE_W / 2.0
     p = _box(-P.PLATE_T, 0, -half, half, -P.PLATE_BOT_BELOW, P.PLATE_TOP_ABOVE)
-    p = p.cut(_xcyl(P.RETAINER_D, -2.0, 0.0))     # the casting is recessed here
-    p = p.cut(_xcyl(26.0, -P.PLATE_T - 1, 1.0))
+    p = p.fuse(_xcyl(P.BOSS_D, 0, P.BOSS_PROUD))
+    p = p.cut(_xcyl(26.0, -P.PLATE_T - 1, P.BOSS_PROUD + 1))
     for s in (+1, -1):
         p = p.cut(_xcyl(P.BOLT_CLEAR_D, -P.PLATE_T - 1, 1,
                         s * P.BOLT_PITCH / 2.0, P.BOLT_ABOVE))

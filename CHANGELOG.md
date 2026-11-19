@@ -12,13 +12,23 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Fixed
 
-- **The register bore is gone - there is no raised boss to register on.**
-  The photo gauge settled it: all eight fingers, which sit on the plate face
-  at r = 16 to 23, are visible with the casting recessed behind them. Nothing
-  stands proud within Ø46. The backplate now bolts flat with a Ø46 clearance
-  for the retainer and the pulley flange, the bolts locate it, and face
-  contact over a 45 mm-tall plate takes the moment from the motor's overhang.
-  That also removes the last dimension that could make the part refuse to fit.
+- **The boss is Ø35 and stands 16 proud; the register bore is back.** It was
+  briefly removed on a misreading of a head-on photo, in which the casting
+  appeared to sit behind the gauge's fingers; a side-on shot showed it
+  plainly protruding, with the steel retainer on its face and the pulley hard
+  up against it. The bore is Ø35.15 in the 8 mm backplate, so the plate bears
+  on the casting's face while the bore engages 8 mm of the boss.
+- `build.py` now asserts the register FITS rather than merely missing: the
+  real Ø35 boss must pass through the bore and a Ø35.5 one must not. An
+  oversized bore locates nothing, and a clash test alone cannot tell.
+- `LAND_START_X` is no longer a guess. The pulley seats on the boss face, so
+  it is the boss protrusion - confirmed in the side-on photo, where scaling
+  off the pulley's known 28.4 flange OD put its width at 21.4 against the
+  modelled 21.8.
+- `render.py` saved nothing before closing documents it had recoloured, so
+  FreeCAD raised a save prompt that blocked the GUI thread. Every later call
+  then timed out and the instance looked hung when it was waiting on a
+  dialog nobody could see.
 - **The X bracket's register bore was 25 mm out of position.** It was placed
   from a third-party STEP model that put the bolt line 26.3 above the screw;
   the screw actually runs on the end plate's centreline, which makes it 1.0.

@@ -115,17 +115,36 @@ The clipped corner is **top left**. It is there because with the bolt line only
 1 mm off centre the part is nearly symmetric and would otherwise read either
 way up.
 
-## Before you cut metal
+## Measured, not assumed
 
-Two dimensions in `params.py` are still `ASSUMED`:
+Everything on the mounting face now has a measurement behind it:
 
-| Param | Guess | Measure |
-|---|---|---|
-| `BOSS_D` | 38.0 | OD of the bearing boss - the gauge above reads it |
-| `LAND_START_X` | 20.0 | plate face to the inner face of the 40T pulley |
+| | |
+|---|---|
+| Bolt pitch | 72.0 |
+| Hole centres | 21.5 below the top edge, 21.5 in from the left |
+| Screw axis | on the plate centreline, 1.0 below the bolt line |
+| Boss | **Ø35**, standing **16** proud of the plate face |
+| Pulley inner face | seats on the boss face, so 16 from the plate |
 
-`LAND_START_X` sets the belt plane, and therefore where the motor plate sits.
-Everything else on this page is measured.
+The register bore is Ø35.15 in an 8 mm backplate: the plate bears on the
+casting's face while the bore engages 8 mm of the boss. `build.py` asserts
+the fit rather than the absence of a clash - the real Ø35 boss must pass
+through the bore and a Ø35.5 one must not.
+
+### What went wrong on the way here
+
+Worth recording, because the same trap is waiting on Y and Z:
+
+- The bolt line came from a third-party STEP model that put it 26.3 above
+  the screw. It is 1.0. The first bracket was printed before that surfaced.
+- The boss was briefly removed from the model entirely, on a photo that
+  looked as though the casting sat *behind* the gauge's fingers. A side-on
+  shot showed it plainly protruding. **Measure it; do not infer it from a
+  photograph.**
+- Four rounds of tape measurements disagreed with each other before the
+  numbers above settled. The ones that survived are those with two or three
+  independent routes to the same answer.
 
 ## A different belt
 
