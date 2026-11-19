@@ -10,6 +10,8 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-19
+
 ### Added
 
 - **X-axis belt drive** (`hardware/mechanical/x-drive/`): a NEMA 23 driving
@@ -168,4 +170,5 @@ Changelogs are for humans. Record what changed about the *machine* or the
   not measurements. They must be confirmed during commissioning before the
   machine cuts anything.
 
-[Unreleased]: https://github.com/jajmangold/wen-33013-cnc/commits/main
+[Unreleased]: https://github.com/jajmangold/wen-33013-cnc/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/jajmangold/wen-33013-cnc/releases/tag/v0.1.0
