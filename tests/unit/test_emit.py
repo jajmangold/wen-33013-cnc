@@ -168,3 +168,32 @@ class TestDeterminism:
     def test_every_target_is_under_the_repo_root(self, real_machine, tmp_path):
         for path in generate_all(real_machine, tmp_path, "fp"):
             assert tmp_path in path.parents
+
+
+class TestFingerprintIsPortable:
+    """The source fingerprint must not depend on line endings.
+
+    This repo is edited on Windows and runs on Linux. Hashing raw bytes meant
+    the same TOML fingerprinted differently depending on which machine wrote
+    it, so every generated file looked stale on the other one - `verify`
+    failed on CI while passing locally, with nothing in the diff to show why.
+    """
+
+    def test_crlf_and_lf_fingerprint_the_same(self, tmp_path):
+        from machinegen.emit import fingerprint
+
+        body = "[machine]\nname = 'x'\n"
+        lf = tmp_path / "lf.toml"
+        lf.write_bytes(body.encode())
+        crlf = tmp_path / "crlf.toml"
+        crlf.write_bytes(body.replace("\n", "\r\n").encode())
+        assert fingerprint(lf) == fingerprint(crlf)
+
+    def test_a_real_content_change_still_moves_it(self, tmp_path):
+        from machinegen.emit import fingerprint
+
+        a = tmp_path / "a.toml"
+        a.write_bytes(b"[machine]\nname = 'a'\n")
+        b = tmp_path / "b.toml"
+        b.write_bytes(b"[machine]\nname = 'b'\n")
+        assert fingerprint(a) != fingerprint(b)

@@ -10,6 +10,14 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ## [Unreleased]
 
+### Fixed
+
+- The source fingerprint hashed raw bytes, so the same machine description
+  fingerprinted differently on Windows (CRLF working copy) and Linux (LF in
+  git). Every generated file then looked stale on whichever machine had not
+  written it - `verify` failed on CI while passing locally, with nothing in
+  the diff to explain why. Line endings are normalised before hashing.
+
 ## [0.1.0] - 2026-11-19
 
 ### Added
