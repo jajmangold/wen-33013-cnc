@@ -22,9 +22,11 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Added
 
-- `gauge.py`: a 22 cm3 fit check for the bracket's mounting face, printed
-  instead of the 148 cm3 bracket. Its register is a staircase of diameters,
-  so how far it stands proud reads off the boss OD.
+- `gauge.py`: a 12 cm3 flat gauge to print, hold against the plate and
+  photograph. It carries the bolt pattern, a scribed line where the plate's
+  top edge should fall, and a fan of fingers reaching to known radii, so the
+  bolt pattern, the plate height and the boss OD can all be read off one
+  picture rather than measured again.
 
 ### Fixed
 

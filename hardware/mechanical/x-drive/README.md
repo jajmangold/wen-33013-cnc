@@ -92,25 +92,28 @@ Three independent routes gave the same hole position, which is why it is
 trusted: 16 to the hole's top edge plus a 5 radius; 21.5 measured to the
 centre; and a 30 across the corner, which is sqrt(21.5^2 + 21.5^2) = 30.4.
 
-## Check the fit before printing the bracket
+## Photo gauge
 
 ```bash
-FreeCADCmd gauge.py      # -> stl/FitGauge.stl, 22 cm3
+FreeCADCmd gauge.py      # -> stl/FitGauge.stl, 12.4 cm3, ~10 min, no supports
 ```
 
-The bracket is 148 cm3 and the first one did not fit, so there is a 22 cm3
-version of just the mounting face: the same two bolt holes, the same register.
-If it drops over the boss and the bolts line up, the bracket will too.
+![fit gauge](../../../docs/renders/x-drive-fit-gauge.png)
 
-Its register is a staircase rather than one bore, so it measures the boss at
-the same time - the boss jams at the step that matches it:
+Hold it against the plate and photograph it. Reading a dimension off a photo
+normally fails on scale and perspective; this puts a known ruler in the same
+plane as the thing being measured, so neither matters.
 
-| Gauge sits | Boss OD is |
+| Feature | Tells you |
 |---|---|
-| flush | 34-36 |
-| 1.5 proud | 36-38 |
-| 3.0 proud | 38-40 |
-| 4.5 proud | 40-42 |
+| Two Ø5.5 holes | should sit concentric in the plate's Ø10 holes, an even 2.25 ring all round. Off-centre rings mean the bolt pattern is wrong, and which way |
+| Scribed line near the top | where the plate's **top edge** should fall. Confirms the 45 mm height and the screw being on the centreline |
+| Finger fan, left to right | tips at r = 16, 17, 18, 19, 20, 21, 22, 23. The boss hides the ones that land on it; wherever that changes is the boss radius |
+| Ticks along the bottom | 5 mm, long every 10 - a backup scale for anything else in frame |
+
+The clipped corner is **top left**. It is there because with the bolt line only
+1 mm off centre the part is nearly symmetric and would otherwise read either
+way up.
 
 ## Before you cut metal
 
