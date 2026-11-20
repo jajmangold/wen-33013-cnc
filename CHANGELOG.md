@@ -12,6 +12,22 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Added
 
+- **The X end housing exists** (`hardware/mechanical/x-end/`). Replaces the
+  stock bearing seat with a preloaded pair of 6000-2RS in a single Ø26
+  bore, bolted to the table's own two M6 holes. ADR-0010 is Accepted: both
+  things it was blocked on turned out to be derivable from measurements
+  already taken.
+- **38 mm** of Ø10 land is outboard of the table's end face - plate 12 +
+  boss 16 + free land 10, all caliper readings. It cross-checks against the
+  whole land measured off a ChArUco frame (54 mm, self-calibrated two ways):
+  54 - 38 = 16 of shoulder inside the casting, which is the depth of the
+  stock bearing pocket. Two routes, one answer.
+- The spacer is **solved, not chosen**: the M8 washer cannot pass over the
+  Ø10 land, so the pulley face must reach the thread and the nut must keep
+  thread under it. `params.py` refuses to build if what is left over is
+  under 3 mm. This housing tops out at a 17.6 mm pulley, so a hubbed one
+  will not fit.
+
 - **The X fit coupon fits the machine** (2026-11-19), confirming the 72 mm
   bolt pitch, the 15.7 mm bolt-line offset, the bore clearing the boss and
   the backplate sitting flat. Side-wall clearance remains asserted rather

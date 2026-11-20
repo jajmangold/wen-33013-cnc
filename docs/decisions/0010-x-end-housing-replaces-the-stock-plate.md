@@ -1,6 +1,6 @@
 # ADR-0010: An X end housing replacing the stock bearing seat
 
-- **Status:** Proposed
+- **Status:** Accepted (2026-11-20)
 - **Date:** 2026-11-20
 
 ## Context
@@ -68,9 +68,33 @@ same two M6 holes in the table casting, and support the screw properly:
 - Screw preload becomes a set-up setting rather than a side effect of handwheel
   assembly, which is what makes commissioning repeatable.
 
-## Still needed before this is Accepted
+## Resolved
 
-1. Ø16 shoulder to M8 thread start, measured.
-2. Table end face to that shoulder.
-3. Motor shaft diameter - the 10 mm bore pulleys need a 10 mm shaft.
-4. Tooth counts on both pulleys; they drive steps_per_mm.
+1. **Ø16 shoulder to M8 thread start: 54 mm.** Off a ChArUco frame at
+   0.044 mm reprojection, self-calibrated two ways - the shaft reads Ø10.07
+   across against a caliper 10.00, the thread 13.5 along against 12.99.
+2. **Land outboard of the table face: 38 mm.** Derived from three caliper
+   readings already taken - stock plate 12, boss standing 16 proud, 10 mm of
+   free land beyond the assembled stock stack. It cross-checks: 54 - 38 = 16
+   of shoulder inside the casting, which is the depth of the stock bearing
+   pocket. The shoulder itself cannot be reached with calipers, which is why
+   asking for "table face to shoulder" was the wrong question.
+
+Both blockers are gone, so this is Accepted and
+`hardware/mechanical/x-end/` builds.
+
+**Correction to the costing above.** "Bearing centres 23 mm apart, overhang
+ratio 0.59" was computed against the whole 50 mm land. Only 38 of it is
+outboard of the mounting face, so the real figures are **12.6 mm apart with
+an overhang ratio of 1.21**. Still far inside what a 6000 takes at 50 N of
+belt pull - the bearings see about 130 N and are rated 4.5 kN - but it is
+worse than this ADR first claimed, and it is why pulley width now matters.
+
+## Still open, on the drive side only
+
+These gate the motor tower and the TOML, not the housing:
+
+1. Pulley width - decides the spacer; this housing tops out at 17.6, so a
+   hubbed pulley will not fit.
+2. Motor shaft diameter - the 10 mm bore pulleys need a 10 mm shaft.
+3. Tooth counts on both pulleys; they drive steps_per_mm.
