@@ -21,11 +21,17 @@ M6s that already hold the plate on - just longer ones.
 the 72 mm bolt pitch, the 15.7 mm bolt-line offset, the bore clearing the
 boss, and the backplate sitting flat on the plate face.
 
-It does **not** confirm the side walls clear the boss. The coupon is only
-the bracket's first 4 mm; the walls start at 8 and the boss stands 16 proud,
-so that clearance is asserted in `build.py` and not yet fitted. Watch it
-when the full bracket goes on. The walls now stand at |Y| 29, which leaves
-8 mm over the Ø35 boss rather than the 1.5 they had before.
+The side walls clearing the boss used to be the one thing left unfitted.
+It is no longer a risk, and not because the tolerance got better: when the
+M6 heads forced the walls to start at Z = 30.7 they moved out of that space
+altogether. The boss only reaches Z = +17.5, so the walls stand **24.7 mm**
+clear of it and no placement error can bring them together.
+
+The coupon that was fitted predates today's changes, but nothing it was
+checking moved: the bolt pitch, slot size, slot travel, bore diameter and
+backplate thickness are all the same numbers. What changed is above
+Z = 36 (the window) and below Z = -8 (the narrowed bottom band), neither of
+which the plate touches. **No need to re-fit before printing.**
 
 ## The screw end it fits
 
@@ -161,7 +167,7 @@ the motor plate only - not everywhere.
 | 1 | 2GT closed loop, 15 mm wide, 200 mm / 100T | buy |
 | 1 | NEMA 23, 6.35 mm shaft ≥ 21 mm | buy |
 | 2 | **M6** × 30 socket cap | replaces the stock **M6 × 16** (parts list #17) |
-| 4 | M5 for the motor | NEMA 23 pattern; ±5 mm tension slots |
+| 4 | M5 × 16 socket cap | 8 mm through the plate, ~8 into the motor; ±5 mm tension slots |
 | 1 | M8 nut + washer | **reuse the stock ones** off the handwheel |
 
 ## The mounting face
