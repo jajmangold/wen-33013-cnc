@@ -176,14 +176,34 @@ BELT_TEETH = 100         # 200 mm closed loop. Sets the centre distance.
 MOTOR_ANGLE = 0.0        # degrees from straight up, toward +Y
 MOUNT_T = 8.0            # backplate, bears on the mill plate
 FIT_PLATE_T = 4.0        # the fit coupon: the bracket's first 4 mm, nothing else
-WALL_T = 8.0
+# 6, not 8: the walls had to move outboard to clear the motor screws, and
+# thinning them keeps the motor plate (76 wide) landing on both of them.
+# The wider spacing more than pays back the lost section in torsion.
+WALL_T = 6.0
 MOTOR_PLATE_T = 8.0
-# Inner face of the side walls. The belt needs ~13 and the 40T flange 14.2,
-# but the binding constraint is the BOSS: it stands 16 proud and so pokes 8
-# past the backplate into this channel, at Ø35 plus whatever the loose bore
-# lets it sit off-centre. 17.5 + 3.5 = 21.0, so 22.5 keeps 1.5 in hand.
-WALL_Y_IN = 22.5
+# The corridor an M5 cap screw and its key need, to reach the motor plate
+# from inboard. A NEMA 23 has BLIND TAPPED HOLES, so its screws can only ever
+# be inserted from behind the plate - there is no second side to put a nut on.
+# Everything below is sized to keep that corridor open.
+TOOL_ACCESS_D = 10.0
+
+# Inner face of the side walls. Two constraints, and the second one is the
+# reason this moved:
+#   * the BOSS stands 16 proud, so it pokes 8 past the backplate into this
+#     channel at Ø35 plus the loose bore's slop: 17.5 + 3.5 = 21.0 minimum.
+#   * the NEMA 23 bolt circle sits at Y = +-23.57. At 22.5 the walls ran
+#     straight down the line of all four motor screws and buried them over
+#     the full 35 mm from the backplate to the motor plate - the motor could
+#     not be bolted on at all. The walls must clear 23.57 + TOOL/2 = 28.6.
+# A clash audit never caught this: nothing interfered. The part was solid
+# exactly where a hand and a hex key had to be. build.py now asserts the
+# corridor directly.
+WALL_Y_IN = 29.0
 BACK_W_LOW = 96.0
-BACK_W_HIGH = 56.0
-MOTOR_PLATE_W = 70.0
-MOTOR_PLATE_H = 70.0
+# Wide enough up top to carry the walls at their new spacing AND to leave
+# material around the four tool-access slots.
+BACK_W_HIGH = 76.0
+MOTOR_PLATE_W = 76.0     # covers the wall ends (35.0) with 3 to spare
+# Tall enough that the upper access slots, at their highest tension setting,
+# still have material above them rather than opening the top edge.
+MOTOR_PLATE_H = 78.0

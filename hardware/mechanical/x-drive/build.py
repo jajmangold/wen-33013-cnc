@@ -177,6 +177,33 @@ def main():
     print(f"  bore         Ø{P.BOSS_D + 2 * P.BORE_CLEARANCE:.1f} clears the "
           f"Ø{P.BOSS_D:.0f} boss by {P.BORE_CLEARANCE:.1f} all round, "
           f"over {P.MOUNT_T:.0f} of its {P.BOSS_PROUD:.0f} mm")
+    # ASSEMBLY ACCESS, which is a different question from interference and is
+    # not implied by it. A NEMA 23 screws into BLIND tapped holes: its screws
+    # can only ever enter from inboard, so there must be an open corridor from
+    # outside the backplate all the way to the motor plate. The first version
+    # of this bracket passed every clash check and could not be assembled -
+    # the side walls ran down the line of all four screws. Probe the corridor.
+    h = P.NEMA_BOLT_PITCH / 2.0
+    t = P.TENSION_SLOT / 2.0
+    blocked = []
+    for dy in (-h, h):
+        for dz in (-h, h):
+            for slide in (-t, 0.0, t):          # both ends of the tension travel
+                y = mount.MOTOR_Y + dy
+                z = mount.MOTOR_Z + dz + slide
+                corridor = _P.makeCylinder(
+                    P.TOOL_ACCESS_D / 2.0, mount.MPLATE_X0 + 1.0,
+                    Vector(-1.0, y, z), Vector(1, 0, 0))
+                v = bracket.common(corridor).Volume
+                if v > 1e-6:
+                    blocked.append(f"Y{y:+.1f} Z{z:.1f} ({v:.0f} mm3)")
+    if blocked:
+        raise AssertionError(
+            f"the motor cannot be bolted on: the Ø10 screw corridor is "
+            f"blocked at {', '.join(blocked)}")
+    print(f"  motor screws Ø{P.TOOL_ACCESS_D:.0f} corridor open from behind the "
+          f"backplate to the motor plate, 4 of 4, over the full "
+          f"{P.TENSION_SLOT:.0f} mm of tension travel")
 
     print("")
     stack = BORE_L + 1.6 + 6.5          # washer + M8 nut

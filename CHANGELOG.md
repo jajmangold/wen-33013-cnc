@@ -19,6 +19,20 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Fixed
 
+- **The NEMA 23 could not be bolted on at all.** The bracket's side walls
+  sat at |Y| 22.5-30.5 and the NEMA 23 bolt circle sits at Y = +-23.57 -
+  the same place. All four motor screws were buried in solid plastic over
+  the full 35 mm from the backplate to the motor plate, and a NEMA 23 taps
+  into BLIND holes, so there is no far side to put a nut on. Walls moved out
+  to |Y| 29-35 and thinned to 6, and four slots now carry the screw corridor
+  through the backplate so a driver reaches each head from behind.
+- `build.py` now probes **assembly access**, which is a different question
+  from interference and is not implied by it. Every clash check passed on a
+  bracket that could not be assembled: nothing overlapped, the part was
+  simply solid where a hand and a hex key had to be. The new check casts a
+  Ø10 corridor down each motor screw's axis, at both ends of the tension
+  travel, and fails if any of the four is obstructed.
+
 - **The 40T pulley was too wide for the shaft that is actually available.**
   The free keyed length outboard of the bearing stack is 10 mm, not the
   18.81 measured earlier - that was the stub exposed with the plate on, and

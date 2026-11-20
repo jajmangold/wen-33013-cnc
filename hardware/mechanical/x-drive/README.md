@@ -4,7 +4,7 @@ A NEMA 23 driving the **stock** X lead screw through a 2:1 GT2 belt, bolted to
 the mill's existing X-axis bearing-seat plate. Nothing on the machine is
 modified or drilled: the 40T pulley takes the place of the dial and handwheel
 on the screw's existing keyed stub, and the bracket is clamped by the same two
-M5s that already hold the plate on - just longer ones.
+M6s that already hold the plate on - just longer ones.
 
 ![assembly](../../../docs/renders/x-drive-assembly.png)
 
@@ -13,7 +13,7 @@ M5s that already hold the plate on - just longer ones.
 | Reduction | 2:1 (40T screw / 20T motor), from `machine/wen33013.toml` |
 | Belt | 2GT, 15 mm wide, 200 mm closed loop (100T) |
 | Centre distance | 69.71 mm, motor directly above the screw |
-| Bracket | 37 × 96 × 129 mm, 131 cm³ |
+| Bracket | 43 × 96 × 133 mm, 144 cm³ |
 
 ## Status
 
@@ -24,7 +24,8 @@ boss, and the backplate sitting flat on the plate face.
 It does **not** confirm the side walls clear the boss. The coupon is only
 the bracket's first 4 mm; the walls start at 8 and the boss stands 16 proud,
 so that clearance is asserted in `build.py` and not yet fitted. Watch it
-when the full bracket goes on.
+when the full bracket goes on. The walls now stand at |Y| 29, which leaves
+8 mm over the Ø35 boss rather than the 1.5 they had before.
 
 ## The screw end it fits
 
@@ -75,10 +76,47 @@ outboard - that couple has no lever arm between them - so the boss takes it
 and sets the pulleys concentric at the same time.
 
 The motor sits directly above the screw so belt tension acts straight down
-through the bolt pattern's vertical centreline: pure shear on the M5s rather
+through the bolt pattern's vertical centreline: pure shear on the M6s rather
 than a moment.
 
 ![bracket](../../../docs/renders/x-drive-bracket.png)
+
+## Bolting the motor on
+
+A NEMA 23 has **blind tapped holes**. Its screws can only ever go in from
+behind the motor plate - there is no far side to put a nut on - so the
+bracket has to leave a corridor open down each screw's axis.
+
+It did not. The side walls sat at |Y| 22.5-30.5 and the bolt circle sits at
+Y = +-23.57: the same place. All four screws were buried in solid plastic
+over the full 35 mm from the backplate to the motor plate, and the part
+could not be assembled at all. Every clash check passed, because nothing
+*interfered* - the part was simply solid where a hand and a hex key had to
+be. **Interference and access are different questions, and the first does
+not imply the second.**
+
+The walls are now at |Y| 29-35, and four slots carry the corridor on through
+the backplate:
+
+```
+   behind          backplate      channel        motor plate
+   the bracket     0 .. 8         8 .. 35        35 .. 43
+   ------------->  [ slot ]  ---------------->  [ screw ]-->| motor
+```
+
+Drive each screw from behind with a long key or a magnetic bit holder. The
+slots track the motor's tension slots exactly, so they stay lined up at any
+belt tension, and `build.py` asserts the corridor stays clear at both ends
+of that travel.
+
+Order of assembly:
+
+1. Pulleys on both shafts, belt on.
+2. Motor into the bracket, four M5s from behind, left finger-tight.
+3. Slide the motor up to tension the belt, tighten.
+4. Whole assembly onto the plate, two M6 x 30.
+
+Step 4 last, because the belt cannot be fitted once the bracket is on.
 
 ## Bill of materials
 
@@ -108,7 +146,7 @@ Measured off the machine, all from the plate's top-left corner:
         +------------------------------+   ---
 ```
 
-The two Ø10 holes are **clearance** - the stock M5s pass through them into
+The two Ø10 holes are **clearance** - the stock M6s pass through them into
 the table casting, so the bracket bolts into the same tapped holes and the
 72 mm pitch is what has to be right.
 

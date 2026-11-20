@@ -116,6 +116,15 @@ def make_bracket():
         for dz in (-h, h):
             b = b.cut(_xslot(P.NEMA_BOLT_CLEAR, MPLATE_X0 - 1.0, MOTOR_FACE_X + 1.0,
                              MOTOR_Y + dy, MOTOR_Z + dz, P.TENSION_SLOT))
+    # Tool access. A NEMA 23 screws into BLIND tapped holes, so its screws can
+    # ONLY go in from inboard - there is no far side to put a nut on. These
+    # four slots carry that corridor through the backplate, so a magnetic
+    # driver goes in from behind and drives the screw straight. They track the
+    # motor slots exactly, so they stay lined up at any belt tension.
+    for dy in (-h, h):
+        for dz in (-h, h):
+            b = b.cut(_xslot(P.TOOL_ACCESS_D, -1.0, P.MOUNT_T + 1.0,
+                             MOTOR_Y + dy, MOTOR_Z + dz, P.TENSION_SLOT))
     return b.removeSplitter()
 
 
