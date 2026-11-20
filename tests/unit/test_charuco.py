@@ -80,3 +80,34 @@ class TestItRefusesRatherThanGuesses:
     def test_a_missing_file_is_an_error(self, tmp_path):
         with pytest.raises(SystemExit, match="cannot read"):
             charuco.detect(str(tmp_path / "nope.png"))
+
+class TestOcclusionDoesNotCorruptScale:
+    """A boss standing proud stops paper lying flat, so the board gets a hole
+
+    cut in it and the boss pokes through. The middle of the board is then
+    missing. That must cost detections, not accuracy - a board that is not
+    coplanar with what it measures is far worse than one with a hole in it.
+    """
+
+    @pytest.fixture(scope="class")
+    def holed_photo(self, tmp_path_factory):
+        out = tmp_path_factory.mktemp("holed")
+        png = charuco.make_board(str(out / "holed.png"), hole_mm=46.0)
+        src = cv2.imread(png)
+        h, w = src.shape[:2]
+        quad = np.float32([[0, 0], [w, 0], [w, h], [0, h]])
+        skew = np.float32([[120, 60], [w - 40, 180], [w - 200, h - 40], [60, h - 150]])
+        warped = cv2.warpPerspective(src, cv2.getPerspectiveTransform(quad, skew),
+                                     (w, h), borderValue=(255, 255, 255))
+        warped = cv2.resize(warped, (1512, int(1512 * h / w)))
+        path = str(out / "photo.png")
+        cv2.imwrite(path, warped)
+        return path
+
+    def test_a_46mm_hole_still_leaves_enough_corners(self, holed_photo):
+        _, _, n, _ = charuco.detect(holed_photo)
+        assert n >= 10
+
+    def test_and_the_millimetres_are_still_true(self, holed_photo):
+        measured, truth, _ = _corners_in_mm(holed_photo)
+        assert float(np.abs(measured - truth).max()) < 0.1

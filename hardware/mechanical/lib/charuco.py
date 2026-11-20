@@ -10,7 +10,7 @@ other, and because reading a dimension off an uncalibrated photo got the
 X bracket wrong twice - once by 25 mm, once by deleting a boss that was
 really there.
 
-    python charuco.py board  [out.png]        print this at 100%, no scaling
+    python charuco.py board  [out.png] [hole_mm]   print at 100%, no scaling
     python charuco.py rectify photo.jpg [out.png]
     python charuco.py probe   photo.jpg X1 Y1 X2 Y2    distance between two
                                                        points, in mm
@@ -47,11 +47,26 @@ def _mm_to_px(mm: float, dpi: int = PRINT_DPI) -> int:
     return int(round(mm / 25.4 * dpi))
 
 
-def make_board(path: str = "charuco_board.png", dpi: int = PRINT_DPI) -> str:
+def make_board(path: str = "charuco_board.png", dpi: int = PRINT_DPI,
+               hole_mm: float = 0.0) -> str:
     """Render the board at exact scale, with its own proof of scale on it."""
     w_mm = SQUARES_X * SQUARE_MM
     h_mm = SQUARES_Y * SQUARE_MM
     img = _board().generateImage((_mm_to_px(w_mm, dpi), _mm_to_px(h_mm, dpi)))
+
+    # A boss standing proud of the surface stops paper lying flat on it, and a
+    # board that is not coplanar with what it measures is worse than no board:
+    # parallel-but-offset by 40 mm at arm's length is a ~10% scale error. So
+    # punch a hole and let the boss through.
+    if hole_mm:
+        cx, cy = img.shape[1] // 2, img.shape[0] // 2
+        r = _mm_to_px(hole_mm / 2.0, dpi)
+        cv2.circle(img, (cx, cy), r, 255, -1)
+        # dashed cut line, drawn just inside so the cut removes it
+        for a in range(0, 360, 8):
+            t0, t1 = np.radians(a), np.radians(a + 4)
+            cv2.ellipse(img, (cx, cy), (r, r), 0, np.degrees(t0), np.degrees(t1),
+                        0, max(2, dpi // 400))
 
     m = _mm_to_px(MARGIN_MM, dpi)
     canvas = np.full((img.shape[0] + 3 * m, img.shape[1] + 2 * m), 255, np.uint8)
@@ -148,7 +163,9 @@ def main(argv: list[str]) -> int:
         return 2
     cmd, rest = argv[0], argv[1:]
     if cmd == "board":
-        print("wrote", make_board(*(rest[:1] or ["charuco_board.png"])))
+        path = rest[0] if rest else "charuco_board.png"
+        hole = float(rest[1]) if len(rest) > 1 else 0.0
+        print("wrote", make_board(path, hole_mm=hole))
     elif cmd == "rectify":
         rectify(rest[0], *(rest[1:2] or ["rectified.png"]))
     elif cmd == "probe":
