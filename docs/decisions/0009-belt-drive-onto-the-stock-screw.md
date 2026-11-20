@@ -1,6 +1,7 @@
 # ADR-0009: Belt drive onto the stock lead screw, ballscrews later
 
-- **Status:** Accepted
+- **Status:** Accepted; the **reduction** is superseded by [ADR-0011](0011-one-to-one-not-two-to-one.md) (1:1, 2026-11-20), and the **mounting** by [ADR-0010](0010-x-end-housing-replaces-the-stock-plate.md).
+  What stands is the decision to belt rather than couple, and why.
 - **Date:** 2026-11-19
 
 ## Context

@@ -67,25 +67,37 @@ travel_mm            = 300.0
 # must move 15.875 mm. If it moves 20, it really is a 2 mm screw.
 screw_pitch_mm       = 1.5875
 microsteps           = 16
-# PROVISIONAL. The ceiling here is the MOTOR, not the driver: a 2 mm lead
-# through a 2:1 reduction means 10 mm/s already asks 600 motor rpm, which is
-# about where a NEMA 23 on a DM542T still has useful torque. The old 41.67
-# (2500 mm/min) was a ballscrew figure and would need 2500 rpm.
-max_velocity_mm_s    = 10.0
+# PROVISIONAL. The ceiling is the MOTOR, not the driver. At 1.5875 mm per
+# turn, 1:1, 15.875 mm/s is 600 motor rpm - about where a NEMA 23 on a
+# DM542T still has useful torque. Going to 1:1 doubled this: the same 600
+# rpm gave only 7.9 mm/s through the old 2:1.
+max_velocity_mm_s    = 15.0
 max_accel_mm_s2      = 400.0          # PROVISIONAL
 home_direction       = -1
 soft_limit_margin_mm = 2.0
 invert_direction     = false
 
 [axis.x.drive]
-# 2:1 GT2 belt reduction onto the stock screw, so one motor turn is half a
-# screw turn. This DOUBLES steps_per_mm. The CAD that builds these two
-# pulleys is hardware/mechanical/x-drive and reads the tooth counts from here.
+# 1:1 GT2 belt onto the stock screw - one motor turn is one screw turn. The
+# belt is NOT here for reduction; it is here because the screw ends in M8
+# thread, so whatever is outermost has to be the nut, and the pulley is what
+# the nut clamps. A coupler would have to swallow that 13 mm stub and still
+# grip the land, which a 30 mm coupler cannot do.
+# The CAD is hardware/mechanical/x-end and reads these counts from here.
 kind          = "belt"
 # CONFIRMED 2026-11-20. The screw pulley is in hand and measures ~25 mm over
 # the tooth tips: a 40T GT2 is 24.957, a 38T is 23.68 and a 42T is 26.23, so
 # the count is not in doubt. 17.0 mm overall width, 10 mm bore, 6 mm belt.
-motor_teeth   = 20
+# 1:1, decided 2026-11-20. The 2:1 was chosen when the lead was assumed
+# 2.0 mm; at the real 1.5875 the screw is already a huge reduction and the
+# gearing bought torque margin that was never needed. 300 N at the table is
+# 0.35 Nm at the screw against ~1.0 Nm from a NEMA 23 at 600 rpm - 2.9x at
+# 1:1 - while the 2:1 halved an axis that is slow to begin with.
+#   1:1   2016 steps/mm, 0.50 um, 952 mm/min at 600 rpm
+#   2:1   4031 steps/mm, 0.25 um, 476 mm/min
+# 0.50 um is still 20x finer than the 0.010 mm the manual claims for the
+# machine, so the resolution the 2:1 bought was not resolution anyone gets.
+motor_teeth   = 40
 screw_teeth   = 40
 belt_pitch_mm = 2.0               # GT2
 # 6, not 15. The pulley in hand is a 6 mm belt pulley. A single 6 mm 2GT

@@ -96,13 +96,34 @@ class TestValidation:
 
 
 class TestRealMachine:
-    def test_x_is_belted_two_to_one(self, real_machine):
-        assert real_machine.axis("x").drive.reduction == pytest.approx(2.0)
+    def test_x_is_belted_one_to_one(self, real_machine):
+        """1:1 since 2026-11-20, when the lead turned out to be 1.5875.
+
+        The 2:1 was chosen against an assumed 2.0 mm lead. At the real lead
+        the screw is already reduction enough - 300 N at the table is 0.35 Nm
+        at the screw - and the gearing only halved an axis that is slow to
+        start with. This asserts the decision, not an arbitrary number: if
+        someone puts a 20T back on the motor, the INI and the firmware both
+        move and nothing else would notice.
+        """
+        assert real_machine.axis("x").drive.reduction == pytest.approx(1.0)
 
     def test_x_pulleys_match_the_cad(self, real_machine):
-        """hardware/mechanical/x-drive builds these two tooth counts."""
+        """hardware/mechanical/x-end builds around these two tooth counts."""
         drive = real_machine.axis("x").drive
-        assert (drive.motor_teeth, drive.screw_teeth) == (20, 40)
+        assert (drive.motor_teeth, drive.screw_teeth) == (40, 40)
+
+    def test_x_scale_follows_the_measured_lead(self, real_machine):
+        """2016 steps/mm, and the arithmetic that gets there.
+
+        Guards two numbers that were each wrong by a lot within the same day:
+        the lead (guessed 2.0, documented 1.5875) and the reduction (2:1,
+        now 1:1). Both feed the same product, so a mistake in either is
+        invisible in the output alone.
+        """
+        x = real_machine.axis("x")
+        assert x.screw_pitch_mm == pytest.approx(1.5875)
+        assert x.steps_per_mm == pytest.approx(200 * 16 * 1.0 / 1.5875)
 
 
 class TestCadAgreesWithTheModel:
