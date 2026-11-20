@@ -158,19 +158,24 @@ The coupon is the housing's **own first 14 mm** - an intersection with a
 slab, so it cannot drift from the part it is checking - carrying the lip and
 the start of the bore.
 
-Press a 6000-2RS in. You want it snug, seating with hand pressure or a light
-tap, not hammered and not loose. If it is wrong, change `BORE_FIT` in
-`params.py` and print the coupon again - it is minutes, not hours.
+Press a 6000 in. You want it snug, seating with hand pressure or a light
+tap, not hammered and not loose, and **square on the lip** - that 2 mm seat
+is all that holds the outer race true, and a squished first layer can cock
+it. If it is wrong, change `BORE_FIT` in `params.py` and print the coupon
+again - it is minutes, not hours.
 
-`BORE_FIT` is 0.05, which is a *machining* allowance. A printed bore usually
-wants more like 0.2-0.3 to land in the same place. Tune it on the coupon.
+**On the machine this was designed on, `BORE_FIT = 0.05` was right first
+try** (2026-11-20: firm, square, no rock). Do not take that as a constant.
+It is a *machining* allowance and a printed Ø26 commonly comes out 0.2-0.3
+undersize, which would want BORE_FIT nearer 0.3. The coupon is 27 cm³ and
+tells you in minutes which case you are in.
 
 ## Bill of materials
 
 | Qty | Item | Note |
 |---|---|---|
 | 1 | Housing | `build.py` |
-| 2 | 6000-2RS, 10 × 26 × 8 | you have a stack of them |
+| 2 | 6000, 10 × 26 × 8 | **ZZ or 2RS** - you have a stack of ZZ, and they sit inside a closed housing |
 | 1 | Inner spacer, Ø16 × Ø10.1 × 18 | turned; bridges the casting pocket |
 | 1 | Outer spacer, Ø24 × Ø19 × 4.6 | sets the preload span |
 | 1 | Circlip, DIN 472, 26 mm bore | |

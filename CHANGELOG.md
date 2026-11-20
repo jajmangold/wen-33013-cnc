@@ -12,6 +12,13 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Added
 
+- **The bore fit is confirmed.** Printed the BoreGauge coupon and pressed a
+  real 6000ZZ in: firm, square on the lip, no rock, first try. `BORE_FIT`
+  stays 0.05 - but it is now recorded as a PRINTER number, not a part one.
+  A printed Ø26 commonly comes out 0.2-0.3 undersize and would have wanted
+  nearer 0.3; this profile simply put the bore where the model asked.
+  The 27 cm3 coupon is what tells you which case you are in.
+
 - **The X end housing carries the motor plate.** A bought T3 x 60 x 96.5
   NEMA 23 plate on two bosses, with the plate's own five slots doing the
   belt tensioning - 21.5 mm of travel. 92 cm3, and still no bridges.

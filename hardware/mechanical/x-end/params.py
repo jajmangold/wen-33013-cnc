@@ -67,11 +67,22 @@ LAND_TOTAL = 54.0        # PHOTO, +-2
 SHOULDER_X = -(LAND_TOTAL - LAND_OUTBOARD)                # -16.0
 
 # ------------------------------------------------------------- bearings
-BEAR_ID, BEAR_OD, BEAR_W = 10.0, 26.0, 8.0    # STANDARD  6000-2RS
+BEAR_ID, BEAR_OD, BEAR_W = 10.0, 26.0, 8.0    # STANDARD  6000, ZZ or 2RS
 THRUST_OD, THRUST_W = 26.0, 11.0              # STANDARD  8200 / 51200
 # The 26 mm OD is shared, so the housing is one bore at one diameter and the
 # stock thrust bearing stays a drop-in option in the same pocket.
-BORE_D = BEAR_OD + 0.00                       # press/slip fit, set by print
+BORE_D = BEAR_OD + 0.00
+
+# CONFIRMED 2026-11-20 by printing the BoreGauge coupon and pressing a real
+# 6000ZZ in: firm, square on the lip, no rock. First try.
+#
+# This is a PRINTER number, not a part number. 0.05 is a machining-style
+# allowance and it happened to land because the printer and profile put the
+# bore where the model asked. On another machine, or another material, start
+# from the coupon rather than from this value - a printed Ø26 commonly comes
+# out 0.2-0.3 undersize, which would have needed BORE_FIT nearer 0.3.
+#   too tight, will not seat flat  -> increase
+#   slides in with fingers, rocks  -> decrease, even negative
 BORE_FIT = 0.05
 
 # -------------------------------------------- the mounting face, unchanged
