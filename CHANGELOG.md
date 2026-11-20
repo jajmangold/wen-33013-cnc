@@ -61,6 +61,18 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Fixed
 
+- **The screw ran through the motor plate.** The M8 nut is the outermost
+  thing on the screw - it is what clamps the bearing stack - and at Y 0,
+  Z 0 it passed straight through the plate. Fixed without changing the belt
+  or touching the bought plate: only ~7 of each pulley's 17 mm is teeth, so
+  turning the screw pulley hub-INBOARD moves the belt plane out 8 mm, and
+  the plate then clears the nut at X 51 instead of the pulley at 42.9.
+  As a bonus the grub screws now land over the Ø10 land, not the thread.
+- **The clash audit is exhaustive.** It was a hand-written list of pairs and
+  it simply never paired ScrewEnd with AlPlate. It now checks all 66 pairs
+  and anything allowed to touch has to be named - currently just the belt
+  against the two pulleys, whose teeth are meant to engage.
+
 - **The motor pulley was 2.5 mm out of the belt plane.** `PLATE_X0` carried
   a second constraint - that the motor's shaft tip clear the housing -
   which is nonsense: the motor sits 60 mm ABOVE the screw and its shaft

@@ -198,6 +198,17 @@ PLATE_SLOT_W = 5.10               # M5
 # works that out rather than being told.
 PULLEY_MAX_OD = 30.0              # PROVISIONAL - flanges unmeasured
 PULLEY_HUB_OD = 18.0              # MEASURED
+
+# How the 17 mm is divided up. Only ~7 of it is teeth; the rest is hub and
+# flanges, so WHICH WAY ROUND the pulley goes on the shaft moves the belt
+# plane by the hub's 8 mm. That is a free choice and it is worth spending:
+# hub INBOARD puts the grub screws over the Ø10 land instead of out by the
+# thread, and moves the teeth outboard, which is what lets the motor plate
+# sit beyond the M8 nut instead of through it.
+PULLEY_FLANGE_T = 1.0
+PULLEY_HUB_L = 8.0
+PULLEY_TEETH_W = PULLEY_W - 2 * PULLEY_FLANGE_T - PULLEY_HUB_L   # 7.0
+PULLEY_HUB_INBOARD = True
 BOSS_CLEAR = 2.0                  # boss face to the pulley
 BOSS_WALL = 2.0                   # tapped hole to the boss face
 M5_TAP_D = 4.2

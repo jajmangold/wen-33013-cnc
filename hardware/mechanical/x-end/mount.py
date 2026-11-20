@@ -28,11 +28,13 @@ C = centre_distance()
 MOTOR_Z = C * math.cos(math.radians(P.MOTOR_ANGLE))
 MOTOR_Y = C * math.sin(math.radians(P.MOTOR_ANGLE))
 
-# The screw pulley is 17 overall. PROVISIONAL split: flange 1, teeth 7,
-# flange 1, hub 8 with the HUB OUTBOARD, so the grub screws are reachable and
-# the M8 washer bears on the hub's end face - which lands on the thread.
-BELT_X0 = P.PULLEY_X0 + 1.0
-BELT_X1 = BELT_X0 + P.BELT_W + 1.0
+# The screw pulley's TEETH, which is what the belt plane is. Hub inboard,
+# so: hub 8, flange 1, teeth 7, flange 1 outboard.
+if P.PULLEY_HUB_INBOARD:
+    BELT_X0 = P.PULLEY_X0 + P.PULLEY_HUB_L + P.PULLEY_FLANGE_T
+else:
+    BELT_X0 = P.PULLEY_X0 + P.PULLEY_FLANGE_T
+BELT_X1 = BELT_X0 + P.PULLEY_TEETH_W
 MOTOR_FACE_X = BELT_X1 + 1.0 + P.MOTOR_HUB_ALLOW
 MPLATE_X0 = MOTOR_FACE_X - P.MOTOR_PLATE_T
 WALL_X1 = MPLATE_X0
@@ -87,7 +89,13 @@ NEMA_SHAFT_L = 21.0               # ASSUMED - measure if the motor is in hand
 # ABOVE the screw and its shaft passes nothing. That 2.5 mm mattered: it left
 # the motor pulley's teeth only 4.5 mm of overlap with the screw pulley's,
 # and the belt is 6 wide. Modelling the whole drive is what caught it.
-PLATE_X0 = P.PULLEY_X1 + 1.0
+# The plate has to clear the M8 NUT, not just the pulley. The nut is what
+# clamps the bearing stack, so it is always the outermost thing on the
+# screw - and at Y=0, Z=0 it runs straight through where the plate wants to
+# be. Pairing ScrewEnd with AlPlate is what the hand-written clash list
+# never did; the exhaustive audit found it immediately.
+NUT_END_X = P.PULLEY_X1 + P.WASHER_T + P.NUT_T
+PLATE_X0 = max(P.PULLEY_X1, NUT_END_X) + 1.0
 PLATE_X1 = PLATE_X0 + P.PLATE_T_AL
 AL_MOTOR_FACE_X = PLATE_X1
 
@@ -131,7 +139,11 @@ def add_plate_mount(b):
 
 # Where the motor pulley lands, given the shaft it has to sit on.
 MOTOR_SHAFT_X0 = AL_MOTOR_FACE_X - NEMA_SHAFT_L
-MPUL_X0 = max(MOTOR_SHAFT_X0, P.PULLEY_X0)
+# The motor pulley goes on the other way round - hub OUTBOARD - so its teeth
+# sit at its inboard end and can reach back to meet the screw's. Where it
+# sits on the shaft is a free adjustment: slide it until the belt lines up.
+MPUL_X0 = max(BELT_X0 - P.PULLEY_FLANGE_T, MOTOR_SHAFT_X0)
 MPUL_X1 = MPUL_X0 + P.PULLEY_W
-MOTOR_TEETH_X0 = MPUL_X0 + 1.0
-MOTOR_TEETH_X1 = MOTOR_TEETH_X0 + P.BELT_W + 1.0
+MOTOR_TEETH_X0 = MPUL_X0 + P.PULLEY_FLANGE_T
+MOTOR_TEETH_X1 = MOTOR_TEETH_X0 + P.PULLEY_TEETH_W
+TEETH_OVERLAP = min(BELT_X1, MOTOR_TEETH_X1) - max(BELT_X0, MOTOR_TEETH_X0)

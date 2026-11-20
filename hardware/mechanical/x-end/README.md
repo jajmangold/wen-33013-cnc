@@ -251,6 +251,29 @@ Two bolts is not as thin as it sounds: the plate clamps flat against a tall
 boss face, so the bolts only supply clamp force. The tipping moment from the
 overhung motor is about 0.4 Nm against a 5 mm lever - 80 N a bolt.
 
+### Which way round the pulleys go matters
+
+Only about **7 mm of each pulley's 17 is teeth**; the rest is hub and
+flanges. So which way round each one sits on its shaft moves the belt plane
+by the hub's 8 mm, and that is the difference between this working and the
+screw running through the motor plate.
+
+| | |
+|---|---|
+| **Screw pulley: hub INBOARD** | teeth at X 33.9..40.9, and the grub screws land over the Ø10 land instead of out by the thread |
+| **Motor pulley: hub OUTBOARD** | teeth at its inboard end, X 34.0..41.0, reaching back to meet them |
+| shared teeth | **6.9 mm** for a 6 mm belt, asserted |
+
+The motor pulley's position on its shaft is a free adjustment - slide it
+until the belt lines up. `build.py` fails if the two tooth bands share less
+than the belt's width.
+
+The plate then clears the **M8 nut** (which ends at X 50.0) rather than the
+pulley, sitting at X 51.0. The nut is always the outermost thing on the
+screw because it is what clamps the bearing stack - and at Y 0, Z 0 it ran
+straight through where the plate wanted to be. The exhaustive clash audit
+found that; the hand-written pair list never thought to check it.
+
 ### If the printed tower is ever wanted instead
 
 Set `PRINTED_TOWER = True`. It will fail: at 1:1 the 200 mm belt gives

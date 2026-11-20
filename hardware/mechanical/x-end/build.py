@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.join(_HERE, "..", "lib"))
 import FreeCAD as App
 import mount
 import params as P
-from fcutil import box, check, clearance, xcyl
+from fcutil import box, check, xcyl
 from FreeCAD import Vector
 
 OUT = os.path.join(_HERE, "wen_x_end.FCStd")
@@ -162,19 +162,36 @@ def main():
         o = doc.addObject("Part::Feature", name)
         o.Shape = shp
 
+    # --- CLASH AUDIT, exhaustive. Every pair, not a list I thought of.
+    #
+    # The hand-written list missed the screw running through the motor
+    # plate: ScrewEnd and AlPlate were simply never paired. An audit is only
+    # as good as its enumeration, so it enumerates itself now and anything
+    # allowed to touch has to be named and justified.
+    import itertools
+    ALLOWED = {
+        # the belt's teeth engage the pulleys; the racetrack model overlaps
+        frozenset(("Pulley_REF", "Belt_REF")),
+        frozenset(("MotorPulley_REF", "Belt_REF")),
+    }
+    named = [("Housing", housing), ("InnerSpacer", inner), ("OuterSpacer", outer),
+             ("Bearing1_REF", b1), ("Bearing2_REF", b2), ("ScrewEnd_REF", screw),
+             ("Pulley_REF", pulley), ("MotorPulley_REF", mpulley),
+             ("Belt_REF", belt), ("AlPlate_REF", alplate), ("NEMA23_REF", nema),
+             ("TableEnd_REF", table)]
     print("")
-    for an, a, bn, bb in (("Housing", housing, "Pulley", pulley),
-                          ("Housing", housing, "InnerSpacer", inner),
-                          ("Housing", housing, "ScrewEnd", screw),
-                          ("Bearing1", b1, "Bearing2", b2),
-                          ("Housing", housing, "AlPlate", alplate),
-                          ("Housing", housing, "Belt", belt),
-                          ("Housing", housing, "MotorPulley", mpulley),
-                          ("Housing", housing, "NEMA23", nema),
-                          ("AlPlate", alplate, "Pulley", pulley),
-                          ("Belt", belt, "TableEnd", table)):
-        if clearance(a, an, bb, bn) > 1e-6:
-            raise AssertionError(f"{an} interferes with {bn}")
+    clashes = []
+    for (an, a), (bn, bb) in itertools.combinations(named, 2):
+        if frozenset((an, bn)) in ALLOWED:
+            continue
+        v = a.common(bb).Volume
+        if v > 1e-6:
+            clashes.append(f"{an} vs {bn} ({v:.0f} mm3)")
+    print(f"  clash audit  {len(named)} parts, "
+          f"{len(named) * (len(named) - 1) // 2} pairs, "
+          f"{len(ALLOWED)} allowed to touch")
+    if clashes:
+        raise AssertionError("parts interfere: " + ", ".join(clashes))
 
     # --- the axial budget. An M8 washer's 8.4 bore cannot pass over the O10
     # land, so the pulley's outboard face MUST reach the thread, and the nut
@@ -244,6 +261,14 @@ def main():
             f"budget {BUDGET:.0f}. Printed inboard-face-down, anything in the air "
             f"that is not that bridge should be a lip, not a ledge")
 
+    # The belt has to be fully on BOTH sets of teeth. Only ~7 of each
+    # pulley's 17 mm is teeth, so this is tighter than it looks and it moves
+    # with which way round each pulley goes on its shaft.
+    if mount.TEETH_OVERLAP < P.BELT_W:
+        raise AssertionError(
+            f"the pulleys share only {mount.TEETH_OVERLAP:.1f} mm of teeth "
+            f"and the belt is {P.BELT_W:.0f} wide - it would run off one")
+
     gap = mount.MPLATE_X0 - mount.BELT_X1 if P.PRINTED_TOWER else float("inf")
     if gap < 3.0:
         raise AssertionError(
@@ -297,7 +322,12 @@ def main():
         f"motor mount                      "
         f"{'printed tower' if P.PRINTED_TOWER else 'bought T3 x 60 x 96.5 plate'}",
         f"belt plane                       X {mount.BELT_X0:.1f}"
-        f"..{mount.BELT_X1:.1f}",
+        f"..{mount.BELT_X1:.1f}, {mount.TEETH_OVERLAP:.1f} mm of shared teeth"
+        f" for a {P.BELT_W:.0f} mm belt",
+        f"screw pulley                     X {P.PULLEY_X0:.1f}..{P.PULLEY_X1:.1f}"
+        f", hub INBOARD; M8 nut ends {mount.NUT_END_X:.1f}",
+        f"motor pulley                     X {mount.MPUL_X0:.1f}"
+        f"..{mount.MPUL_X1:.1f}, hub OUTBOARD, slide to suit",
         f"centre distance                  {mount.C:.2f} on a {P.BELT_TEETH}T"
         f" belt at {P.TEETH}/{P.MOTOR_TEETH} = 1:1",
         f"plate                            X {mount.PLATE_X0:.1f}"
