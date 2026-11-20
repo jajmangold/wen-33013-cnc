@@ -228,8 +228,17 @@ Changelogs are for humans. Record what changed about the *machine* or the
   `/opt/cnc-tools`, udev rule installed, and `/dev/cnc/pendant` verified
   driving the board end to end.
 
-### Fixed
-
+### Fixed
+
+- **The plate is 117 wide and its bolt holes are symmetric**, from a traced
+  model of the plate calibrated against two features whose true size was
+  already known. Scaling it by the 72 mm bolt pitch and by the 45.42 mm
+  plate height agree to 1.4%, and hole-below-top falls out at 21.0-21.3
+  against 21.5 measured on the machine - an independent check that the
+  trace is sound. Holes sit 22.7 from the left edge and 22.2 from the right,
+  so an earlier guess that they were off-centre was wrong. Affects the
+  reference model and the photo gauge only; the backplate is 96 wide and
+  fits either way.
 - **udev rules used the wrong case for USB serials.** The generator emitted
   the serial as written in the TOML, which is conventionally uppercase
   because that is how MicroPython prints `machine.unique_id()`. udev matches

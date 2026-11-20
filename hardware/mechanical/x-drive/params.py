@@ -74,7 +74,14 @@ SETSCREW_TAP_D = 3.3     # M4 tapping drill
 # Origin: X = 0 at the plate's OUTER face, Z = 0 on the screw centreline,
 # +X outboard, +Z up.
 PLATE_T = 12.0           # MEASURED
-PLATE_W = 115.0          # MEASURED  21.5 + 72 + 21.5; the original 120 was a tape read
+# From Josh's traced model of the plate (plate2.FCStd, drawn over a photo).
+# It is in arbitrary units, but it carries two features whose true size is
+# known, so it calibrates itself: scaling by the 72 bolt pitch and by the
+# 45.42 plate height agree to 1.4%, and the hole-below-top falls out at
+# 21.0-21.3 against the 21.5 measured on the machine. The holes are
+# symmetric - 22.7 from the left edge, 22.2 from the right - so an earlier
+# guess that they sat off-centre was wrong.
+PLATE_W = 117.0          # TRACED    22.5 + 72 + 22.5, good to about +-1
 PLATE_H = 45.42          # MEASURED  the plain part of the plate
 
 # Holes are given the way they were MEASURED - from the plate's edges - rather
@@ -92,7 +99,7 @@ BOLT_CLEAR_D = 5.5       # M5 clearance in our parts
 # within 0.5 mm (16 + 5 = 21.0 against 21.5), and the corner diagonal is the
 # third route: sqrt(21.5^2 + 21.5^2) = 30.4, which is the 30 that was measured.
 HOLE_BELOW_TOP = 21.5    # MEASURED  hole centre below the top edge
-HOLE_FROM_SIDE = 21.5    # MEASURED  hole centre in from each side edge
+HOLE_FROM_SIDE = 22.5    # TRACED    hole centre in from each side edge
 
 # MEASURED two independent ways, which is why this one is finally believed.
 # Both are hard edges a caliper can sit on, and they agree to 0.6 mm:
