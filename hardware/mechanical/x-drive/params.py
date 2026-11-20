@@ -43,7 +43,11 @@ REDUCTION = _DRIVE.reduction
 
 # ---------------------------------------------------------- lead screw end
 SHAFT_D = 10.00          # MEASURED  plain keyed land
-SHAFT_LAND_L = 18.8      # MEASURED  (18.81) length of that land
+# The FREE keyed length, outboard of the bearing stack - not the whole land.
+# 18.81 was the stub exposed with the plate on; with the plate off the plain
+# shaft measures about 50 against the ChArUco board, and the bearings,
+# spacers and retainer take all but the last 10 of it.
+SHAFT_LAND_L = 10.0    # MEASURED, with the stack assembled
 THREAD_D = 8.0           # MANUAL    #14 Washer M8 / #15 Nut M8
 THREAD_L = 13.0          # MEASURED  (12.99) threaded stub beyond the land
 KEY_W = 4.00             # MANUAL    #2-1 "Key, 4 X 16", confirmed by measurement
@@ -67,7 +71,10 @@ HUB_OD = 22.0
 BORE_FIT = 0.02          # bore = SHAFT_D + this, reamed
 BORE_OVERRUN = 0.5       # bore runs this far past the end of the land
 CBORE_D = 17.0           # recess for the stock M8 washer + nut
-CBORE_DEPTH = 2.5
+# Deep enough to swallow an M8 washer (1.6) and nut (6.5). The washer's
+# ~8.4 bore cannot pass over the Ø10 land, so the counterbore FLOOR has
+# to land on the thread - which is what sets the pulley's width.
+CBORE_DEPTH = 8.5
 SETSCREW_TAP_D = 3.3     # M4 tapping drill
 
 # -------------------------------------------- the mill's X-axis end plate

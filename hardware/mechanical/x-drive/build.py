@@ -30,8 +30,9 @@ BORE_L   = P.SHAFT_LAND_L + P.BORE_OVERRUN
 X_FLANGE_IN  = (0.0, P.FLANGE_T)
 X_SEAT       = (P.FLANGE_T, P.FLANGE_T + P.SEAT_W)
 X_FLANGE_OUT = (X_SEAT[1], X_SEAT[1] + P.FLANGE_T)
-X_HUB        = (X_FLANGE_OUT[1], BORE_L + P.CBORE_DEPTH)
-PULLEY_W     = X_HUB[1]
+# No hub: the pulley is only as wide as the flanges and seat need, because
+# anything wider pushes the nut past the end of the thread.
+PULLEY_W     = X_FLANGE_OUT[1]
 
 
 
@@ -51,7 +52,6 @@ def make_pulley():
     body = toothed
     body = body.fuse(_tube(P.FLANGE_OD, *X_FLANGE_IN))
     body = body.fuse(_tube(P.FLANGE_OD, *X_FLANGE_OUT))
-    body = body.fuse(_tube(P.HUB_OD, *X_HUB))
     body = body.removeSplitter()
 
     # bore, nut recess
@@ -65,6 +65,22 @@ def make_pulley():
     body = body.cut(key)
 
     body = body.removeSplitter()
+    # The M8 washer's ~8.4 bore cannot pass over the Ø10 land, so the
+    # counterbore floor HAS to sit on the thread - and far enough in that the
+    # nut still has thread under it. That pair of constraints, not the belt,
+    # is what fixes this pulley's width.
+    WASHER_T, NUT_T = 1.6, 6.5
+    thread0, thread1 = P.SHAFT_LAND_L, P.SHAFT_LAND_L + P.THREAD_L
+    if thread0 > BORE_L:
+        raise AssertionError(
+            f"counterbore floor at {BORE_L:.1f} is still on the Ø{P.SHAFT_D:.0f} "
+            f"land (ends {thread0:.1f}); an M8 washer will not pass over it")
+    if thread1 < BORE_L + WASHER_T + NUT_T:
+        raise AssertionError(
+            f"washer and nut reach {BORE_L + WASHER_T + NUT_T:.1f} but the "
+            f"thread ends at {thread1:.1f} - only "
+            f"{thread1 - BORE_L:.1f} mm of thread under the nut")
+
     return check(body, "Pulley_40T", 1), pd, ro
 
 
@@ -163,7 +179,6 @@ def main():
           f"over {P.MOUNT_T:.0f} of its {P.BOSS_PROUD:.0f} mm")
 
     print("")
-    hub_w = X_HUB[1] - X_HUB[0]
     stack = BORE_L + 1.6 + 6.5          # washer + M8 nut
     avail = P.SHAFT_LAND_L + P.THREAD_L
     for line in (
@@ -183,7 +198,7 @@ def main():
         "",
         f"40T pitch dia {pd:.3f}, tooth OD {2 * ro:.3f}, flange OD {P.FLANGE_OD:.1f}",
         f"width {PULLEY_W:.1f} = flange {P.FLANGE_T:.1f} + seat {P.SEAT_W:.1f}"
-        f" + flange {P.FLANGE_T:.1f} + hub {hub_w:.1f}",
+        f" + flange {P.FLANGE_T:.1f}",
         f"bore {BORE_D:.2f} x {BORE_L:.1f} deep,"
         f" keyway {P.KEY_W + P.KEY_FIT:.2f} x {P.KEY_HUB_DEPTH:.1f}",
         f"nut recess {P.CBORE_D:.1f} dia x {P.CBORE_DEPTH:.1f} deep",

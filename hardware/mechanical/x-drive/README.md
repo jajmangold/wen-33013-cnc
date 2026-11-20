@@ -44,15 +44,28 @@ Measured 2026-11-19, and corroborated by the WEN parts list in three places:
 
 ## How it is held on
 
-The bore runs 19.3 mm deep - 0.5 past the end of the Ø10 land - so the nut
-recess bottoms on the *thread*, not on the shaft's own shoulder. The stock M8
-washer and nut then clamp the pulley back against the bearing seat exactly the
-way they clamped the handwheel. Washer and nut finish at 27.4 mm with 4.4 mm
-of thread to spare.
+The free keyed shaft - what is left outboard once the bearing stack is
+assembled - is **10 mm**, with 13 mm of M8 thread beyond it. The whole
+plain land is nearer 50, but the bearings, spacers and retainer take all
+but the last 10.
 
-There is **no grub screw**: the hub boss wall is only 2.5 mm, and putting one
-through the belt seat would chew up three teeth. Torque goes through the key,
-the nut holds it on. Use a nyloc or a jam nut.
+That, not the belt, fixes the pulley's width. An M8 washer's ~8.4 bore
+cannot pass over the Ø10 land, so the counterbore floor has to sit **on the
+thread**, and far enough in that the nut still has thread under it:
+
+```
+  0        10.0            18.6      23.0
+  |  land  | thread ------------------|
+  |<-bore->|<- washer + nut ->|
+           ^ counterbore floor at 10.5      4.4 mm of thread spare
+```
+
+`build.py` asserts both ends of that: the floor must clear the land, and
+the nut must not run off the thread. Getting it wrong is not visible in the
+model - it just means the nut spins without clamping.
+
+Torque goes through the key, the nut holds it on, exactly as the handwheel
+was retained. There is no grub screw; use a nyloc or a jam nut.
 
 ## What locates it
 

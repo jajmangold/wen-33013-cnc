@@ -19,6 +19,20 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Fixed
 
+- **The 40T pulley was too wide for the shaft that is actually available.**
+  The free keyed length outboard of the bearing stack is 10 mm, not the
+  18.81 measured earlier - that was the stub exposed with the plate on, and
+  with the plate off the plain land measures nearer 50, almost all of it
+  occupied by bearings, spacers and retainer. At 21.8 wide the pulley put
+  its counterbore floor at 19.3, leaving 3.7 mm of thread under the nut
+  against the 8.1 it needs. Pulley is now 19.0 wide with the floor at 10.5
+  and 4.4 mm of thread spare.
+- `build.py` now asserts the nut can actually clamp: the counterbore floor
+  must clear the Ø10 land, because an M8 washer's ~8.4 bore will not pass
+  over it, and the nut must not run off the end of the thread. Neither
+  failure is visible in the model - the nut simply spins without clamping.
+
+
 - **The plate's screws are M6, not M5**, so the bracket's bolt slots were
   1 mm undersize and would not have passed them. WEN parts list #17 is
   "Cap Screw, M6 X 16", and the exploded view on page 18 shows two of them
