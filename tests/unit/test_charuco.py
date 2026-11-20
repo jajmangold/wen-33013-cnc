@@ -40,8 +40,8 @@ def oblique_photo(tmp_path_factory):
 
 
 def _corners_in_mm(path):
-    img, H, n, err = charuco.detect(path)
-    board = charuco._board()
+    img, H, n, err, name = charuco.detect(path)
+    board = charuco._board(name)
     detector = cv2.aruco.CharucoDetector(board)
     found, ids, _, _ = detector.detectBoard(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY))
     measured = cv2.perspectiveTransform(found.reshape(-1, 1, 2), H).reshape(-1, 2)
@@ -74,7 +74,7 @@ class TestItRefusesRatherThanGuesses:
     def test_a_photo_with_no_board_is_an_error_not_a_number(self, tmp_path):
         blank = tmp_path / "blank.png"
         cv2.imwrite(str(blank), np.full((600, 800, 3), 255, np.uint8))
-        with pytest.raises(SystemExit, match="board corners"):
+        with pytest.raises(SystemExit, match="no board found"):
             charuco.detect(str(blank))
 
     def test_a_missing_file_is_an_error(self, tmp_path):
@@ -105,9 +105,47 @@ class TestOcclusionDoesNotCorruptScale:
         return path
 
     def test_a_46mm_hole_still_leaves_enough_corners(self, holed_photo):
-        _, _, n, _ = charuco.detect(holed_photo)
+        _, _, n, _, _ = charuco.detect(holed_photo)
         assert n >= 10
 
     def test_and_the_millimetres_are_still_true(self, holed_photo):
         measured, truth, _ = _corners_in_mm(holed_photo)
+        assert float(np.abs(measured - truth).max()) < 0.1
+
+class TestItIdentifiesWhichBoardItIsLookingAt:
+    """Reading a photo against the wrong board definition does not fail.
+
+    It silently scales every measurement by the ratio of the square sizes,
+    which is the worst kind of wrong: plausible and invisible. So the board
+    identifies itself from the photo rather than being asserted by whoever
+    typed the command.
+    """
+
+    @pytest.mark.parametrize("name", sorted(charuco.BOARDS))
+    def test_each_preset_is_recognised_from_its_own_photo(self, name, tmp_path):
+        png = charuco.make_board(str(tmp_path / f"{name}.png"), name=name)
+        src = cv2.imread(png)
+        h, w = src.shape[:2]
+        quad = np.float32([[0, 0], [w, 0], [w, h], [0, h]])
+        skew = np.float32([[90, 50], [w - 30, 140], [w - 150, h - 30], [50, h - 110]])
+        warped = cv2.warpPerspective(src, cv2.getPerspectiveTransform(quad, skew),
+                                     (w, h), borderValue=(255, 255, 255))
+        warped = cv2.resize(warped, (1512, int(1512 * h / w)))
+        path = str(tmp_path / "photo.png")
+        cv2.imwrite(path, warped)
+        _, _, _, _, chosen = charuco.detect(path)
+        assert chosen == name
+
+    def test_the_small_board_still_measures_true(self, tmp_path):
+        png = charuco.make_board(str(tmp_path / "small.png"), name="small")
+        src = cv2.imread(png)
+        h, w = src.shape[:2]
+        quad = np.float32([[0, 0], [w, 0], [w, h], [0, h]])
+        skew = np.float32([[90, 50], [w - 30, 140], [w - 150, h - 30], [50, h - 110]])
+        warped = cv2.warpPerspective(src, cv2.getPerspectiveTransform(quad, skew),
+                                     (w, h), borderValue=(255, 255, 255))
+        warped = cv2.resize(warped, (1512, int(1512 * h / w)))
+        path = str(tmp_path / "photo.png")
+        cv2.imwrite(path, warped)
+        measured, truth, _ = _corners_in_mm(path)
         assert float(np.abs(measured - truth).max()) < 0.1

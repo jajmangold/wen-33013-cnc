@@ -10,7 +10,7 @@ other, and because reading a dimension off an uncalibrated photo got the
 X bracket wrong twice - once by 25 mm, once by deleting a boss that was
 really there.
 
-    python charuco.py board  [out.png] [hole_mm]   print at 100%, no scaling
+    python charuco.py board  [out.png] [hole_mm] [plate|small]
     python charuco.py rectify photo.jpg [out.png]
     python charuco.py probe   photo.jpg X1 Y1 X2 Y2    distance between two
                                                        points, in mm
@@ -25,20 +25,35 @@ import sys
 import cv2
 import numpy as np
 
-# 10 mm squares over 11 x 4 fits the 115 x 45 X-axis end plate with room for
-# the boss to cover the middle - ChArUco reads whatever corners it can see, so
-# an occluded centre costs nothing.
-SQUARES_X, SQUARES_Y = 11, 4
-SQUARE_MM = 10.0
-MARKER_MM = 7.5
+# Two sizes, because the surface decides. The board must be COPLANAR with
+# what it measures, so it has to fit on the flat part of that surface - a
+# board held nearby in a different plane returns confident nonsense.
+#
+#   plate  110 x 40 - the whole end plate, boss poking through a cut hole
+#   small   42 x 24 - the flat strip beside the boss, 40 x 45 of clear metal
+#
+# detect() tries every preset and keeps the best, so a photo can never be
+# read against the wrong board definition. Getting that wrong would not
+# fail - it would silently scale every measurement.
+BOARDS = {
+    "plate": dict(squares=(11, 4), square_mm=10.0, marker_mm=7.5),
+    "small": dict(squares=(7, 4), square_mm=6.0, marker_mm=4.5),
+}
+DEFAULT_BOARD = "plate"
 DICT = cv2.aruco.DICT_4X4_50
 PRINT_DPI = 600
 MARGIN_MM = 8.0
 
 
-def _board():
+def _spec(name: str) -> dict:
+    if name not in BOARDS:
+        raise SystemExit(f"unknown board {name!r}; have {', '.join(BOARDS)}")
+    return BOARDS[name]
+
+def _board(name: str = DEFAULT_BOARD):
+    b = _spec(name)
     return cv2.aruco.CharucoBoard(
-        (SQUARES_X, SQUARES_Y), SQUARE_MM, MARKER_MM,
+        b["squares"], b["square_mm"], b["marker_mm"],
         cv2.aruco.getPredefinedDictionary(DICT),
     )
 
@@ -48,11 +63,12 @@ def _mm_to_px(mm: float, dpi: int = PRINT_DPI) -> int:
 
 
 def make_board(path: str = "charuco_board.png", dpi: int = PRINT_DPI,
-               hole_mm: float = 0.0) -> str:
+               hole_mm: float = 0.0, name: str = DEFAULT_BOARD) -> str:
     """Render the board at exact scale, with its own proof of scale on it."""
-    w_mm = SQUARES_X * SQUARE_MM
-    h_mm = SQUARES_Y * SQUARE_MM
-    img = _board().generateImage((_mm_to_px(w_mm, dpi), _mm_to_px(h_mm, dpi)))
+    b = _spec(name)
+    w_mm = b["squares"][0] * b["square_mm"]
+    h_mm = b["squares"][1] * b["square_mm"]
+    img = _board(name).generateImage((_mm_to_px(w_mm, dpi), _mm_to_px(h_mm, dpi)))
 
     # A boss standing proud of the surface stops paper lying flat on it, and a
     # board that is not coplanar with what it measures is worse than no board:
@@ -76,39 +92,53 @@ def make_board(path: str = "charuco_board.png", dpi: int = PRINT_DPI,
     # paper, the print was scaled and every number downstream is wrong.
     y = m + img.shape[0] + m
     x0 = m
-    x1 = x0 + _mm_to_px(100.0, dpi)
+    bar_mm = 100.0 if w_mm >= 100.0 else 40.0
+    x1 = x0 + _mm_to_px(bar_mm, dpi)
     cv2.line(canvas, (x0, y), (x1, y), 0, max(2, dpi // 300))
     for x in (x0, x1):
         cv2.line(canvas, (x, y - _mm_to_px(2, dpi)), (x, y + _mm_to_px(2, dpi)),
                  0, max(2, dpi // 300))
-    cv2.putText(canvas, "100 mm - PRINT AT 100%, NO FIT-TO-PAGE",
+    cv2.putText(canvas, f"{bar_mm:.0f} mm - PRINT AT 100%, NO FIT-TO-PAGE",
                 (x1 + _mm_to_px(4, dpi), y + _mm_to_px(2, dpi)),
                 cv2.FONT_HERSHEY_SIMPLEX, dpi / 600.0, 0, max(1, dpi // 500))
     cv2.imwrite(path, canvas)
     return path
 
 
-def detect(image_path: str):
-    """Board corners found in a photo, plus the homography to board mm."""
+def detect(image_path: str, name: str | None = None):
+    """Board corners found in a photo, plus the homography to board mm.
+
+    With no board named, every preset is tried and the one yielding the most
+    corners wins. Reading a photo against the wrong board definition would
+    not fail - it would silently scale every measurement - so the choice is
+    not left to whoever types the command.
+    """
     img = cv2.imread(image_path)
     if img is None:
         raise SystemExit(f"cannot read {image_path}")
-    board = _board()
-    detector = cv2.aruco.CharucoDetector(board)
-    corners, ids, _, _ = detector.detectBoard(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY))
-    if ids is None or len(ids) < 6:
-        raise SystemExit(
-            f"found {0 if ids is None else len(ids)} board corners, need 6+. "
-            "Get the board flatter, closer, or better lit."
-        )
-    obj = board.getChessboardCorners()[ids.flatten()][:, :2].astype(np.float32)
-    img_pts = corners.reshape(-1, 2).astype(np.float32)
-    H, mask = cv2.findHomography(img_pts, obj, cv2.RANSAC, 2.0)
-    if H is None:
-        raise SystemExit("could not fit a homography to those corners")
-    err = _reprojection_error(H, img_pts, obj)
-    return img, H, len(ids), err
+    grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
+    best = None
+    for candidate in ([name] if name else list(BOARDS)):
+        board = _board(candidate)
+        corners, ids, _, _ = cv2.aruco.CharucoDetector(board).detectBoard(grey)
+        if ids is None or len(ids) < 6:
+            continue
+        obj = board.getChessboardCorners()[ids.flatten()][:, :2].astype(np.float32)
+        pts = corners.reshape(-1, 2).astype(np.float32)
+        H, _ = cv2.findHomography(pts, obj, cv2.RANSAC, 2.0)
+        if H is None:
+            continue
+        err = _reprojection_error(H, pts, obj)
+        if best is None or len(ids) > best[3]:
+            best = (candidate, H, err, len(ids))
+
+    if best is None:
+        raise SystemExit(
+            "no board found with 6+ corners. Get it flatter, closer, or better lit."
+        )
+    chosen, H, err, n = best
+    return img, H, n, err, chosen
 
 def _reprojection_error(H, img_pts, obj) -> float:
     proj = cv2.perspectiveTransform(img_pts.reshape(-1, 1, 2), H).reshape(-1, 2)
@@ -123,12 +153,13 @@ def to_mm(H, x: float, y: float) -> tuple[float, float]:
 def rectify(image_path: str, out: str = "rectified.png", px_per_mm: float = 6.0,
             pad_mm: float = 40.0) -> str:
     """Write a square-on, metric view: one pixel is 1/px_per_mm of a mm."""
-    img, H, n, err = detect(image_path)
+    img, H, n, err, name = detect(image_path)
     S = np.array([[px_per_mm, 0, pad_mm * px_per_mm],
                   [0, px_per_mm, pad_mm * px_per_mm],
                   [0, 0, 1]], np.float64)
-    w = int((SQUARES_X * SQUARE_MM + 2 * pad_mm) * px_per_mm)
-    h = int((SQUARES_Y * SQUARE_MM + 2 * pad_mm) * px_per_mm)
+    b = _spec(name)
+    w = int((b["squares"][0] * b["square_mm"] + 2 * pad_mm) * px_per_mm)
+    h = int((b["squares"][1] * b["square_mm"] + 2 * pad_mm) * px_per_mm)
     warped = cv2.warpPerspective(img, S @ H, (w, h))
 
     # 10 mm grid, so the rectified image carries its own ruler
@@ -139,18 +170,18 @@ def rectify(image_path: str, out: str = "rectified.png", px_per_mm: float = 6.0,
         y = int(mm * px_per_mm)
         cv2.line(warped, (0, y), (w, y), (0, 255, 0), 1)
     cv2.imwrite(out, warped)
-    print(f"{n} corners, reprojection error {err:.3f} mm")
+    print(f"board {name!r}: {n} corners, reprojection error {err:.3f} mm")
     print(f"board origin is at ({pad_mm:.0f}, {pad_mm:.0f}) mm; grid is 10 mm")
     print(f"wrote {out}  ({w} x {h} px at {px_per_mm} px/mm)")
     return out
 
 
 def probe(image_path: str, x1, y1, x2, y2) -> float:
-    img, H, n, err = detect(image_path)
+    img, H, n, err, name = detect(image_path)
     a = to_mm(H, float(x1), float(y1))
     b = to_mm(H, float(x2), float(y2))
     d = float(np.hypot(b[0] - a[0], b[1] - a[1]))
-    print(f"{n} corners, reprojection error {err:.3f} mm")
+    print(f"board {name!r}: {n} corners, reprojection error {err:.3f} mm")
     print(f"({x1},{y1}) -> {a[0]:.2f}, {a[1]:.2f} mm")
     print(f"({x2},{y2}) -> {b[0]:.2f}, {b[1]:.2f} mm")
     print(f"distance {d:.2f} mm")
@@ -165,7 +196,8 @@ def main(argv: list[str]) -> int:
     if cmd == "board":
         path = rest[0] if rest else "charuco_board.png"
         hole = float(rest[1]) if len(rest) > 1 else 0.0
-        print("wrote", make_board(path, hole_mm=hole))
+        preset = rest[2] if len(rest) > 2 else DEFAULT_BOARD
+        print("wrote", make_board(path, hole_mm=hole, name=preset))
     elif cmd == "rectify":
         rectify(rest[0], *(rest[1:2] or ["rectified.png"]))
     elif cmd == "probe":

@@ -67,11 +67,29 @@ python lib/charuco.py rectify photo.jpg out.png      # square-on, metric
 python lib/charuco.py probe   photo.jpg x1 y1 x2 y2  # distance in mm
 ```
 
-Print the board **at 100%, no fit-to-page** - it carries a 100 mm bar so you
-can check with a rule - and tape it flat on the surface being measured. The
-board is 110 x 40 mm, which fits the X end plate with the boss free to cover
-the middle; ChArUco reads whatever corners it can see, so occlusion is fine.
+Print **at 100%, no fit-to-page** - each board carries a bar you can check
+with a rule - and tape it flat on the surface being measured.
 
+| Preset | Size | For |
+|---|---|---|
+| `plate` | 110 x 40 | a whole face; cut the optional hole and let a boss through |
+| `small` | 42 x 24 | the flat strip beside a boss - the X end plate leaves 40 x 45 |
+
+```bash
+python lib/charuco.py board out.png 46 plate   # with a 46 mm hole cut-line
+python lib/charuco.py board out.png 0  small
+```
+
+**Coplanar is the whole mechanism, not a detail.** A board held near the
+work but in a different plane returns a confident, wrong number: parallel
+but offset by 40 mm at arm's length is roughly a 10% scale error. If the
+board does not fit on the flat part of the surface, use a smaller one -
+do not move it somewhere it fits.
+
+You never say which board a photo shows. `detect()` tries every preset and
+keeps the one that reads best, because reading a photo against the wrong
+definition would not fail - it would scale every measurement by the ratio
+of the square sizes, which is plausible and invisible.
 `rectify` warps the photo into a square-on view where one pixel is a known
 fraction of a millimetre, and overlays a 10 mm grid. Anything **coplanar
 with the board** can then be measured straight off it. Features standing
