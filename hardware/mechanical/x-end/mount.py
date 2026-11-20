@@ -1,0 +1,77 @@
+"""Motor tower for the X end housing.
+
+Same job as x-drive/mount.py and the same hard-won rules - the NEMA 23's
+screws go into blind holes so a corridor has to stay open to each of them,
+and the M6s into the table casting likewise - but it stands on the bearing
+housing instead of on the stock plate.
+"""
+import math
+
+import params as P
+from fcutil import box as _box
+from fcutil import xcyl as _xcyl
+from fcutil import xslot as _xslot
+from fcutil import xwindow as _xwindow
+
+
+def centre_distance():
+    d1 = P.PITCH * P.TEETH / math.pi
+    d2 = P.PITCH * P.MOTOR_TEETH / math.pi
+    b = P.BELT_TEETH * P.PITCH - (math.pi / 2.0) * (d1 + d2)
+    disc = b * b - 2.0 * (d1 - d2) ** 2
+    if disc < 0:
+        raise ValueError("belt is too short for this pulley pair")
+    return (b + math.sqrt(disc)) / 4.0
+
+
+C = centre_distance()
+MOTOR_Z = C * math.cos(math.radians(P.MOTOR_ANGLE))
+MOTOR_Y = C * math.sin(math.radians(P.MOTOR_ANGLE))
+
+# The screw pulley is 17 overall. PROVISIONAL split: flange 1, teeth 7,
+# flange 1, hub 8 with the HUB OUTBOARD, so the grub screws are reachable and
+# the M8 washer bears on the hub's end face - which lands on the thread.
+BELT_X0 = P.PULLEY_X0 + 1.0
+BELT_X1 = BELT_X0 + P.BELT_W + 1.0
+MOTOR_FACE_X = BELT_X1 + 1.0 + P.MOTOR_HUB_ALLOW
+MPLATE_X0 = MOTOR_FACE_X - P.MOTOR_PLATE_T
+WALL_X1 = MPLATE_X0
+BRACKET_TOP = MOTOR_Z + P.MOTOR_PLATE_H / 2.0
+WEB_T = 8.0
+
+# The tower must clear the M6 counterbores: head and driver run outboard
+# along X at Y = +-36, Z = 15.7. Anything of ours at that Y has to start
+# above it. Same rule that forced the x-drive walls up.
+M6_CLEAR_TOP = P.BOLT_ABOVE + (P.M6_HEAD_D + 1.0) / 2.0 + 0.8
+WALL_BOT = M6_CLEAR_TOP
+
+
+def add_tower(b, body_top):
+    """Fuse the back web, side walls and motor plate onto the housing."""
+    half_hi = P.MOTOR_PLATE_W / 2.0
+    wy0, wy1 = P.WALL_Y_IN, P.WALL_Y_IN + P.WALL_T
+    mh, mw = P.MOTOR_PLATE_H / 2.0, P.MOTOR_PLATE_W / 2.0
+
+    b = b.fuse(_box(0, WEB_T, -half_hi, half_hi, body_top, BRACKET_TOP))
+    for s in (+1, -1):
+        b = b.fuse(_box(WEB_T, WALL_X1, s * wy0, s * wy1, WALL_BOT, BRACKET_TOP))
+    b = b.fuse(_box(MPLATE_X0, MOTOR_FACE_X, MOTOR_Y - mw, MOTOR_Y + mw,
+                    MOTOR_Z - mh, MOTOR_Z + mh))
+    b = b.removeSplitter()
+
+    pilot = P.NEMA_PILOT_D + P.TENSION_SLOT + 1.0
+    b = b.cut(_xcyl(pilot, MPLATE_X0 - 1.0, MOTOR_FACE_X + 1.0, MOTOR_Y, MOTOR_Z))
+    h = P.NEMA_BOLT_PITCH / 2.0
+    for dy in (-h, h):
+        for dz in (-h, h):
+            b = b.cut(_xslot(P.NEMA_BOLT_CLEAR, MPLATE_X0 - 1.0,
+                             MOTOR_FACE_X + 1.0, MOTOR_Y + dy, MOTOR_Z + dz,
+                             P.TENSION_SLOT))
+    # The motor's screws can only enter from inboard. This window carries the
+    # corridor through the back web - exactly the convex hull of the four.
+    r = P.TOOL_ACCESS_D / 2.0
+    b = b.cut(_xwindow(-1.0, WEB_T + 1.0,
+                       MOTOR_Y - (h + r), MOTOR_Y + (h + r),
+                       MOTOR_Z - (h + P.TENSION_SLOT / 2.0 + r),
+                       MOTOR_Z + (h + P.TENSION_SLOT / 2.0 + r), r))
+    return b.removeSplitter()

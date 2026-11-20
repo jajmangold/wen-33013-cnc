@@ -12,6 +12,16 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Added
 
+- **The X end housing is one part now** - bearing block, back web, side
+  walls and motor plate. All three numbers it was waiting on arrived:
+  the motor shafts are **8 mm**, and the screw pulley is **40T** (~25 over
+  the tooth tips; a 40T GT2 is 24.957, a 38T 23.68, a 42T 26.23),
+  **17.0 wide** - 0.6 inside this housing's ceiling - on a **6 mm** belt.
+- `machine/wen33013.toml` belt width 15 -> 6, tooth counts confirmed rather
+  than assumed. The 15 mm belt was only ever a guess at what Josh had.
+- The 8 mm motor shaft is a BOM consequence, not a geometry one: the 10 mm
+  bore pulleys fit the screw but not the motor, so the 20T is a buy.
+
 - **The X end housing exists** (`hardware/mechanical/x-end/`). Replaces the
   stock bearing seat with a preloaded pair of 6000-2RS in a single Ø26
   bore, bolted to the table's own two M6 holes. ADR-0010 is Accepted: both

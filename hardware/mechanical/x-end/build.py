@@ -13,6 +13,7 @@ sys.path.insert(0, _HERE)
 sys.path.insert(0, os.path.join(_HERE, "..", "lib"))
 
 import FreeCAD as App
+import mount
 import params as P
 from fcutil import box, check, clearance, xcyl
 
@@ -39,7 +40,8 @@ def make_housing():
         y = s * P.BOLT_PITCH / 2.0
         b = b.cut(xcyl(P.BOLT_CLEAR_D, -1.0, BODY_L + 1.0, y, P.BOLT_ABOVE))
         b = b.cut(xcyl(CB_D, BODY_L - CB_DEPTH, BODY_L + 1.0, y, P.BOLT_ABOVE))
-    return b.removeSplitter()
+    b = mount.add_tower(b.removeSplitter(), BODY_TOP)
+    return b
 
 
 def ref_screw():
@@ -95,13 +97,34 @@ def main():
     if P.SPACER_L < P.SPACER_MIN:
         raise AssertionError(f"spacer {P.SPACER_L:.1f} too short to preload on")
 
-    # --- the M6s must be fittable: head and driver down the counterbore
-    for s in (+1, -1):
-        y = s * P.BOLT_PITCH / 2.0
-        corridor = xcyl(P.M6_HEAD_D + 1.0, BODY_L - CB_DEPTH, 70.0, y, P.BOLT_ABOVE)
-        v = housing.common(corridor).Volume
+    # --- every fastener must be fittable. Both families go into BLIND holes
+    # - the motor's into the NEMA 23, the M6s into the table casting - so each
+    # can only enter from one side and needs an open corridor from it. This is
+    # the check that caught two unassemblable versions of the x-drive bracket.
+    h = P.NEMA_BOLT_PITCH / 2.0
+    t = P.TENSION_SLOT / 2.0
+    jobs = []
+    for s in (+1, -1):                       # M6, driven from OUTBOARD down
+        jobs.append(("M6 mount", P.M6_HEAD_D + 1.0, BODY_L - CB_DEPTH, 70.0,
+                     s * P.BOLT_PITCH / 2.0, P.BOLT_ABOVE))
+    for dy in (-h, h):                       # motor screws, from INBOARD
+        for dz in (-h, h):
+            for sl in (-t, 0.0, t):
+                jobs.append(("M5 motor", P.TOOL_ACCESS_D, -1.0, mount.MPLATE_X0,
+                             mount.MOTOR_Y + dy, mount.MOTOR_Z + dz + sl))
+    blocked = []
+    for what, dia, x0, x1, y, z in jobs:
+        v = housing.common(xcyl(dia, x0, x1, y, z)).Volume
         if v > 1e-6:
-            raise AssertionError(f"M6 at Y{y:+.0f} is blocked ({v:.0f} mm3)")
+            blocked.append(f"{what} Y{y:+.1f} Z{z:.1f} ({v:.0f} mm3)")
+    if blocked:
+        raise AssertionError("screws cannot be fitted: " + ", ".join(blocked))
+
+    gap = mount.MPLATE_X0 - mount.BELT_X1
+    if gap < 3.0:
+        raise AssertionError(
+            f"motor plate clears the belt by only {gap:.1f} mm and it bridges "
+            f"{2*P.WALL_Y_IN:.0f}")
 
     span = (P.BRG2_X0 + P.BRG2_X1) / 2 - (P.BRG1_X0 + P.BRG1_X1) / 2
     over = (P.PULLEY_X0 + P.PULLEY_X1) / 2 - (P.BRG2_X0 + P.BRG2_X1) / 2
@@ -116,14 +139,25 @@ def main():
         f"pulley overhang                  {over:.1f}  (ratio {over/span:.2f})",
         f"washer+nut end                   {nut_end:.1f} of {thread_end:.1f}"
         f"  -> {thread_end-nut_end:.1f} spare",
-        f"pulley width                     {P.PULLEY_W:.1f} PROVISIONAL;"
+        f"pulley width                     {P.PULLEY_W:.1f} MEASURED;"
         f" this housing takes up to {P.PULLEY_W_MAX:.1f}",
         f"spacer                           {P.SPACER_L:.1f}, solved - it is"
         f" what the budget leaves, not a choice",
         f"M6 length                        {BODY_L - CB_DEPTH:.0f} through"
         f" + ~10 thread -> M6 x 25",
-        f"housing                          {BODY_L:.1f} x {BODY_W:.0f} x"
-        f" {BODY_TOP-BODY_BOT:.1f}, {housing.Volume/1000:.1f} cm3",
+        "",
+        f"centre distance                  {mount.C:.2f} on a {P.BELT_TEETH}T"
+        f" belt, motor straight above",
+        f"belt plane                       X {mount.BELT_X0:.1f}"
+        f"..{mount.BELT_X1:.1f}, {gap:.1f} clear under the motor plate",
+        f"walls start                      Z {mount.WALL_BOT:.1f}, above the"
+        f" M6 heads at {P.BOLT_ABOVE:.1f}",
+        f"motor face                       X {mount.MOTOR_FACE_X:.1f}",
+        f"bearing block                    {BODY_L:.1f} x {BODY_W:.0f} x"
+        f" {BODY_TOP-BODY_BOT:.1f}",
+        f"whole part                       {housing.BoundBox.XLength:.1f} x"
+        f" {housing.BoundBox.YLength:.0f} x {housing.BoundBox.ZLength:.1f},"
+        f" {housing.Volume/1000:.1f} cm3",
     ):
         print(line)
 

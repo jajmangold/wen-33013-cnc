@@ -104,10 +104,10 @@ WASHER_T, NUT_T = 1.6, 6.5   # M8
 THREAD_MARGIN = 1.0          # thread left under the nut
 SPACER_MIN = 3.0             # less than this is not worth calling a spacer
 
-# PROVISIONAL - Josh's bought 10 mm-bore GT2 pulley, overall width along the
-# shaft. MEASURE IT. It is the only free variable left and it decides how far
-# apart the bearings can sit.
-PULLEY_W = 16.0
+# MEASURED 2026-11-20, the pulley in hand: ~25 mm over the tooth tips (so
+# 40T - a 38T is 23.68 and a 42T is 26.23), 17.0 overall, 10 mm bore, 6 mm
+# belt. It fits, with 0.6 mm to spare against this housing's 17.6 ceiling.
+PULLEY_W = 17.0
 
 FIXED = LIP_D * 0 + LIP_L + 2 * BEAR_W + CLIP_W + WEB + GAP   # 21.3 + spacer
 THREAD_END = LAND_OUTBOARD + THREAD_L
@@ -137,3 +137,24 @@ if PULLEY_X1 < FACE_MIN:
     raise SystemExit(
         f"pulley face at {PULLEY_X1:.1f} is still on the Ø{SHAFT_D:.0f} land "
         f"(ends {FACE_MIN:.1f}); an M8 washer will not pass over it")
+
+# ---------------------------------------------------------------- NEMA 23
+# MEASURED 2026-11-20: the motor shafts are 8 mm. So the 10 mm bore pulleys
+# fit the SCREW but not the motor - the 20T has to be bought with an 8 mm
+# bore. Noted here because it is a BOM consequence, not a geometry input:
+# nothing in this housing touches the motor shaft.
+MOTOR_SHAFT_D = 8.0
+NEMA_FRAME = 56.4
+NEMA_BOLT_PITCH = 47.14
+NEMA_PILOT_D = 38.1
+NEMA_BOLT_CLEAR = 5.5
+TOOL_ACCESS_D = 10.0
+TENSION_SLOT = 10.0
+MOTOR_HUB_ALLOW = 10.0
+BELT_TEETH = 100          # 200 mm closed loop, in 6 mm
+MOTOR_ANGLE = 0.0
+WALL_T = 6.0
+WALL_Y_IN = 29.0
+MOTOR_PLATE_T = 8.0
+MOTOR_PLATE_W = 76.0
+MOTOR_PLATE_H = 78.0

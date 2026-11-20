@@ -60,14 +60,16 @@ spacer, circlip, web and the pulley's own width all fit in that window.
 refuses to build if it comes out under 3 mm:
 
 ```
-pulley width   16.0 PROVISIONAL; this housing takes up to 17.6
-spacer          4.6, solved
-bearings        2.0..10.0 and 14.6..22.6, centres 12.6 apart
-pulley         25.9..41.9     nut ends 50.0 of 51.0 -> 1.0 spare
+pulley width   17.0 MEASURED; this housing takes up to 17.6
+spacer          3.6, solved
+bearings        2.0..10.0 and 13.6..21.6, centres 11.6 apart
+pulley         24.9..41.9     nut ends 50.0 of 51.0 -> 1.0 spare
 ```
 
-So a **hubbed** pulley will not fit - at 21 mm wide the spacer vanishes.
-Measure yours; it is the only free variable left on this side.
+The pulley in hand is **17.0 and it fits, with 0.6 mm to spare.** It is a
+40T: ~25 mm over the tooth tips, and a 40T GT2 is 24.957 where a 38T is
+23.68 and a 42T 26.23, so the count is not in doubt. Anything wider than
+17.6 would leave no spacer to preload across.
 
 ## One bore, one diameter
 
@@ -91,24 +93,43 @@ spacer has to bridge 18 mm back to the shoulder.
 | 1 | Outer spacer, Ø24 × Ø19 × 4.6 | sets the preload span |
 | 1 | Circlip, DIN 472, 26 mm bore | |
 | 2 | **M6 × 25** socket cap | replaces the stock M6 × 16 |
-| 1 | 40T GT2, 10 mm bore, **≤ 17.6 wide** | yours - grub screw into the keyway |
+| 1 | 40T GT2, 10 mm bore, 6 mm belt, 17.0 wide | **yours** - grub screw into the keyway |
+| 1 | 20T GT2, **8 mm bore**, 6 mm belt, hubbed | buy - your 10 mm bore will not fit an 8 mm shaft |
+| 1 | 2GT closed loop, **6 mm** wide, 200 mm / 100T | buy |
+| 1 | NEMA 23, 8 mm shaft | |
 | 1 | M8 nut + washer | reuse the stock ones |
 
 The key comes **out**: it stands 1.5 proud and a plain Ø10 bore will not pass
 over it. Grub screw into the empty slot, second at 90°.
 
-## Not done yet
+## The motor tower
 
-The **motor tower** is not on this part. It carries over from
-[`../x-drive`](../x-drive) unchanged in principle - same bolt interface, same
-access rules - but its centre distance depends on the tooth counts and belt
-width, and those are still unconfirmed. Building it now would be building on
-the one thing still unmeasured.
+One part, not two: the bearing block carries a back web, two side walls and
+the motor plate, with the NEMA 23 straight above the screw so belt tension is
+pure shear through the M6s rather than a moment.
 
-Still needed, and genuinely not in anything measured so far:
+```
+centre distance   69.71 on a 100T belt, motor straight above
+belt plane        X 25.9..32.9, 3.0 clear under the motor plate
+walls start       Z 22.0, above the M6 heads at 15.7
+whole part        43.9 x 92 x 128.7, 167 cm3
+```
 
-1. **Pulley width** - decides the spacer, above.
-2. **Motor shaft diameter** - 10 mm bore pulleys need a 10 mm shaft; a
-   NEMA 23 is usually 6.35 or 8.
-3. **Tooth counts, both pulleys** - they drive `steps_per_mm`, so they go in
-   `machine/wen33013.toml`, not here.
+Two rules carried over from the x-drive bracket, both learned the hard way:
+
+- **Every screw has to be reachable.** The motor's four go into blind holes
+  so they can only enter from inboard - the window in the back web is the
+  convex hull of their four corridors. The M6s are driven from outboard down
+  their counterbores, which is why the side walls start at Z = 22, above
+  their heads. `build.py` probes all six, at every slot extreme.
+- **The motor plate's underside is a bridge over the belt.** It clears by
+  3.0 mm, and that gap is asserted.
+
+## Still open
+
+1. **A 20T with an 8 mm bore.** The motor shafts measure 8 mm, so the 10 mm
+   bore pulleys fit the *screw* but not the motor. This one has to be bought.
+2. **Where the teeth sit in the screw pulley's 17 mm.** Assumed flange 1 /
+   teeth 7 / flange 1 / hub 8 with the hub outboard. If it is the other way
+   round the belt plane moves 8 mm, and the motor pulley just slides along
+   its shaft to match - the grub screws make this a non-problem in practice.

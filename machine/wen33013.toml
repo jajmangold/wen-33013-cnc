@@ -82,10 +82,17 @@ invert_direction     = false
 # screw turn. This DOUBLES steps_per_mm. The CAD that builds these two
 # pulleys is hardware/mechanical/x-drive and reads the tooth counts from here.
 kind          = "belt"
+# CONFIRMED 2026-11-20. The screw pulley is in hand and measures ~25 mm over
+# the tooth tips: a 40T GT2 is 24.957, a 38T is 23.68 and a 42T is 26.23, so
+# the count is not in doubt. 17.0 mm overall width, 10 mm bore, 6 mm belt.
 motor_teeth   = 20
 screw_teeth   = 40
 belt_pitch_mm = 2.0               # GT2
-belt_width_mm = 15.0
+# 6, not 15. The pulley in hand is a 6 mm belt pulley. A single 6 mm 2GT
+# allows roughly 60 N against the 17-33 N this axis needs to jog, home and
+# cut lightly, so it is not the limit here - the printed bracket was simply
+# drawn for a belt nobody had.
+belt_width_mm = 6.0
 
 [axis.x.encoder]
 # 14-bit absolute, on a GT2 pulley belted to the axis so it measures REAL
