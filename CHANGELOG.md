@@ -105,8 +105,21 @@ Changelogs are for humans. Record what changed about the *machine* or the
   is what it is for. X is now 3200 steps/mm at 32 kHz, and the ceiling is the
   motor (600 rpm) rather than the driver.
 
-### Fixed
-
+### Fixed
+
+- **The bolt line sits 15.4 mm above the screw axis - measured, at last.**
+  19.40 from the plate's top edge to the top of the Ø35 boss, both hard
+  edges a caliper can sit on, giving the screw 36.9 below the top edge
+  against hole centres at 21.5. Four earlier attempts at this one dimension
+  spanned 25 mm: 26.3 from a third-party model, 1.0 from "screw on the
+  centreline", ~10.5 from how the printed gauge sat, 16-30 from
+  photogrammetry. None of them was a direct measurement of the thing.
+- The plate is **73.8 mm tall**, not the 45 first paced out - 36.9 above the
+  screw alone. The backplate was sized from that 45 and its bolt slots ran
+  off the top edge, making them an open fork rather than slots. `build.py`
+  now asserts the backplate reaches past the top of the slots.
+- Slots kept, at 16 mm travel, even though the offset is now known. They
+  cost nothing, and the register bore does the locating regardless.
 - The pulley's tooth-profile audit probed a plane the assembled part no longer
   occupied, so every groove read as empty material. Probe coordinates now come
   from `params.py` instead of being written as literals.

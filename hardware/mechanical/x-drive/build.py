@@ -145,20 +145,26 @@ def main():
                 f"register bore is wrong: a boss of "
                 f"Ø{P.BOSS_D + extra:.1f} {'clashes' if hits else 'passes'}, "
                 f"expected {'clash' if want_clash else 'pass'}")
-    # The bolt line to screw offset was never pinned down. Rather than pick
-    # one of the four candidate answers, the slots have to swallow all of
-    # them - so assert that, instead of trusting the arithmetic above.
+    # The offset is measured now, but the slots stay: they cost nothing, and
+    # four earlier answers to this one dimension spanned 25 mm. What must be
+    # asserted is that the slot is a SLOT - material all round it - and not
+    # an open fork off the top of the backplate, which is what happened when
+    # the backplate was sized from a plate height that had been paced out.
     lo = P.BOLT_ABOVE - P.BOLT_SLOT_TRAVEL / 2.0
     hi = P.BOLT_ABOVE + P.BOLT_SLOT_TRAVEL / 2.0
-    CANDIDATES = {"plate centreline": 1.0, "printed gauge fit": 10.5,
-                  "photogrammetry": 19.0}
-    outside = {k: v for k, v in CANDIDATES.items() if not lo <= v <= hi}
-    if outside:
+    top_of_slot = hi + P.BOLT_CLEAR_D / 2.0
+    if top_of_slot > P.PLATE_TOP_ABOVE - 2.0:
         raise AssertionError(
-            f"bolt slots span {lo:.1f}..{hi:.1f} above the screw and miss {outside}")
-    print(f"  bolt slots   {lo:.1f}..{hi:.1f} above the screw axis, covering "
-          f"{', '.join(CANDIDATES)}")
-
+            f"slot reaches {top_of_slot:.1f} but the backplate only goes to "
+            f"{P.PLATE_TOP_ABOVE:.1f} - it would be an open fork")
+    for z in (lo, hi):
+        y = P.BOLT_PITCH / 2.0
+        if not bracket.isInside(Vector(P.MOUNT_T / 2.0, y, z), 1e-6, True):
+            pass        # inside the slot void, as it should be
+        else:
+            raise AssertionError(f"the bolt slot is not open at z={z:.1f}")
+    print(f"  bolt slots   {lo:.1f}..{hi:.1f} above the screw "
+          f"(measured {P.BOLT_ABOVE:.1f}), backplate reaches {P.PLATE_TOP_ABOVE:.1f}")
     print(f"  register     Ø{P.BOSS_D + P.REGISTER_FIT:.2f} bore fits the Ø{P.BOSS_D:.0f}"
           f" boss, engages {P.MOUNT_T:.0f} of its {P.BOSS_PROUD:.0f} mm")
 
