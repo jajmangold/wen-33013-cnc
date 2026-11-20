@@ -81,6 +81,7 @@ BOLT_PITCH = 72.0        # MEASURED + STEP
 BOLT_ABOVE = 15.7        # MEASURED two ways, agreeing to 0.6
 BOLT_CLEAR_D = 6.5       # M6
 M6_HEAD_D = 10.0         # STANDARD  ISO 4762
+CB_D = 14.0              # counterbore: takes an M6 washer under the head
 
 # --------------------------------------------------------- the axial stack
 # Everything from the shoulder outboard, on the Ø10 land:

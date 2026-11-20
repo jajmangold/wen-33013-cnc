@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.join(_HERE, "..", "lib"))
 import FreeCAD as App
 import MeshPart
 
-OURS = ("Housing", "InnerSpacer", "OuterSpacer")
+OURS = ("Housing", "BoreGauge", "InnerSpacer", "OuterSpacer")
 OUTDIR = os.path.join(_HERE, "stl")
 
 

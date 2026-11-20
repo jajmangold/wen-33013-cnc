@@ -89,6 +89,59 @@ outboard. The inboard end cannot be closed by the table face itself, because
 the casting has the old bearing pocket there - which is also why the inner
 spacer has to bridge 18 mm back to the shoulder.
 
+## Printing
+
+Print the **inboard face flat on the bed**, building up in +X. The Ø26 bore
+then prints as a vertical cylinder - round, no support - and the only
+overhang is the motor plate's underside, which bridges between the two side
+walls. That face is not functional; the motor seats on the other side of the
+plate. Supports off.
+
+**Perimeters, not infill.** The sections that carry load here are thin: 7 mm
+of wall between the bore and the bottom face, a 2 mm lip under the first
+bearing, and 12 mm of counterbore floor under each bolt. Perimeters are solid
+extrusion; infill is not.
+
+| | |
+|---|---|
+| Perimeters | **5-6** (2.0-2.4 mm at a 0.4 nozzle) |
+| Top / bottom layers | **5-6** - the lip and the counterbore floors are top surfaces in this orientation |
+| Infill | **40-50%**, gyroid or grid. Below ~25% the block round the bore goes spongy; above ~50% buys little |
+| Material | **PETG or ASA, not PLA.** PLA creeps under sustained bolt load |
+
+Nothing here is highly stressed - the bearings see about 130 N against a
+4.5 kN rating, and the M8 nut's preload closes through the *shaft*, not
+through this part. The failure modes are creep and bore fit, not fracture.
+
+### The M6 washers are not optional
+
+The counterbores are Ø14 so a standard M6 washer sits under each head. A
+Ø10 cap head straight on plastic is ~45 mm² of bearing area; this joint wants
+roughly 500 N a bolt to hold against belt pull and cutting load, which is
+11 MPa of sustained compression. PETG creeps under that and the clamp goes
+slack over weeks. With the washer it is 5.6 MPa.
+
+Don't torque them to an M6 spec either - the aim is a firm clamp, not a
+fastener at its own limit.
+
+### Check the bore before printing the whole thing
+
+```bash
+FreeCADCmd build.py      # -> stl/BoreGauge.stl, 27 cm3
+```
+
+A printed Ø26 bore will not come out at 26.00, and the housing is 167 cm³.
+The coupon is the housing's **own first 14 mm** - an intersection with a
+slab, so it cannot drift from the part it is checking - carrying the lip and
+the start of the bore.
+
+Press a 6000-2RS in. You want it snug, seating with hand pressure or a light
+tap, not hammered and not loose. If it is wrong, change `BORE_FIT` in
+`params.py` and print the coupon again - it is minutes, not hours.
+
+`BORE_FIT` is 0.05, which is a *machining* allowance. A printed bore usually
+wants more like 0.2-0.3 to land in the same place. Tune it on the coupon.
+
 ## Bill of materials
 
 | Qty | Item | Note |
@@ -99,6 +152,7 @@ spacer has to bridge 18 mm back to the shoulder.
 | 1 | Outer spacer, Ø24 × Ø19 × 4.6 | sets the preload span |
 | 1 | Circlip, DIN 472, 26 mm bore | |
 | 2 | **M6 × 25** socket cap | replaces the stock M6 × 16 |
+| 2 | M6 washer | **required** - see Printing |
 | 1 | 40T GT2, 10 mm bore, 6 mm belt, 17.0 wide | **yours** - grub screw into the keyway |
 | 1 | 20T GT2, **8 mm bore**, 6 mm belt, hubbed | buy - your 10 mm bore will not fit an 8 mm shaft |
 | 1 | 2GT closed loop, **6 mm** wide, 200 mm / 100T | buy |

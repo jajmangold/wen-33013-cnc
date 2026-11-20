@@ -42,7 +42,7 @@ WEB_T = 8.0
 # The tower must clear the M6 counterbores: head and driver run outboard
 # along X at Y = +-36, Z = 15.7. Anything of ours at that Y has to start
 # above it. Same rule that forced the x-drive walls up.
-M6_CLEAR_TOP = P.BOLT_ABOVE + (P.M6_HEAD_D + 1.0) / 2.0 + 0.8
+M6_CLEAR_TOP = P.BOLT_ABOVE + P.CB_D / 2.0 + 0.8
 WALL_BOT = M6_CLEAR_TOP
 
 

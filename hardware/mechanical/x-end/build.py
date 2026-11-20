@@ -23,7 +23,12 @@ BODY_L = P.BODY_L                # solved in params, with the circlip and web
 BODY_W = 92.0                    # reaches both M6s with 10 mm to spare
 BODY_TOP = P.BOLT_ABOVE + 11.0
 BODY_BOT = -(P.BEAR_OD / 2.0 + 7.0)
-CB_D, CB_DEPTH = 11.0, 12.0      # M6 counterbore, so an M6 x 25 reaches
+# Ø14 so a standard M6 washer (12.5 OD) fits UNDER the head. A Ø10 cap head
+# straight on plastic is ~45 mm2 of bearing area; this joint wants about
+# 500 N a bolt to hold against belt pull and cutting load, which is 11 MPa
+# of sustained compression. PETG creeps under that and the clamp goes slack
+# over weeks. With the washer it is 5.6 MPa. The washer is not optional.
+CB_D, CB_DEPTH = P.CB_D, 12.0
 CLIP_D, CLIP_W = 27.2, P.CLIP_W  # DIN 472 internal circlip for a 26 bore
 
 
@@ -66,7 +71,14 @@ def main():
     screw = check(ref_screw(), "ScrewEnd_REF", 1)
     pulley = check(tube(30.0, P.SHAFT_D + 0.1, P.PULLEY_X0, P.PULLEY_X1), "Pulley_REF", 1)
 
-    for shp, name in ((housing, "Housing"), (inner, "InnerSpacer"),
+    # The bearing fit in a PRINTED Ø26 bore is a tuning exercise, and this
+    # part is 167 cm3. The coupon is the housing's own first 14 mm - an
+    # intersection, so it cannot drift from the part it is checking - with
+    # the lip, the start of the bore and both bolt holes.
+    slab = box(0.0, 14.0, -30.0, 30.0, -20.0, 20.0)
+    gauge = check(housing.common(slab), "BoreGauge", 1)
+
+    for shp, name in ((housing, "Housing"), (gauge, "BoreGauge"), (inner, "InnerSpacer"),
                       (outer, "OuterSpacer"), (b1, "Bearing1_REF"),
                       (b2, "Bearing2_REF"), (screw, "ScrewEnd_REF"),
                       (pulley, "Pulley_REF")):
@@ -105,7 +117,7 @@ def main():
     t = P.TENSION_SLOT / 2.0
     jobs = []
     for s in (+1, -1):                       # M6, driven from OUTBOARD down
-        jobs.append(("M6 mount", P.M6_HEAD_D + 1.0, BODY_L - CB_DEPTH, 70.0,
+        jobs.append(("M6 mount", CB_D, BODY_L - CB_DEPTH, 70.0,
                      s * P.BOLT_PITCH / 2.0, P.BOLT_ABOVE))
     for dy in (-h, h):                       # motor screws, from INBOARD
         for dz in (-h, h):
