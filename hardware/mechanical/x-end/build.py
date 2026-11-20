@@ -56,9 +56,8 @@ def make_housing():
         b = b.cut(xcyl(P.BOLT_CLEAR_D, -1.0, BODY_L + 1.0, y, P.BOLT_ABOVE))
         b = b.cut(xcyl(CB_D, BODY_L - CB_DEPTH, BODY_L + 1.0, y, P.BOLT_ABOVE))
     b = b.removeSplitter()
-    if P.PRINTED_TOWER:
-        b = mount.add_tower(b, BODY_TOP)
-    return b
+    return (mount.add_tower(b, BODY_TOP) if P.PRINTED_TOWER
+            else mount.add_plate_mount(b))
 
 
 def ref_screw():
@@ -179,6 +178,30 @@ def main():
             f"motor plate clears the belt by only {gap:.1f} mm and it bridges "
             f"{2*P.WALL_Y_IN:.0f}")
 
+    # --- the bosses must clear the pulley, and the tapped holes must have
+    # wall. Both are governed by the pulley's largest diameter, which is a
+    # parameter precisely because it has not been measured.
+    _bolts, _both = mount.bolt_positions()
+    if not P.PRINTED_TOWER:
+        import Part as _Pt
+        # A keep-out TUBE around the pulley, over the pulley's own length.
+        # Not distToShape against the pulley itself: that measures the axial
+        # gap to the housing face, which is a different number and is meant
+        # to be small.
+        keep = _Pt.makeCylinder(P.PULLEY_MAX_OD / 2.0 + P.BOSS_CLEAR - 0.02,
+                                P.PULLEY_X1 - P.PULLEY_X0,
+                                Vector(P.PULLEY_X0, 0, 0), Vector(1, 0, 0))
+        v = housing.common(keep).Volume
+        if v > 1e-6:
+            raise AssertionError(
+                f"{v:.0f} mm3 of the mount intrudes within {P.BOSS_CLEAR:.1f} mm "
+                f"of a Ø{P.PULLEY_MAX_OD:.0f} pulley")
+        print(f"  mount clears a Ø{P.PULLEY_MAX_OD:.0f} pulley by "
+              f"{P.BOSS_CLEAR:.1f}+, {len(_bolts)} bolts usable"
+              f"{'' if _both else ' (upper slots only)'}")
+        if mount.PLATE_X0 - P.PULLEY_X1 < 1.0:
+            raise AssertionError("the plate would foul the screw pulley")
+
     span = (P.BRG2_X0 + P.BRG2_X1) / 2 - (P.BRG1_X0 + P.BRG1_X1) / 2
     over = (P.PULLEY_X0 + P.PULLEY_X1) / 2 - (P.BRG2_X0 + P.BRG2_X1) / 2
     for line in (
@@ -200,13 +223,18 @@ def main():
         f" + ~10 thread -> M6 x 25",
         "",
         f"motor mount                      "
-        f"{'printed tower' if P.PRINTED_TOWER else 'STEEL ANGLE BRACKET - not on this part'}",
+        f"{'printed tower' if P.PRINTED_TOWER else 'bought T3 x 60 x 96.5 plate'}",
         f"belt plane                       X {mount.BELT_X0:.1f}"
         f"..{mount.BELT_X1:.1f}",
-        f"pad for the bracket              top face Z {BODY_TOP:.1f},"
-        f" {BODY_L:.1f} deep x {BODY_W:.0f} wide",
-        f"motor axis wants to be           Z {mount.C:.2f} on a"
-        f" {P.BELT_TEETH}T belt -> {mount.C - BODY_TOP:.2f} above that pad",
+        f"centre distance                  {mount.C:.2f} on a {P.BELT_TEETH}T"
+        f" belt at {P.TEETH}/{P.MOTOR_TEETH} = 1:1",
+        f"plate                            X {mount.PLATE_X0:.1f}"
+        f"..{mount.PLATE_X1:.1f}, top edge Z {mount.PLATE_TOP_Z:.2f},"
+        f" motor face X {mount.AL_MOTOR_FACE_X:.1f}",
+        f"tension travel                   Z {mount.SLOT_Z_LO:.2f}"
+        f"..{mount.SLOT_Z_HI:.2f}, the plate's own slots",
+        f"bolts                            {len(_bolts)} x M5 into the bosses"
+        f"{'' if _both else '  (upper slots only - the pulley blocks the lower pair)'}",
         f"bearing block                    {BODY_L:.1f} x {BODY_W:.0f} x"
         f" {BODY_TOP-BODY_BOT:.1f}",
         f"whole part                       {housing.BoundBox.XLength:.1f} x"

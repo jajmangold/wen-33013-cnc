@@ -196,6 +196,52 @@ walls. The print drops from 165 cm³ to 88, the overhang from 2985 mm² to
 201, and the bearing block - the part whose fit is actually uncertain - can
 be printed and tried on its own.
 
+It carries a **bought T3 × 60 × 96.5 NEMA 23 plate** on two bosses, and the
+plate's own five slots are the belt tensioning - 21.5 mm of vertical travel:
+
+```
+centre distance   60.00 on a 100T belt at 40T/40T = 1:1
+plate             X 45.4..48.4, top edge Z 89.70, motor face X 48.4
+tension travel    Z 1.25 .. 22.75
+bolts             2 x M5 (upper slots only - see below)
+whole part        45.4 x 92 x 46.7, 92 cm3
+```
+
+The plate is 60 wide (Y ±30) and the M6 heads are at Y ±36, so it misses
+them entirely - no need to raise the walls the way the printed tower did.
+
+**The Pololu L bracket does not fit**, and not for the reason you'd guess:
+its base is 65 mm deep and extends *away* from the motor face, so putting
+the motor pulley in the belt plane would run that base 21 mm inside the
+table casting. Push it out far enough to clear and the pulley is 20 mm out
+of plane.
+
+### How many bolts depends on one unmeasured diameter
+
+The plate's outer slots sit at Y = ±20 and the 40T pulley is in the way:
+
+| pulley max OD | boss face can be | bolts |
+|---|---|---|
+| 25 (flangeless) | Y 14.5 | **all four** |
+| 28, 30, 32 (flanged) | Y 16.0-18.0 | upper pair only |
+
+`PULLEY_MAX_OD` is **30, PROVISIONAL** - the teeth measure 24.96 and the hub
+18.0, but the flanges have never been measured and they are what governs.
+`build.py` works out which slots are usable from that number rather than
+being told, and asserts the clearance either way. Measure the flanges and
+change one line.
+
+Two bolts is not as thin as it sounds: the plate clamps flat against a tall
+boss face, so the bolts only supply clamp force. The tipping moment from the
+overhung motor is about 0.4 Nm against a 5 mm lever - 80 N a bolt.
+
+### If the printed tower is ever wanted instead
+
+Set `PRINTED_TOWER = True`. It will fail: at 1:1 the 200 mm belt gives
+C = 60.00, and the tower needs its motor plate to clear the M6 heads at
+Z 23.5 and land on the walls, which floors the motor axis at 62.5. A 220 mm
+/ 110T belt puts C at 70.0 and it fits.
+
 What the bracket has to deliver:
 
 | | |

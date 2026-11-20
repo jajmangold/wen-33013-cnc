@@ -75,3 +75,50 @@ def add_tower(b, body_top):
                        MOTOR_Z - (h + P.TENSION_SLOT / 2.0 + r),
                        MOTOR_Z + (h + P.TENSION_SLOT / 2.0 + r), r))
     return b.removeSplitter()
+
+
+# ------------------------------------------- the bought aluminium plate
+# Where the plate sits: outboard of the screw pulley, and far enough out
+# that the motor's own shaft tip clears the housing.
+NEMA_SHAFT_L = 21.0               # ASSUMED - measure if the motor is in hand
+PLATE_X0 = max(P.PULLEY_X1 + 1.0,
+               P.BODY_L_CLEAR + 3.0 + NEMA_SHAFT_L - P.PLATE_T_AL)
+PLATE_X1 = PLATE_X0 + P.PLATE_T_AL
+AL_MOTOR_FACE_X = PLATE_X1
+
+PLATE_TOP_Z = C + P.PLATE_PILOT_FROM_TOP
+SLOT_Z_HI = PLATE_TOP_Z - P.PLATE_SLOT_FROM_TOP[0]      # upper end of travel
+SLOT_Z_LO = PLATE_TOP_Z - P.PLATE_SLOT_FROM_TOP[1]
+
+BOSS_Y_IN = P.PULLEY_MAX_OD / 2.0 + P.BOSS_CLEAR
+BOSS_Y_OUT = 20.0 + P.M5_TAP_D / 2.0 + P.BOSS_WALL + 2.0
+
+
+def bolt_positions():
+    """Which of the plate's slots we can actually bolt into.
+
+    The outer slots sit at Y = +-20. A tapped M5 there needs the boss face
+    to be at most 20 - M5/2 - wall; the pulley says it must be at least
+    its own radius plus clearance. Whether both ends of the slot are usable
+    therefore depends on the pulley's largest diameter, which is why that is
+    a parameter and not a constant.
+    """
+    beside_pulley_ok = BOSS_Y_IN <= 20.0 - P.M5_TAP_D / 2.0 - P.BOSS_WALL
+    zs = [SLOT_Z_HI - 3.0]
+    if beside_pulley_ok:
+        zs.append(SLOT_Z_LO + 3.0)
+    return [(sy * 20.0, z) for sy in (1, -1) for z in zs], beside_pulley_ok
+
+
+def add_plate_mount(b):
+    """Two bosses standing off the housing face to carry the plate."""
+    bolts, both = bolt_positions()
+    z_lo = (SLOT_Z_LO - 2.0) if both else (SLOT_Z_HI - 8.0)
+    z_hi = SLOT_Z_HI + 3.0
+    for sy in (+1, -1):
+        b = b.fuse(_box(P.BODY_L_CLEAR - 2.0, PLATE_X0,
+                        sy * BOSS_Y_IN, sy * BOSS_Y_OUT, z_lo, z_hi))
+    b = b.removeSplitter()
+    for y, z in bolts:
+        b = b.cut(_xcyl(P.M5_TAP_D, PLATE_X0 - 12.0, PLATE_X0 + 1.0, y, z))
+    return b.removeSplitter()

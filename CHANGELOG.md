@@ -12,6 +12,15 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Added
 
+- **The X end housing carries the motor plate.** A bought T3 x 60 x 96.5
+  NEMA 23 plate on two bosses, with the plate's own five slots doing the
+  belt tensioning - 21.5 mm of travel. 92 cm3, and still no bridges.
+- How many bolts the mount gets is DERIVED, not chosen: the plate's outer
+  slots sit at Y +-20 and the 40T pulley is in the way, so `build.py` works
+  out from `PULLEY_MAX_OD` whether the lower pair is reachable and asserts
+  the clearance. At a flangeless 25 all four are usable; at 30 only the
+  upper pair. The flanges have never been measured - 18 was the hub.
+
 - **The X end housing is one part now** - bearing block, back web, side
   walls and motor plate. All three numbers it was waiting on arrived:
   the motor shafts are **8 mm**, and the screw pulley is **40T** (~25 over

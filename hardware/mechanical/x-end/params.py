@@ -166,9 +166,36 @@ BELT_TEETH = 100          # 200 mm closed loop, in 6 mm
 # The tower code stays, because it is the fallback if the bracket does not
 # put the motor where the belt needs it.
 PRINTED_TOWER = False
+
+# ------------------------------------------- the bought NEMA 23 mount plate
+# RobotDigg / OpenBuilds style, T3 x 60 x 96.5. Dimensions off the drawing.
+# Its five slots are the belt tensioning: 21.5 mm of vertical travel, which
+# the Pololu L bracket could not give (and whose 65 mm base would have run
+# 21 mm inside the table casting anyway).
+PLATE_T_AL = 3.0
+PLATE_W_AL, PLATE_L_AL = 60.0, 96.5
+PLATE_PILOT_FROM_TOP = 29.70      # motor axis, from the plate's top edge
+PLATE_SLOT_FROM_TOP = (66.95, 88.45)
+PLATE_SLOT_Y = (-20.0, -10.0, 0.0, 10.0, 20.0)
+PLATE_SLOT_W = 5.10               # M5
+
+# The pulley's LARGEST diameter decides how close a mounting boss can come.
+# MEASURED: teeth 24.96 (so 40T), hub 18.0. The FLANGES have not been
+# measured and are the governing number - 18 is smaller than the teeth, so
+# that reading was the hub. 30 is the conservative assumption; at a true
+# flangeless 25 the lower pair of slots becomes usable too, and build.py
+# works that out rather than being told.
+PULLEY_MAX_OD = 30.0              # PROVISIONAL - flanges unmeasured
+PULLEY_HUB_OD = 18.0              # MEASURED
+BOSS_CLEAR = 2.0                  # boss face to the pulley
+BOSS_WALL = 2.0                   # tapped hole to the boss face
+M5_TAP_D = 4.2
+
 MOTOR_ANGLE = 0.0
 WALL_T = 6.0
 WALL_Y_IN = 29.0
 MOTOR_PLATE_T = 8.0
 MOTOR_PLATE_W = 76.0
 MOTOR_PLATE_H = 78.0
+
+BODY_L_CLEAR = BODY_L     # the housing's outboard face
