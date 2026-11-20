@@ -178,7 +178,7 @@ def main():
         f"bracket envelope       X 0..{mount.MOTOR_FACE_X:.1f},"
         f" Y +-{P.MOTOR_PLATE_W / 2:.1f},"
         f" Z {mount.BRACKET_BOT:.1f}..{mount.BRACKET_TOP:.1f}",
-        f"M5 length needed       {P.MOUNT_T + P.PLATE_T + 10:.0f} mm min"
+        f"M6 length needed       {P.MOUNT_T + P.PLATE_T + 10:.0f} mm min"
         f" ({P.MOUNT_T:.0f} bracket + {P.PLATE_T:.0f} plate + ~10 thread)",
         "",
         f"40T pitch dia {pd:.3f}, tooth OD {2 * ro:.3f}, flange OD {P.FLANGE_OD:.1f}",

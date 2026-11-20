@@ -93,7 +93,13 @@ HOLE_FROM_TOP_EDGE = 16.0    # MEASURED  top edge of the hole to the top of the 
 HOLE_FROM_SIDE_EDGE = 16.5   # MEASURED  21.5 centre - 5 radius
 BOLT_PITCH = 72.0        # MEASURED + STEP  centre to centre, and 82.39 across the
                          # outer edges = 72 + 10. Three routes, one number.
-BOLT_CLEAR_D = 5.5       # M5 clearance in our parts
+# M6, not M5. WEN parts list #17 "Cap Screw, M6 X 16", which the exploded
+# view on page 18 shows entering both holes of #18, the X-Axis Bearing Seat.
+# The list alignment is confirmed by four parts measured on the machine:
+# #2-1 Key 4x16, #13 Ball Bearing 8200, #14 Washer M8, #15 Nut M8.
+# An M6 cap head is Ø10 - the same as the plate's holes - so the head sits
+# on their chamfer. Our 6.5 slots are narrower, so they retain it properly.
+BOLT_CLEAR_D = 6.5       # M6 clearance in our parts
 
 # Centres, measured directly. The edge readings above corroborate them to
 # within 0.5 mm (16 + 5 = 21.0 against 21.5), and the corner diagonal is the

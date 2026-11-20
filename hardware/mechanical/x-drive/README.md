@@ -76,8 +76,8 @@ than a moment.
 | 1 | 20T GT2 pulley, 15 mm, **6.35 mm bore**, hubbed | buy |
 | 1 | 2GT closed loop, 15 mm wide, 200 mm / 100T | buy |
 | 1 | NEMA 23, 6.35 mm shaft ≥ 21 mm | buy |
-| 2 | M5 × 30 socket cap | replaces the stock M5 × 15 |
-| 4 | M5 for the motor | ±5 mm tension slots |
+| 2 | **M6** × 30 socket cap | replaces the stock **M6 × 16** (parts list #17) |
+| 4 | M5 for the motor | NEMA 23 pattern; ±5 mm tension slots |
 | 1 | M8 nut + washer | **reuse the stock ones** off the handwheel |
 
 ## The mounting face
@@ -114,7 +114,7 @@ Cheaper than plastic and faster than a print. The outline is **sliced from
 the FitPlate solid**, not drawn again, so it cannot drift from the part.
 Print at 100%, check the 100 mm bar with a rule, cut out the bore and slots,
 and hold it on the plate: the crosshair goes on the screw axis and the slots
-should sit over the two M5 holes.
+should sit over the two M6 holes.
 
 ## Check the fit before printing the bracket
 

@@ -19,6 +19,14 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Fixed
 
+- **The plate's screws are M6, not M5**, so the bracket's bolt slots were
+  1 mm undersize and would not have passed them. WEN parts list #17 is
+  "Cap Screw, M6 X 16", and the exploded view on page 18 shows two of them
+  entering both holes of #18, the X-Axis Bearing Seat. The list alignment
+  is confirmed by four parts measured on the machine - #2-1 Key 4x16,
+  #13 Ball Bearing 8200, #14 Washer M8, #15 Nut M8. Slots are now 6.5.
+
+
 - **The bore clears the boss instead of registering on it.** Nothing here
   needs locating tightly: pulley planes are set by the pulleys on their own
   shafts, centre distance is adjustable through the motor's +-8 mm slots,
