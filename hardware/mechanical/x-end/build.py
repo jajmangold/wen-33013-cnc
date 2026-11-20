@@ -79,7 +79,6 @@ def ref_motor_pulley():
 
 def ref_belt():
     """The 200 mm loop, as a racetrack round two equal pulleys."""
-    import Part as _Pt
     R = P.PITCH * P.TEETH / math.pi / 2.0
     x0, x1 = mount.BELT_X0, mount.BELT_X0 + P.BELT_W
     def stadium(r):
