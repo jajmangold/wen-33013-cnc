@@ -55,7 +55,9 @@ def make_housing():
         y = s * P.BOLT_PITCH / 2.0
         b = b.cut(xcyl(P.BOLT_CLEAR_D, -1.0, BODY_L + 1.0, y, P.BOLT_ABOVE))
         b = b.cut(xcyl(CB_D, BODY_L - CB_DEPTH, BODY_L + 1.0, y, P.BOLT_ABOVE))
-    b = mount.add_tower(b.removeSplitter(), BODY_TOP)
+    b = b.removeSplitter()
+    if P.PRINTED_TOWER:
+        b = mount.add_tower(b, BODY_TOP)
     return b
 
 
@@ -129,11 +131,13 @@ def main():
     for s in (+1, -1):                       # M6, driven from OUTBOARD down
         jobs.append(("M6 mount", CB_D, BODY_L - CB_DEPTH, 70.0,
                      s * P.BOLT_PITCH / 2.0, P.BOLT_ABOVE))
-    for dy in (-h, h):                       # motor screws, from INBOARD
-        for dz in (-h, h):
-            for sl in (-t, 0.0, t):
-                jobs.append(("M5 motor", P.TOOL_ACCESS_D, -1.0, mount.MPLATE_X0,
-                             mount.MOTOR_Y + dy, mount.MOTOR_Z + dz + sl))
+    if P.PRINTED_TOWER:
+        for dy in (-h, h):                   # motor screws, from INBOARD
+            for dz in (-h, h):
+                for sl in (-t, 0.0, t):
+                    jobs.append(("M5 motor", P.TOOL_ACCESS_D, -1.0,
+                                 mount.MPLATE_X0, mount.MOTOR_Y + dy,
+                                 mount.MOTOR_Z + dz + sl))
     blocked = []
     for what, dia, x0, x1, y, z in jobs:
         v = housing.common(xcyl(dia, x0, x1, y, z)).Volume
@@ -158,7 +162,7 @@ def main():
     for i in sorted(islands, key=lambda i: -i.Volume):
         c = i.BoundBox
         area = i.Volume / LAYER
-        plate = abs(c.XMin - mount.MPLATE_X0) < 0.01
+        plate = P.PRINTED_TOWER and abs(c.XMin - mount.MPLATE_X0) < 0.01
         if not plate:
             stray += area
         print(f"  overhang {area:8.1f} mm2 at X={c.XMin:6.2f}"
@@ -169,7 +173,7 @@ def main():
             f"budget {BUDGET:.0f}. Printed inboard-face-down, anything in the air "
             f"that is not that bridge should be a lip, not a ledge")
 
-    gap = mount.MPLATE_X0 - mount.BELT_X1
+    gap = mount.MPLATE_X0 - mount.BELT_X1 if P.PRINTED_TOWER else float("inf")
     if gap < 3.0:
         raise AssertionError(
             f"motor plate clears the belt by only {gap:.1f} mm and it bridges "
@@ -195,13 +199,14 @@ def main():
         f"M6 length                        {BODY_L - CB_DEPTH:.0f} through"
         f" + ~10 thread -> M6 x 25",
         "",
-        f"centre distance                  {mount.C:.2f} on a {P.BELT_TEETH}T"
-        f" belt, motor straight above",
+        f"motor mount                      "
+        f"{'printed tower' if P.PRINTED_TOWER else 'STEEL ANGLE BRACKET - not on this part'}",
         f"belt plane                       X {mount.BELT_X0:.1f}"
-        f"..{mount.BELT_X1:.1f}, {gap:.1f} clear under the motor plate",
-        f"walls start                      Z {mount.WALL_BOT:.1f}, above the"
-        f" M6 heads at {P.BOLT_ABOVE:.1f}",
-        f"motor face                       X {mount.MOTOR_FACE_X:.1f}",
+        f"..{mount.BELT_X1:.1f}",
+        f"pad for the bracket              top face Z {BODY_TOP:.1f},"
+        f" {BODY_L:.1f} deep x {BODY_W:.0f} wide",
+        f"motor axis wants to be           Z {mount.C:.2f} on a"
+        f" {P.BELT_TEETH}T belt -> {mount.C - BODY_TOP:.2f} above that pad",
         f"bearing block                    {BODY_L:.1f} x {BODY_W:.0f} x"
         f" {BODY_TOP-BODY_BOT:.1f}",
         f"whole part                       {housing.BoundBox.XLength:.1f} x"

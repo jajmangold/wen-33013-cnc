@@ -185,7 +185,35 @@ wants more like 0.2-0.3 to land in the same place. Tune it on the coupon.
 The key comes **out**: it stands 1.5 proud and a plain Ø10 bore will not pass
 over it. Grub screw into the empty slot, second at 90°.
 
-## The motor tower
+## The motor mount is NOT on this part
+
+`PRINTED_TOWER = False` in `params.py`, and that is the default.
+
+Steel angle brackets and OpenBuilds face-mount plates do not creep under a
+motor's weight, and taking the tower off removes the **only** thing on this
+part that had to bridge - the motor plate's underside, 58 mm between the
+walls. The print drops from 165 cm³ to 88, the overhang from 2985 mm² to
+201, and the bearing block - the part whose fit is actually uncertain - can
+be printed and tried on its own.
+
+What the bracket has to deliver:
+
+| | |
+|---|---|
+| motor axis above the screw | **69.71** on a 100T belt - i.e. 43.0 above this part's top face |
+| motor face at | **X 43.9**, so the 20T lands in the belt plane |
+| belt plane | X 25.9..32.9 |
+
+Those numbers follow the belt, and the belt is a choice. **If the bracket
+puts the motor somewhere else, the belt changes to suit, not the bracket.**
+Centre distance 59.66 is a 90T / 180 mm loop, 79.76 a 110T / 220 mm - and
+the motor's own slots trim whatever is left.
+
+So the useful direction is: measure where the bracket actually puts the
+motor, then pick the belt. Set `PRINTED_TOWER = True` only if no bracket
+puts it anywhere a stock belt length can reach.
+
+## The printed tower, if it is ever needed
 
 One part, not two: the bearing block carries a back web, two side walls and
 the motor plate, with the NEMA 23 straight above the screw so belt tension is

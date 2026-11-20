@@ -153,6 +153,19 @@ TOOL_ACCESS_D = 10.0
 TENSION_SLOT = 10.0
 MOTOR_HUB_ALLOW = 10.0
 BELT_TEETH = 100          # 200 mm closed loop, in 6 mm
+
+# Print the motor tower, or hang the motor off a steel angle bracket?
+#
+# FALSE is the default and the better engineering. Josh has steel NEMA 23
+# angle brackets: steel does not creep under the motor's weight, and taking
+# the tower off this part removes the ONLY thing on it that has to bridge -
+# the motor plate's underside, 58 mm between the walls. It also drops the
+# print from 165 cm3 to 93, and lets the bearing block - the part whose fit
+# is actually uncertain - be printed and tried on its own.
+#
+# The tower code stays, because it is the fallback if the bracket does not
+# put the motor where the belt needs it.
+PRINTED_TOWER = False
 MOTOR_ANGLE = 0.0
 WALL_T = 6.0
 WALL_Y_IN = 29.0
