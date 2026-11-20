@@ -15,8 +15,8 @@ LinuxCNC (Raspberry Pi 4 "lcnc", PREEMPT_RT kernel)
 |---|---|
 | Base machine | WEN 33013 - a rebadged **Sieg X2D**, the large-table X2 - R8 spindle, 100-2500 RPM, 130 lb |
 | Travels | X 300 mm, Y 130 mm, Z 177.8 mm |
-| Drives | NEMA 23 on DM542T; X belted 2:1 onto the **stock** lead screw (ADR-0009) |
-| Resolution | X 3200 steps/mm (0.31 um); Y/Z 1280 steps/mm (0.78 um) |
+| Drives | NEMA 23 on DM542T; X belted **1:1** onto the **stock** lead screw (ADR-0009, ADR-0011) |
+| Resolution | X and Y 4032 steps/mm (0.25 um) at 32x; X runs 16x -> 2016 (0.50 um) |
 | Feedback | 14-bit absolute encoders, GT2 belt driven, 409.6 counts/mm (2.44 um) |
 | Controller | LinuxCNC 2.9.8 on Pi 4, 1 kHz servo thread |
 
@@ -117,13 +117,20 @@ Early, and honest about it.
 | Machine model, generators, constraint checks | working, tested |
 | Pi 4 provisioned and on the network | done |
 | Pendant panel brought up | done |
-| X-axis belt drive | designed, 4 dimensions still to measure |
+| X end housing + belt drive | designed and asserted; bore fit not yet printed |
 | RP2040 SPI firmware | not started |
 | Y and Z drives | not started |
 
 **Nothing here has cut metal yet.** Values marked `PROVISIONAL` in
-`machine/wen33013.toml` are guesses until commissioning confirms them - in
-particular the stock X screw's lead, which every X scale depends on.
+`machine/wen33013.toml` are starting points until commissioning confirms
+them. The X screw's lead is no longer one of them: the SIEG X2D manual
+documents it as 0.0625in (1.5875 mm) per turn, which replaced a guessed
+2.0 that was wrong by 26%. Confirm it anyway - ten turns of X must move the
+table 15.875 mm.
+
+Z is the last un-sourced scale in the file, and it is modelling the wrong
+mechanism: the X2 Z axis is a rack and pinion with a fine-feed worm, not a
+lead screw.
 
 See `CHANGELOG.md` for what has actually been done, and `AGENTS.md` for the
 working standards.

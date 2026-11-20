@@ -129,10 +129,14 @@ class TestRealMachine:
 class TestCadAgreesWithTheModel:
     """The pulleys that get cut must be the pulleys the scale assumes.
 
-    `hardware/mechanical/x-drive/params.py` reads the machine model rather
+    `hardware/mechanical/x-end/params.py` reads the machine model rather
     than restating it. This asserts that it really does - a params.py that
-    quietly hard-coded 20 and 40 would pass every other test in this file
+    quietly hard-coded 40 and 40 would pass every other test in this file
     while the metal and the INI drifted apart.
+
+    It follows the LIVE part. When x-drive was superseded by x-end this had
+    to move with it, which is the point: a test pinned to a retired
+    directory stops guarding anything while still passing.
     """
 
     @staticmethod
@@ -141,8 +145,8 @@ class TestCadAgreesWithTheModel:
         from pathlib import Path
 
         path = (Path(__file__).resolve().parents[2]
-                / "hardware" / "mechanical" / "x-drive" / "params.py")
-        spec = importlib.util.spec_from_file_location("x_drive_params", path)
+                / "hardware" / "mechanical" / "x-end" / "params.py")
+        spec = importlib.util.spec_from_file_location("x_end_params", path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         return module
@@ -157,7 +161,30 @@ class TestCadAgreesWithTheModel:
         drive = real_machine.axis("x").drive
         assert (drive.belt_pitch_mm, drive.belt_width_mm) == (cad.PITCH, cad.BELT_W)
 
-    def test_the_toothed_seat_is_wider_than_the_belt(self):
-        """A seat narrower than the belt throws it. Cheap, and it has happened."""
+    def test_the_pulley_fits_the_land_budget(self):
+        """The stack must close on the 38 mm of land outboard of the face.
+
+        An M8 washer cannot pass over the Ø10 land, so the pulley's outboard
+        face has to reach the thread and the nut has to keep thread under it.
+        Everything between - seat, two bearings, the spacer that sets the
+        preload span, circlip and web - lives in what is left. The spacer is
+        the remainder, and if it goes to nothing there is nothing to preload
+        across.
+        """
         cad = self._cad_params()
-        assert cad.SEAT_W > cad.BELT_W
+        assert cad.PULLEY_W <= cad.PULLEY_W_MAX
+        assert cad.SPACER_L >= cad.SPACER_MIN
+        assert cad.PULLEY_X1 >= cad.LAND_OUTBOARD
+        assert (cad.PULLEY_X1 + cad.WASHER_T + cad.NUT_T
+                <= cad.LAND_OUTBOARD + cad.THREAD_L)
+
+    def test_the_land_budget_has_two_independent_routes(self):
+        """38 outboard + 16 inside the casting = the 54 measured off a board.
+
+        Each was arrived at separately - 38 from three caliper readings
+        (plate 12, boss 16 proud, 10 of free land), 54 from a ChArUco frame.
+        They agree, which is the only reason either is trusted.
+        """
+        cad = self._cad_params()
+        whole = cad.LAND_OUTBOARD - cad.SHOULDER_X
+        assert whole == pytest.approx(cad.LAND_TOTAL, abs=0.01)

@@ -30,6 +30,28 @@ from machinegen.model import default_machine_path  # noqa: E402
 _AXIS = load_machine(default_machine_path()).axis("x")
 _DRIVE = _AXIS.drive
 
+# ---------------------------------------------------------------- SUPERSEDED
+# This part bolts a printed tower onto the STOCK bearing-seat plate at a 2:1
+# reduction. Both halves of that are now decided against:
+#
+#   ADR-0010  the stock plate goes; hardware/mechanical/x-end replaces it
+#             with a housing carrying a preloaded pair of 6000-2RS
+#   ADR-0011  1:1, not 2:1 - the screw's real 1.5875 mm lead is already
+#             reduction enough
+#
+# It is kept as a record, not as a buildable part. At 1:1 the 200 mm belt
+# gives a 60.00 mm centre distance, which is below this tower's floor: its
+# motor plate has to clear the M6 heads at Z 23.5 AND land on the side
+# walls, which puts the motor axis no lower than 62.5. build.py would fail
+# with a blocked-M6 assertion, which says nothing about the real reason.
+# RuntimeError, not SystemExit: FreeCADCmd swallows SystemExit silently,
+# which is worse than a confusing assertion - it just exits with no output.
+raise RuntimeError(
+    "hardware/mechanical/x-drive is SUPERSEDED - see ADR-0010 (the plate) "
+    "and ADR-0011 (the ratio). Build hardware/mechanical/x-end instead. "
+    "This tower cannot reach the 60.00 mm centre distance that 1:1 on a "
+    "200 mm belt needs; it floors at 62.5.")
+
 if _DRIVE.kind != "belt":
     raise SystemExit("axis x is not declared as a belt drive in machine/wen33013.toml")
 

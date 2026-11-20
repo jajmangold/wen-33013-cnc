@@ -1,4 +1,15 @@
-# X-axis belt drive
+# X-axis belt drive — SUPERSEDED
+
+> **This part is a record, not a buildable one.** It bolts a printed tower
+> onto the stock bearing-seat plate at 2:1. Both halves are now decided
+> against: [ADR-0010](../../../docs/decisions/0010-x-end-housing-replaces-the-stock-plate.md)
+> replaces the plate with a proper bearing housing, and
+> [ADR-0011](../../../docs/decisions/0011-one-to-one-not-two-to-one.md) drops
+> the reduction to 1:1. Build [`../x-end`](../x-end) instead.
+>
+> What it taught is in the repo for good: the fastener-access check, the
+> overhang audit, and the habit of asserting the thing that bit you.
+
 
 A NEMA 23 driving the **stock** X lead screw through a 2:1 GT2 belt, bolted to
 the mill's existing X-axis bearing-seat plate. Nothing on the machine is

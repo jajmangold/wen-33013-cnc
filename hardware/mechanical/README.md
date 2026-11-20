@@ -5,7 +5,8 @@ Printed and machined parts, built from scripts. `build.py` is the source; the
 
 | Part | What | Status |
 |---|---|---|
-| [`x-drive/`](x-drive/) | 2:1 GT2 belt drive, NEMA 23 onto the stock X lead screw | 3 dimensions still ASSUMED |
+| [`x-end/`](x-end/) | X end housing: preloaded 6000-2RS pair, 1:1 GT2 belt, bought NEMA 23 plate | built and asserted; bore fit unprinted |
+| [`x-drive/`](x-drive/) | 2:1 belt onto the **stock plate** | **SUPERSEDED** by x-end (ADR-0010, ADR-0011) |
 
 ## Why scripts
 
