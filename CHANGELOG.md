@@ -107,17 +107,18 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Fixed
 
-- **The bolt line sits 15.4 mm above the screw axis - measured, at last.**
-  19.40 from the plate's top edge to the top of the Ø35 boss, both hard
-  edges a caliper can sit on, giving the screw 36.9 below the top edge
-  against hole centres at 21.5. Four earlier attempts at this one dimension
-  spanned 25 mm: 26.3 from a third-party model, 1.0 from "screw on the
-  centreline", ~10.5 from how the printed gauge sat, 16-30 from
-  photogrammetry. None of them was a direct measurement of the thing.
-- The plate is **73.8 mm tall**, not the 45 first paced out - 36.9 above the
-  screw alone. The backplate was sized from that 45 and its bolt slots ran
-  off the top edge, making them an open fork rather than slots. `build.py`
-  now asserts the backplate reaches past the top of the slots.
+- **The bolt line sits 15.7 mm above the screw axis**, measured two
+  independent ways that agree to 0.6 mm: top edge to the TOP of the Ø35
+  boss (19.40 + 17.5 = 36.90 below the top edge) and top edge to the BOTTOM
+  of its lobe (54.99 − 17.5 = 37.49). `params.py` computes both and refuses
+  to load if they disagree by more than 1.5 mm. Four earlier attempts at
+  this one dimension spanned 25 mm and every one inferred it from something
+  else rather than measuring it.
+- **The screw is not central and the plate is 45.42 tall.** It sits 37.2
+  down a 45.42 plate, 8.2 above the bottom edge, with the boss lobe hanging
+  about 9 mm past that edge. An earlier revision had the plate 73.8 tall on
+  the assumption the screw was centred, and sized the backplate from it.
+  The backplate now stops just past the lobe instead of hanging in free air.
 - Slots kept, at 16 mm travel, even though the offset is now known. They
   cost nothing, and the register bore does the locating regardless.
 - The pulley's tooth-profile audit probed a plane the assembled part no longer

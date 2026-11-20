@@ -75,7 +75,7 @@ SETSCREW_TAP_D = 3.3     # M4 tapping drill
 # +X outboard, +Z up.
 PLATE_T = 12.0           # MEASURED
 PLATE_W = 115.0          # MEASURED  21.5 + 72 + 21.5; the original 120 was a tape read
-PLATE_H = 73.8           # DERIVED   2 x 36.9; the first 45 was paced, not measured
+PLATE_H = 45.42          # MEASURED  the plain part of the plate
 
 # Holes are given the way they were MEASURED - from the plate's edges - rather
 # than as centres someone derived. Four rounds of tape measurements disagreed
@@ -94,25 +94,35 @@ BOLT_CLEAR_D = 5.5       # M5 clearance in our parts
 HOLE_BELOW_TOP = 21.5    # MEASURED  hole centre below the top edge
 HOLE_FROM_SIDE = 21.5    # MEASURED  hole centre in from each side edge
 
-# MEASURED at last, and directly: 19.40 from the plate's top edge down to the
-# top of the boss. Both are hard edges a caliper can sit on, which is why
-# this one is believable where four earlier attempts were not - a STEP model
-# said 26.3, "screw on the centreline" said 1.0, the printed gauge implied
-# ~10.5 and photogrammetry said 16-30 from photos whose own checks failed.
-TOP_EDGE_TO_BOSS = 19.40   # MEASURED
-SCREW_BELOW_TOP = TOP_EDGE_TO_BOSS + 35.0 / 2.0     # 36.9, boss is Ø35
-BOLT_ABOVE = SCREW_BELOW_TOP - HOLE_BELOW_TOP       # 15.4 above the screw
+# MEASURED two independent ways, which is why this one is finally believed.
+# Both are hard edges a caliper can sit on, and they agree to 0.6 mm:
+#
+#   top edge -> TOP of the boss      19.40 + 17.5 = 36.90 below the top
+#   top edge -> BOTTOM of the lobe   54.99 - 17.5 = 37.49 below the top
+#
+# Four earlier attempts spanned 25 mm (26.3 from a third-party model, 1.0
+# from "screw on the centreline", ~10.5 from how a printed gauge sat, 16-30
+# from photogrammetry) and every one of them inferred this from something
+# else rather than measuring it.
+TOP_EDGE_TO_BOSS_TOP = 19.40      # MEASURED
+TOP_EDGE_TO_LOBE_BOTTOM = 54.99   # MEASURED
+_VIA_TOP = TOP_EDGE_TO_BOSS_TOP + 35.0 / 2.0
+_VIA_BOTTOM = TOP_EDGE_TO_LOBE_BOTTOM - 35.0 / 2.0
+if abs(_VIA_TOP - _VIA_BOTTOM) > 1.5:
+    raise SystemExit(
+        f"the two routes to the screw axis disagree: "
+        f"{_VIA_TOP:.2f} vs {_VIA_BOTTOM:.2f} below the top edge")
+SCREW_BELOW_TOP = (_VIA_TOP + _VIA_BOTTOM) / 2.0        # 37.20
+BOLT_ABOVE = SCREW_BELOW_TOP - HOLE_BELOW_TOP           # 15.7 above the screw
 
-# The slots stay. They cost nothing, and after this many contradictory
-# answers a part that tolerates +-8 mm is worth more than one that trusts a
-# single reading. The register bore still does the locating.
+# The slots stay. They cost nothing and the register bore locates the part.
 BOLT_SLOT_TRAVEL = 16.0
 
-# The plate is far taller than the 45 first paced out: 36.9 above the screw
-# alone. Only the backplate OUTLINE depends on this - it needs to reach past
-# the top of the slots so they are slots and not an open fork.
+# The screw is NOT central: 37.2 down a 45.42 plate, 8.2 above its bottom
+# edge, with the boss lobe hanging ~9 below that edge. An earlier model had
+# the plate 73.8 tall on the assumption the screw was centred - it is not.
 PLATE_TOP_ABOVE = SCREW_BELOW_TOP
-PLATE_BOT_BELOW = 24.5     # ASSUMED - affects overhang only, nothing that fits
+PLATE_BOT_BELOW = PLATE_H - SCREW_BELOW_TOP             # 8.2
 BOSS_D = 35.0            # MEASURED  bearing boss OD - this is the REGISTER
 BOSS_PROUD = 16.0        # MEASURED  how far it stands off the plate face
 REGISTER_FIT = 0.15

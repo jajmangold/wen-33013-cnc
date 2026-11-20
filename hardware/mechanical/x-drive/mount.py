@@ -36,7 +36,10 @@ MOTOR_FACE_X = MPUL_X1 + P.MOTOR_HUB_ALLOW                    # motor front face
 MPLATE_X0    = MOTOR_FACE_X - P.MOTOR_PLATE_T
 WALL_X1      = MPLATE_X0
 BRACKET_TOP  = MOTOR_Z + P.MOTOR_PLATE_H / 2.0
-BRACKET_BOT  = -(P.BOSS_D / 2.0 + 7.0)
+# Stop just past the boss lobe. The plate itself only reaches 8.2 below
+# the screw, so anything lower is hanging in free air with nothing to bear
+# on - and the lobe already hangs 9 past that edge.
+BRACKET_BOT  = -(P.BOSS_D / 2.0 + 3.0)
 
 
 
