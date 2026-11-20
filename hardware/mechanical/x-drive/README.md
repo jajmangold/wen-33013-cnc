@@ -188,6 +188,32 @@ Worth recording, because the same traps are waiting on Y and Z:
 - The eventual fix was not a better measurement. It was removing the part's
   dependence on the measurement.
 
+## Commissioning on a 6 mm belt
+
+The drive is drawn for 15 mm, but **belt length does not change with width**
+- it is the same 200 mm / 100T loop - and the 40T's 16 mm seat runs a narrow
+belt happily. A single 6 mm belt with a stock 6 mm 20T allows about 60 N
+against the 17-33 N this axis needs to jog, home and cut lightly, so it is a
+sound way to commission before committing to a final width.
+
+Nothing in the bracket or the 40T changes.
+
+Two things to watch on the thin belt:
+
+- **Where it tracks.** It has 10 mm of lateral room in the seat. Climbing
+  hard against one flange means the two pulleys are not in the same plane -
+  which is the `LAND_START_X` assumption. Slide the 20T on its shaft.
+- **Do not over-tension.** The screw runs in a single 8200 THRUST bearing
+  with an overhung pulley. A narrow belt announces "too loose" by skipping
+  teeth long before anything is harmed; there is no such warning for too
+  tight.
+
+Going wider later: two 6 mm belts (~120 N) also fit the 16 mm seat as drawn,
+but parallel loops do not share load equally - closed-loop length tolerance
+means the shortest carries most of it until it stretches, which is why
+industrial multi-belt drives are sold as matched sets. One wider belt is the
+better answer if the capacity is actually needed.
+
 ## A different belt
 
 Centre distance follows the belt. `BELT_TEETH` in `params.py` is the only
