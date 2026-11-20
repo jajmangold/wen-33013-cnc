@@ -92,6 +92,19 @@ Three independent routes gave the same hole position, which is why it is
 trusted: 16 to the hole's top edge plus a 5 radius; 21.5 measured to the
 centre; and a 30 across the corner, which is sqrt(21.5^2 + 21.5^2) = 30.4.
 
+## Check the fit on paper first
+
+```bash
+FreeCADCmd template.py                                   # -> outline.json
+python ../lib/template_sheet.py outline.json sheet.png   # 1:1, 600 dpi
+```
+
+Cheaper than plastic and faster than a print. The outline is **sliced from
+the FitPlate solid**, not drawn again, so it cannot drift from the part.
+Print at 100%, check the 100 mm bar with a rule, cut out the bore and slots,
+and hold it on the plate: the crosshair goes on the screw axis and the slots
+should sit over the two M5 holes.
+
 ## Check the fit before printing the bracket
 
 ```bash

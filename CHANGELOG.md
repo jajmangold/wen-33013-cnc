@@ -128,8 +128,13 @@ Changelogs are for humans. Record what changed about the *machine* or the
   occupied, so every groove read as empty material. Probe coordinates now come
   from `params.py` instead of being written as literals.
 
-### Added
-
+### Added
+
+- **A 1:1 paper template** of the X bracket's mounting face
+  (`template.py` + `lib/template_sheet.py`). The outline is sliced from the
+  FitPlate solid rather than drawn again, so it cannot drift from the part;
+  the sheet carries a 100 mm bar to prove the print was not fitted to the
+  page. Cheaper than plastic and faster than a print.
 - Machine description (`machine/wen33013.toml`) as the single source of truth
   for the WEN 33013 conversion: travels, ballscrew leads, microstepping,
   driver limits, control nodes and encoder feedback.
