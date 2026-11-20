@@ -19,6 +19,22 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Fixed
 
+- **The X and Y lead screws are 1.5875 mm, not 2.0 and 5.0.** The SIEG X2D
+  User's Guide, page 2: "X- and Y-Axis Feed Screws .. 0.0625in (1.59 mm)
+  per rotation" - 16 TPI. X carried a guessed 2.0, wrong by **26%**: a
+  commanded 100 mm would have cut 126. Y carried 5.0, inherited from the
+  1605 ballscrew plan and never true of the stock machine - wrong by 215%.
+  This is precisely the silent-scale failure the generator exists to
+  prevent, and it sat in the file for a day because nobody read page 2 of
+  the manual we already had. X and Y are now 4031.5 steps/mm.
+- Y's `max_velocity_mm_s` dropped 41.67 -> 8.0. At the corrected scale it
+  asked 168 kHz of a 200 kHz driver, and 41.67 mm/s on a 1.5875 lead is
+  1575 motor rpm.
+- Z is flagged UNRESOLVED: the guide gives 235 mm of travel against WEN's
+  177.8, and the X2 Z axis is a rack and pinion with a fine-feed worm, so
+  `screw_pitch_mm` is modelling the wrong mechanism there. It is now the
+  last un-sourced scale in the file.
+
 - **The two M6s could not be fitted either**, found by generalising the
   access check past the motor. An M6 cap head is Ø10 and sits on the
   backplate face at X=8 - exactly where the side walls started - so the

@@ -53,13 +53,19 @@ rated_current_a   = 2.8
 
 [axis.x]
 travel_mm            = 300.0
-# PROVISIONAL, and the most dangerous number in this file. This is the STOCK
-# lead screw, not the 1605 ballscrew that was planned here - the screw end was
-# measured 2026-11-19 and is unmistakably stock (d10 land, 4x16 key, 8200
-# thrust bearing, M8 nut). Its lead has NOT been measured yet.
-# MEASURE IT: crank X ten full turns, divide the table travel by ten.
-# Until then every X scale, feed and limit downstream of here is a guess.
-screw_pitch_mm       = 2.0
+# 16 TPI = 1/16 inch per turn. DOCUMENTED: the SIEG X2D User's Guide, page 2,
+# "X- and Y-Axis Feed Screws .. 0.0625in (1.59 mm) per rotation". This is the
+# STOCK screw - the end was measured 2026-11-19 and is unmistakably stock
+# (d10 land, 4x16 key, 8200 thrust bearing, M8 nut).
+#
+# It replaces a guessed 2.0, which was wrong by 26%: a commanded 100 mm would
+# have cut 126. That is exactly the silent-scale failure this whole file
+# exists to prevent, and it sat here for a day because nobody read page 2.
+#
+# Still PROVISIONAL because it is one source, for the X2D rather than this
+# WEN rebadge specifically. CONFIRM IT: crank X ten full turns - the table
+# must move 15.875 mm. If it moves 20, it really is a 2 mm screw.
+screw_pitch_mm       = 1.5875
 microsteps           = 16
 # PROVISIONAL. The ceiling here is the MOTOR, not the driver: a 2 mm lead
 # through a 2:1 reduction means 10 mm/s already asks 600 motor rpm, which is
@@ -94,9 +100,15 @@ belt_pitch_mm = 2.0               # GT2
 
 [axis.y]
 travel_mm            = 130.0
-screw_pitch_mm       = 5.0
+# Same source, same line: the X2D guide gives X AND Y as 0.0625in per turn.
+# The 5.0 that was here came from the 1605 ballscrew plan and was never true
+# of the stock machine - a 215% error, far worse than X's.
+screw_pitch_mm       = 1.5875
 microsteps           = 32
-max_velocity_mm_s    = 41.67          # PROVISIONAL
+# Dropped from 41.67. At 4031.5 steps/mm that asked 168 kHz of the DM542T,
+# inside its 200 kHz ceiling but with no headroom, and 41.67 mm/s on a
+# 1.5875 lead is 1575 motor rpm - far past useful torque on a NEMA 23.
+max_velocity_mm_s    = 8.0            # PROVISIONAL
 max_accel_mm_s2      = 400.0          # PROVISIONAL
 home_direction       = -1
 soft_limit_margin_mm = 2.0
@@ -114,7 +126,16 @@ pulley_teeth  = 20
 belt_pitch_mm = 2.0               # GT2
 
 [axis.z]
+# UNRESOLVED, flagged 2026-11-20. WEN quotes 7in; the SIEG X2D User's Guide
+# page 2 says Z travel is 9.3in (235 mm). One of them is quill travel and the
+# other head travel, or this rebadge differs. Do not trust either until the
+# head is measured end to end.
 travel_mm            = 177.8          # 7in exactly
+# PROVISIONAL and probably meaningless as written. The X2 Z axis is a rack
+# and pinion with a fine-feed worm, NOT a lead screw, so "screw_pitch_mm" is
+# modelling the wrong mechanism. X and Y were corrected from the manual on
+# 2026-11-20; Z needs its drive train established before its scale means
+# anything. It is the last un-sourced scale in this file.
 screw_pitch_mm       = 5.0
 microsteps           = 32
 max_velocity_mm_s    = 25.0           # PROVISIONAL ~1500 mm/min, Z fights gravity
