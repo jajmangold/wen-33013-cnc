@@ -13,12 +13,19 @@ LinuxCNC (Raspberry Pi 4 "lcnc", PREEMPT_RT kernel)
 
 | | |
 |---|---|
-| Base machine | WEN 33013, R8 spindle, 100-2500 RPM, 130 lb |
+| Base machine | WEN 33013 - a rebadged **Sieg X2D**, the large-table X2 - R8 spindle, 100-2500 RPM, 130 lb |
 | Travels | X 300 mm, Y 130 mm, Z 177.8 mm |
 | Drives | NEMA 23 on DM542T; X belted 2:1 onto the **stock** lead screw (ADR-0009) |
 | Resolution | X 3200 steps/mm (0.31 um); Y/Z 1280 steps/mm (0.78 um) |
 | Feedback | 14-bit absolute encoders, GT2 belt driven, 409.6 counts/mm (2.44 um) |
 | Controller | LinuxCNC 2.9.8 on Pi 4, 1 kHz servo thread |
+
+> **Other X2D owners:** the WEN 33013 is a Sieg X2D clone, so the castings,
+> dovetails and end mounts are shared with every other X2D rebadge. The
+> measured machine dimensions in `hardware/mechanical/` should be a strong
+> starting point for yours - though clone-to-clone casting variation is real,
+> so measure before you cut. Off-the-shelf X2D ballscrew kits exist and use
+> **SFU1204** (12 mm, 4 mm lead) on the wide-table X axis.
 
 ## The idea
 

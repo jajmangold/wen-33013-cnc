@@ -12,6 +12,10 @@
 [machine]
 name          = "wen-33013-cnc"
 base_machine  = "WEN 33013"
+# A rebadged Sieg X2D - the large-table X2. Castings, dovetails and end
+# mounts are shared with every other X2D rebadge. Off-the-shelf X2D ballscrew
+# kits use SFU1204 (12 mm, 4 mm lead) on the wide-table X axis, NOT the 5 mm
+# lead that Y and Z still declare from the original 1605 plan.
 description   = "WEN 33013 benchtop mill converted to CNC"
 # Stock machine reference (from WEN specs, for sanity-checking our travels):
 #   X 11-13/16in (300.0mm), Y 5-1/8in (130.2mm), Z 7in (177.8mm)
