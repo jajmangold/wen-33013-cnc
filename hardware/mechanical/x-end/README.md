@@ -5,7 +5,18 @@ the table casting and supports the screw on a **preloaded pair of 6000-2RS**
 instead of one single-direction thrust bearing. See
 [ADR-0010](../../../docs/decisions/0010-x-end-housing-replaces-the-stock-plate.md).
 
-![housing](../../../docs/renders/x-end-housing.png)
+![assembly](../../../docs/renders/x-end-assembly.png)
+
+The whole drive, with the plate, motor and table casting ghosted: two 40T
+pulleys on a 200 mm loop at 1:1, the screw running on a preloaded pair of
+6000s inside the blue housing, and the motor hanging off a bought plate
+whose own slots do the tensioning.
+
+![end on](../../../docs/renders/x-end-side.png)
+
+End on, which is the view that shows why the lower slots are awkward: the
+screw pulley sits right behind them, and the plate's edges (Y ±30) tuck
+inside the M6 counterbores (Y ±36).
 
 ```bash
 cd hardware/mechanical/x-end

@@ -61,6 +61,14 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Fixed
 
+- **The motor pulley was 2.5 mm out of the belt plane.** `PLATE_X0` carried
+  a second constraint - that the motor's shaft tip clear the housing -
+  which is nonsense: the motor sits 60 mm ABOVE the screw and its shaft
+  passes nothing. Those 2.5 mm left the two pulleys only 4.5 mm of tooth
+  overlap for a 6 mm belt, so it would have run half off the motor pulley.
+  Now 7.0 mm of overlap. Modelling the whole drive is what caught it -
+  nothing in the part alone could have.
+
 - **The X and Y lead screws are 1.5875 mm, not 2.0 and 5.0.** The SIEG X2D
   User's Guide, page 2: "X- and Y-Axis Feed Screws .. 0.0625in (1.59 mm)
   per rotation" - 16 TPI. X carried a guessed 2.0, wrong by **26%**: a

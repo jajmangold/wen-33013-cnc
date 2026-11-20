@@ -81,8 +81,13 @@ def add_tower(b, body_top):
 # Where the plate sits: outboard of the screw pulley, and far enough out
 # that the motor's own shaft tip clears the housing.
 NEMA_SHAFT_L = 21.0               # ASSUMED - measure if the motor is in hand
-PLATE_X0 = max(P.PULLEY_X1 + 1.0,
-               P.BODY_L_CLEAR + 3.0 + NEMA_SHAFT_L - P.PLATE_T_AL)
+# Only ONE thing sets this: the plate must clear the screw pulley. An earlier
+# version also made the motor's shaft tip clear the housing, which pushed the
+# plate 2.5 mm further out - and was nonsense, because the motor sits 60 mm
+# ABOVE the screw and its shaft passes nothing. That 2.5 mm mattered: it left
+# the motor pulley's teeth only 4.5 mm of overlap with the screw pulley's,
+# and the belt is 6 wide. Modelling the whole drive is what caught it.
+PLATE_X0 = P.PULLEY_X1 + 1.0
 PLATE_X1 = PLATE_X0 + P.PLATE_T_AL
 AL_MOTOR_FACE_X = PLATE_X1
 
@@ -122,3 +127,11 @@ def add_plate_mount(b):
     for y, z in bolts:
         b = b.cut(_xcyl(P.M5_TAP_D, PLATE_X0 - 12.0, PLATE_X0 + 1.0, y, z))
     return b.removeSplitter()
+
+
+# Where the motor pulley lands, given the shaft it has to sit on.
+MOTOR_SHAFT_X0 = AL_MOTOR_FACE_X - NEMA_SHAFT_L
+MPUL_X0 = max(MOTOR_SHAFT_X0, P.PULLEY_X0)
+MPUL_X1 = MPUL_X0 + P.PULLEY_W
+MOTOR_TEETH_X0 = MPUL_X0 + 1.0
+MOTOR_TEETH_X1 = MOTOR_TEETH_X0 + P.BELT_W + 1.0

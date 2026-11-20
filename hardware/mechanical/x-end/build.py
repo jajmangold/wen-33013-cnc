@@ -5,6 +5,7 @@ Run headless:  FreeCADCmd build.py
 Replaces the stock bearing seat. Supports the screw on a preloaded pair of
 6000-2RS in a single Ø26 bore, bolted to the table's own two M6 holes.
 """
+import math
 import os
 import sys
 
@@ -71,6 +72,64 @@ def tube(od, id_, x0, x1):
     return xcyl(od, x0, x1).cut(xcyl(id_, x0 - 1, x1 + 1))
 
 
+def ref_motor_pulley():
+    return tube(P.PULLEY_MAX_OD, P.SHAFT_D + 0.1,
+                mount.MPUL_X0, mount.MPUL_X1).translated(Vector(0, 0, mount.C))
+
+
+def ref_belt():
+    """The 200 mm loop, as a racetrack round two equal pulleys."""
+    import Part as _Pt
+    R = P.PITCH * P.TEETH / math.pi / 2.0
+    x0, x1 = mount.BELT_X0, mount.BELT_X0 + P.BELT_W
+    def stadium(r):
+        s = xcyl(2 * r, x0, x1, 0, 0)
+        s = s.fuse(xcyl(2 * r, x0, x1, 0, mount.C))
+        s = s.fuse(box(x0, x1, -r, r, 0, mount.C))
+        return s.removeSplitter()
+    return stadium(R + 0.9).cut(stadium(R - 0.5)).removeSplitter()
+
+
+def ref_plate():
+    """The bought T3 x 60 x 96.5 NEMA 23 plate, as it has to sit."""
+    top = mount.PLATE_TOP_Z
+    p = box(mount.PLATE_X0, mount.PLATE_X1, -P.PLATE_W_AL / 2, P.PLATE_W_AL / 2,
+            top - P.PLATE_L_AL, top)
+    p = p.cut(xcyl(38.20, mount.PLATE_X0 - 1, mount.PLATE_X1 + 1, 0, mount.C))
+    h = P.NEMA_BOLT_PITCH / 2.0
+    for dy in (-h, h):
+        for dz in (-h, h):
+            p = p.cut(xcyl(5.10, mount.PLATE_X0 - 1, mount.PLATE_X1 + 1,
+                           dy, mount.C + dz))
+    for y in P.PLATE_SLOT_Y:
+        p = p.cut(_slot_z(P.PLATE_SLOT_W, mount.PLATE_X0 - 1, mount.PLATE_X1 + 1,
+                          y, top - P.PLATE_SLOT_FROM_TOP[1],
+                          top - P.PLATE_SLOT_FROM_TOP[0]))
+    return p.removeSplitter()
+
+
+def _slot_z(d, x0, x1, y, z0, z1):
+    s = xcyl(d, x0, x1, y, z0).fuse(xcyl(d, x0, x1, y, z1))
+    return s.fuse(box(x0, x1, y - d / 2, y + d / 2, z0, z1)).removeSplitter()
+
+
+def ref_nema23():
+    f = P.NEMA_FRAME / 2.0
+    m = box(mount.AL_MOTOR_FACE_X, mount.AL_MOTOR_FACE_X + 76.0,
+            -f, f, mount.C - f, mount.C + f)
+    m = m.fuse(xcyl(P.NEMA_PILOT_D, mount.AL_MOTOR_FACE_X - 1.6,
+                    mount.AL_MOTOR_FACE_X, 0, mount.C))
+    m = m.fuse(xcyl(P.MOTOR_SHAFT_D, mount.MOTOR_SHAFT_X0,
+                    mount.AL_MOTOR_FACE_X, 0, mount.C))
+    return m.removeSplitter()
+
+
+def ref_table():
+    """The casting this bolts to, just enough of it to read the picture."""
+    t = box(-22.0, 0.0, -58.0, 58.0, -25.0, 45.0)
+    return t.cut(xcyl(20.0, -23.0, 1.0)).removeSplitter()
+
+
 def main():
     doc = App.newDocument("WEN_X_End")
     print("building...\n")
@@ -80,7 +139,13 @@ def main():
     b1 = check(tube(P.BEAR_OD, P.BEAR_ID, P.BRG1_X0, P.BRG1_X1), "Bearing1_REF", 1)
     b2 = check(tube(P.BEAR_OD, P.BEAR_ID, P.BRG2_X0, P.BRG2_X1), "Bearing2_REF", 1)
     screw = check(ref_screw(), "ScrewEnd_REF", 1)
-    pulley = check(tube(30.0, P.SHAFT_D + 0.1, P.PULLEY_X0, P.PULLEY_X1), "Pulley_REF", 1)
+    pulley = check(tube(P.PULLEY_MAX_OD, P.SHAFT_D + 0.1,
+                        P.PULLEY_X0, P.PULLEY_X1), "Pulley_REF", 1)
+    mpulley = check(ref_motor_pulley(), "MotorPulley_REF", 1)
+    belt = check(ref_belt(), "Belt_REF", 1)
+    alplate = check(ref_plate(), "AlPlate_REF", 1)
+    nema = check(ref_nema23(), "NEMA23_REF", 1)
+    table = check(ref_table(), "TableEnd_REF", 1)
 
     # The bearing fit in a PRINTED Ø26 bore is a tuning exercise, and this
     # part is 167 cm3. The coupon is the housing's own first 14 mm - an
@@ -92,7 +157,9 @@ def main():
     for shp, name in ((housing, "Housing"), (gauge, "BoreGauge"), (inner, "InnerSpacer"),
                       (outer, "OuterSpacer"), (b1, "Bearing1_REF"),
                       (b2, "Bearing2_REF"), (screw, "ScrewEnd_REF"),
-                      (pulley, "Pulley_REF")):
+                      (pulley, "Pulley_REF"), (mpulley, "MotorPulley_REF"),
+                      (belt, "Belt_REF"), (alplate, "AlPlate_REF"),
+                      (nema, "NEMA23_REF"), (table, "TableEnd_REF")):
         o = doc.addObject("Part::Feature", name)
         o.Shape = shp
 
@@ -100,7 +167,13 @@ def main():
     for an, a, bn, bb in (("Housing", housing, "Pulley", pulley),
                           ("Housing", housing, "InnerSpacer", inner),
                           ("Housing", housing, "ScrewEnd", screw),
-                          ("Bearing1", b1, "Bearing2", b2)):
+                          ("Bearing1", b1, "Bearing2", b2),
+                          ("Housing", housing, "AlPlate", alplate),
+                          ("Housing", housing, "Belt", belt),
+                          ("Housing", housing, "MotorPulley", mpulley),
+                          ("Housing", housing, "NEMA23", nema),
+                          ("AlPlate", alplate, "Pulley", pulley),
+                          ("Belt", belt, "TableEnd", table)):
         if clearance(a, an, bb, bn) > 1e-6:
             raise AssertionError(f"{an} interferes with {bn}")
 
