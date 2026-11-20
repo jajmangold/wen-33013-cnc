@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.join(_HERE, "..", "lib"))
 import FreeCAD as App
 import MeshPart
 
-OURS = ("Pulley_40T", "Bracket")
+OURS = ("Pulley_40T", "Bracket", "FitPlate")
 GAUGE = ("FitGauge",)
 OUTDIR = os.path.join(_HERE, "stl")
 

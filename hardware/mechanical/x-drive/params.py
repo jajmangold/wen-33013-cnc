@@ -148,6 +148,7 @@ MOTOR_HUB_OD = 14.0      # reference only
 BELT_TEETH = 100         # 200 mm closed loop. Sets the centre distance.
 MOTOR_ANGLE = 0.0        # degrees from straight up, toward +Y
 MOUNT_T = 8.0            # backplate, bears on the mill plate
+FIT_PLATE_T = 4.0        # the fit coupon: the bracket's first 4 mm, nothing else
 WALL_T = 8.0
 MOTOR_PLATE_T = 8.0
 WALL_Y_IN = 20.0         # inner face of the side walls; the belt needs ~13

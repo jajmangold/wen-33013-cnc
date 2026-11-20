@@ -92,6 +92,22 @@ Three independent routes gave the same hole position, which is why it is
 trusted: 16 to the hole's top edge plus a 5 radius; 21.5 measured to the
 centre; and a 30 across the corner, which is sqrt(21.5^2 + 21.5^2) = 30.4.
 
+## Check the fit before printing the bracket
+
+```bash
+FreeCADCmd build.py      # -> stl/FitPlate.stl, 18 cm3
+```
+
+![fit plate](../../../docs/renders/x-drive-fit-plate.png)
+
+The bracket is 140 cm3. This is its **own first 4 mm** - built as an
+intersection of the bracket solid with a thin slab, so it cannot drift from
+the part it is checking. Same outline, same Ø35.15 register bore, same bolt
+slots, same everything that has to line up.
+
+If it drops over the boss and both M5s land in their slots, the bracket will
+too. If it does not, you have lost 15 minutes instead of two hours.
+
 ## Photo gauge
 
 ```bash

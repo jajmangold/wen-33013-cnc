@@ -70,8 +70,11 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ## [0.1.0] - 2026-11-19
 
-### Added
-
+### Added
+
+- **A fit coupon for the X bracket** (`stl/FitPlate.stl`, 18 cm3 against the
+  bracket's 140). It is the bracket's own first 4 mm, built as an
+  intersection with a thin slab, so it cannot drift from the part it checks.
 - **X-axis belt drive** (`hardware/mechanical/x-drive/`): a NEMA 23 driving
   the stock X lead screw through a 2:1 GT2 belt, bolted to the mill's existing
   bearing-seat plate with no drilling or modification. A 40T pulley takes the
@@ -168,8 +171,14 @@ Changelogs are for humans. Record what changed about the *machine* or the
 - Pendant firmware skeleton (`firmware/pendant/main.py`) and a
   `/deploy-pendant` skill.
 
-### Fixed
-
+### Fixed
+
+- **The renderer could silently revert a build.** It saved every open
+  document before closing it, so a stale copy left open in the FreeCAD GUI
+  overwrote a newer build on disk - a part vanished from the model twice
+  before the cause was found. It now renders a throwaway copy, and redirects
+  the save of any already-open document to a scratch file so closing still
+  cannot raise the prompt that blocks the GUI thread.
 - **Pendant beeper could be silently dead after a restart.** A MicroPython
   program killed mid-tone leaves its PWM slice configured, and the next
   program inherited that state - a buzzer that made no sound, with no error,

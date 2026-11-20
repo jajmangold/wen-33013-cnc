@@ -11,8 +11,10 @@ from __future__ import annotations
 
 import base64
 import os
+import shutil
 import socket
 import sys
+import tempfile
 import xmlrpc.client
 
 socket.setdefaulttimeout(120)
@@ -29,13 +31,19 @@ COLOURS: dict[str, tuple[float, float, float]] = {
 
 SETUP = r'''
 import FreeCAD as App, FreeCADGui as Gui
-# Save before closing. Setting ShapeColor marks the document modified, and
-# closing a modified document pops a save prompt that blocks the GUI thread
-# - after which every execute_code times out and the instance looks hung.
-for d in list(App.listDocuments()):
-    doc = App.getDocument(d)
-    if doc.FileName:
-        doc.save()
+# Render a COPY, never the real build. Setting ShapeColor marks a document
+# modified; closing a modified document pops a save prompt that blocks the
+# GUI thread, and saving it instead is worse - a stale document left open in
+# the GUI then overwrites a newer build on disk, silently undoing it. That
+# happened once and cost a part. The copy makes both impossible.
+import os as _os, tempfile as _tf
+_bin = _os.path.join(_tf.gettempdir(), 'wen-render')
+_os.makedirs(_bin, exist_ok=True)
+for _i, d in enumerate(list(App.listDocuments())):
+    _doc = App.getDocument(d)
+    # saveAs a throwaway: clears the modified flag so closing cannot prompt,
+    # WITHOUT writing this stale copy back over whatever is on disk.
+    _doc.saveAs(_os.path.join(_bin, 'closing_%%d.FCStd' %% _i))
     App.closeDocument(d)
 doc = App.openDocument(r"%(doc)s")
 
@@ -116,6 +124,12 @@ def main() -> None:
     if len(sys.argv) < 3:
         raise SystemExit(__doc__)
     doc, out = os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[2])
+    # Work on a throwaway copy so the GUI can never write back over the build.
+    scratch = os.path.join(tempfile.gettempdir(), "wen-render")
+    os.makedirs(scratch, exist_ok=True)
+    copy = os.path.join(scratch, os.path.basename(doc))
+    shutil.copy2(doc, copy)
+    doc = copy
     port = int(sys.argv[3]) if len(sys.argv) > 3 else int(os.environ.get("WEN_FC_PORT", "9879"))
 
     r = Renderer(doc, out, port)

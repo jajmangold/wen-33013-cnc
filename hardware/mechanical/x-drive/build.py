@@ -84,6 +84,12 @@ def make_screw_end():
     return check(s, "ScrewEnd_REF", 1)
 
 
+def _box_mm(x0, x1, z_top, z_bot, half=120.0):
+    """A slab spanning the whole part in Y and Z, thin in X."""
+    return Part.makeBox(x1 - x0, 2 * half, z_top - z_bot,
+                        Vector(x0, -half, z_bot))
+
+
 def main():
     import mount
     doc = App.newDocument("WEN_X_Drive")
@@ -101,7 +107,14 @@ def main():
     mpulley, mpd, mro = mount.make_motor_pulley()
     mpulley.Placement = Placement(Vector(mount.MPUL_X0, mount.MOTOR_Y, mount.MOTOR_Z),
                                   Rotation())
-    bracket = check(mount.make_bracket(), "Bracket", 1)
+    bracket = check(mount.make_bracket(), "Bracket", 1)
+
+    # A fit coupon, so nobody has to print 140 cm3 to find out. It is the
+    # bracket's own first few millimetres - an intersection with a thin slab -
+    # so it cannot drift from the part it is checking. Same outline, same
+    # Ø35.15 register, same bolt slots.
+    slab = _box_mm(0.0, P.FIT_PLATE_T, P.PLATE_TOP_ABOVE + 3.0, mount.BRACKET_BOT)
+    fitplate = check(bracket.common(slab), "FitPlate", 1)
     nema    = check(mount.make_nema23(), "NEMA23_REF", 1)
     plate   = check(mount.make_end_plate(), "EndPlate_REF", 1)
     check(mpulley, "Pulley_20T", 1)
@@ -110,6 +123,7 @@ def main():
             (pulley,  "Pulley_40T",   "Pulley 40T GT2 15mm",   (0.95, 0.45, 0.15)),
             (mpulley, "Pulley_20T",   "Pulley 20T GT2 15mm",   (0.95, 0.45, 0.15)),
             (bracket, "Bracket",      "NEMA 23 bracket",       (0.30, 0.55, 0.85)),
+            (fitplate, "FitPlate",    "Fit coupon",            (0.45, 0.70, 0.35)),
             (screw,   "ScrewEnd_REF", "REF lead screw end",    (0.75, 0.75, 0.78)),
             (nema,    "NEMA23_REF",   "REF NEMA 23",           (0.35, 0.35, 0.38)),
             (plate,   "EndPlate_REF", "REF mill X end plate",  (0.90, 0.30, 0.10))):
