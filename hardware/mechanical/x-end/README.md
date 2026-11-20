@@ -9,8 +9,14 @@ instead of one single-direction thrust bearing. See
 
 ```bash
 cd hardware/mechanical/x-end
-FreeCADCmd build.py
+FreeCADCmd build.py      # -> wen_x_end.FCStd  (a build artefact, gitignored)
+FreeCADCmd export.py     # -> stl/Housing.stl + the two spacers
 ```
+
+`stl/Housing.stl` is the thing to print. **The two spacers are exported for
+reference and a dry fit only** - they carry the M8 nut's clamping preload and
+printed plastic will creep under it, taking the bearing preload with it.
+Turn them from steel or brass.
 
 ## Why
 
