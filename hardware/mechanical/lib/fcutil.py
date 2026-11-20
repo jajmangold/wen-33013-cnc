@@ -46,6 +46,21 @@ def xslot(d: float, x0: float, x1: float, y: float, z: float, travel: float):
     return s.removeSplitter()
 
 
+def xwindow(x0: float, x1: float, y0: float, y1: float,
+            z0: float, z1: float, r: float):
+    """A rounded rectangular prism bored through X.
+
+    Sharp internal corners in a printed part are crack starters and the
+    slicer rounds them badly anyway, so every window here has a radius.
+    """
+    core = box(x0, x1, y0 + r, y1 - r, z0, z1)
+    core = core.fuse(box(x0, x1, y0, y1, z0 + r, z1 - r))
+    for y in (y0 + r, y1 - r):
+        for z in (z0 + r, z1 - r):
+            core = core.fuse(xcyl(2 * r, x0, x1, y, z))
+    return core.removeSplitter()
+
+
 def check(shape, name: str, expect_solids: int = 1):
     """Assert a shape is one closed valid solid, and say so.
 

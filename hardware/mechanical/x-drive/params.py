@@ -107,6 +107,8 @@ BOLT_PITCH = 72.0        # MEASURED + STEP  centre to centre, and 82.39 across t
 # An M6 cap head is Ø10 - the same as the plate's holes - so the head sits
 # on their chamfer. Our 6.5 slots are narrower, so they retain it properly.
 BOLT_CLEAR_D = 6.5       # M6 clearance in our parts
+M6_HEAD_D = 10.0         # ISO 4762 socket cap head, across the flats of
+                         # nothing - it is round. The driver needs more.
 
 # Centres, measured directly. The edge readings above corroborate them to
 # within 0.5 mm (16 + 5 = 21.0 against 21.5), and the corner diagonal is the
@@ -168,7 +170,11 @@ NEMA_SHAFT_D = 6.35
 NEMA_SHAFT_L = 21.0
 NEMA_BOLT_CLEAR = 5.5
 TENSION_SLOT = 10.0      # total travel in the motor slots
-MOTOR_HUB_ALLOW = 8.0    # axial room for the bought 20T pulley's hub
+# Axial room between the pulleys and the motor face. The bought 20T's hub
+# needs about 7 of it, but what SETS this is printing: the motor plate's
+# inboard face is a 58 mm bridge over the belt, and at 8 it cleared the belt
+# by 1.5 mm - less than a bridge that long can sag. At 10 it clears by 3.5.
+MOTOR_HUB_ALLOW = 10.0
 MOTOR_HUB_OD = 14.0      # reference only
 
 # ------------------------------------------------------------ the bracket
@@ -200,6 +206,10 @@ TOOL_ACCESS_D = 10.0
 # corridor directly.
 WALL_Y_IN = 29.0
 BACK_W_LOW = 96.0
+# Below the mill plate's bottom edge the backplate bears on nothing. It is
+# there only so the Ø42 clearance bore stays a closed ring, so it need only
+# be the bore plus a rim: 42 + 2 x 6.
+BACK_W_BELOW = 54.0
 # Wide enough up top to carry the walls at their new spacing AND to leave
 # material around the four tool-access slots.
 BACK_W_HIGH = 76.0

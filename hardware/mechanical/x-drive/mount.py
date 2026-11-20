@@ -11,6 +11,7 @@ import Part
 from fcutil import box as _box
 from fcutil import xcyl as _xcyl
 from fcutil import xslot as _xslot
+from fcutil import xwindow as _xwindow
 from FreeCAD import Placement, Rotation, Vector
 
 
@@ -42,6 +43,13 @@ BRACKET_TOP  = MOTOR_Z + P.MOTOR_PLATE_H / 2.0
 # material bears on nothing, but a closed ring is stiffer and the fit
 # template stays a clean set of closed outlines.
 BRACKET_BOT  = -(P.BOSS_D / 2.0 + P.BORE_CLEARANCE + 3.0)
+# The side walls stop ABOVE the M6 heads. An M6 cap head is 10 across and sits
+# on the backplate face at X = MOUNT_T - exactly where the walls start - so at
+# full height the walls ran straight over both of them and the bracket could
+# not be bolted to the machine at all. Below this line the walls were carrying
+# nothing anyway: the motor's load enters them at the motor plate (Z 30.7 and
+# up) and the backplate takes it down to the bolts on its own.
+WALL_BOT = P.BOLT_ABOVE + P.BOLT_SLOT_TRAVEL / 2.0 + P.M6_HEAD_D / 2.0 + 2.0
 
 
 
@@ -81,14 +89,22 @@ def make_bracket():
     mh = P.MOTOR_PLATE_H / 2.0
     mw = P.MOTOR_PLATE_W / 2.0
 
-    # backplate: wide where it bolts on, narrower as it rises
-    b = _box(0, P.MOUNT_T, -half_lo, half_lo, BRACKET_BOT, P.PLATE_TOP_ABOVE)
+    # backplate, in three bands. It is only wide where it does something:
+    #   below the mill plate's bottom edge it bears on NOTHING and exists
+    #   only to keep the clearance bore a closed ring;
+    #   across the plate it bears flat and carries the two M6s;
+    #   above the plate it is a web tying the two side walls together.
+    half_below = P.BACK_W_BELOW / 2.0
+    b = _box(0, P.MOUNT_T, -half_below, half_below,
+             BRACKET_BOT, -P.PLATE_BOT_BELOW)
+    b = b.fuse(_box(0, P.MOUNT_T, -half_lo, half_lo,
+                    -P.PLATE_BOT_BELOW, P.PLATE_TOP_ABOVE))
     b = b.fuse(_box(0, P.MOUNT_T, -half_hi, half_hi,
                     P.PLATE_TOP_ABOVE, BRACKET_TOP))
     # side walls -> a U channel that doubles as a belt guard
     for s in (+1, -1):
         b = b.fuse(_box(P.MOUNT_T, WALL_X1, s * wy0, s * wy1,
-                        BRACKET_BOT, BRACKET_TOP))
+                        WALL_BOT, BRACKET_TOP))
     # motor plate
     b = b.fuse(_box(MPLATE_X0, MOTOR_FACE_X, MOTOR_Y - mw, MOTOR_Y + mw,
                     MOTOR_Z - mh, MOTOR_Z + mh))
@@ -117,14 +133,21 @@ def make_bracket():
             b = b.cut(_xslot(P.NEMA_BOLT_CLEAR, MPLATE_X0 - 1.0, MOTOR_FACE_X + 1.0,
                              MOTOR_Y + dy, MOTOR_Z + dz, P.TENSION_SLOT))
     # Tool access. A NEMA 23 screws into BLIND tapped holes, so its screws can
-    # ONLY go in from inboard - there is no far side to put a nut on. These
-    # four slots carry that corridor through the backplate, so a magnetic
-    # driver goes in from behind and drives the screw straight. They track the
-    # motor slots exactly, so they stay lined up at any belt tension.
-    for dy in (-h, h):
-        for dz in (-h, h):
-            b = b.cut(_xslot(P.TOOL_ACCESS_D, -1.0, P.MOUNT_T + 1.0,
-                             MOTOR_Y + dy, MOTOR_Z + dz, P.TENSION_SLOT))
+    # ONLY go in from inboard - there is no far side to put a nut on. This
+    # window carries that corridor through the backplate.
+    #
+    # It is EXACTLY the convex hull of the four screw corridors at both ends
+    # of the tension travel - four Ø10 tunnels, joined - so it concedes no
+    # material that was holding anything, and you can see the screws you are
+    # driving instead of fishing down a hole. It also takes 25 cm3 out of the
+    # print. The rim left around it, 28.6 out to 38, is exactly the footing
+    # the side walls stand on.
+    r = P.TOOL_ACCESS_D / 2.0
+    wy = h + r
+    wz = h + P.TENSION_SLOT / 2.0 + r
+    b = b.cut(_xwindow(-1.0, P.MOUNT_T + 1.0,
+                       MOTOR_Y - wy, MOTOR_Y + wy,
+                       MOTOR_Z - wz, MOTOR_Z + wz, r))
     return b.removeSplitter()
 
 

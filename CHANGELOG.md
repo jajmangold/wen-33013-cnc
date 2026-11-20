@@ -19,6 +19,18 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Fixed
 
+- **The two M6s could not be fitted either**, found by generalising the
+  access check past the motor. An M6 cap head is Ø10 and sits on the
+  backplate face at X=8 - exactly where the side walls started - so the
+  walls lay over both heads and the bracket could not be bolted to the
+  machine. The walls now stop at Z = 30.7, above the heads at their highest
+  slot setting; below that they were carrying nothing, because the motor's
+  load enters them at the motor plate and the backplate takes it to the
+  bolts on its own. `build.py` now probes all six fasteners.
+- **The motor plate would have sagged onto the belt.** Its inboard face is a
+  58 mm bridge in the only sane print orientation and it cleared the belt by
+  1.5 mm. `MOTOR_HUB_ALLOW` is now 10 rather than the 8 the pulley hub
+  needs, giving 3.5 mm, and that gap is asserted.
 - **The NEMA 23 could not be bolted on at all.** The bracket's side walls
   sat at |Y| 22.5-30.5 and the NEMA 23 bolt circle sits at Y = +-23.57 -
   the same place. All four motor screws were buried in solid plastic over
@@ -26,6 +38,12 @@ Changelogs are for humans. Record what changed about the *machine* or the
   into BLIND holes, so there is no far side to put a nut on. Walls moved out
   to |Y| 29-35 and thinned to 6, and four slots now carry the screw corridor
   through the backplate so a driver reaches each head from behind.
+- **The bracket is 32% smaller** - 144 cm3 to 98 - without losing anything
+  that was doing work: the four access tunnels became one window, the
+  backplate narrows below the mill plate where it bears on nothing, and the
+  side walls stop above the M6 heads. It now prints with **no support** in
+  one orientation (backplate on the bed), where the only overhang is the
+  motor plate's underside, bridged between the two walls.
 - `build.py` now probes **assembly access**, which is a different question
   from interference and is not implied by it. Every clash check passed on a
   bracket that could not be assembled: nothing overlapped, the part was

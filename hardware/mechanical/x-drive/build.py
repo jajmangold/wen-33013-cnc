@@ -178,32 +178,53 @@ def main():
           f"Ø{P.BOSS_D:.0f} boss by {P.BORE_CLEARANCE:.1f} all round, "
           f"over {P.MOUNT_T:.0f} of its {P.BOSS_PROUD:.0f} mm")
     # ASSEMBLY ACCESS, which is a different question from interference and is
-    # not implied by it. A NEMA 23 screws into BLIND tapped holes: its screws
-    # can only ever enter from inboard, so there must be an open corridor from
-    # outside the backplate all the way to the motor plate. The first version
-    # of this bracket passed every clash check and could not be assembled -
-    # the side walls ran down the line of all four screws. Probe the corridor.
+    # not implied by it. BOTH families of screw here go into BLIND holes - the
+    # motor's four into the NEMA 23, the two M6s into the mill's table casting
+    # - so each can only ever be inserted from one side, and there has to be
+    # an open corridor down its axis from that side. Two versions of this
+    # bracket passed every clash check and could not be assembled: the side
+    # walls ran down the line of all four motor screws, and then over both M6
+    # heads. Nothing interfered either time. The part was simply solid where a
+    # hand and a hex key had to be.
     h = P.NEMA_BOLT_PITCH / 2.0
     t = P.TENSION_SLOT / 2.0
+    bt = P.BOLT_SLOT_TRAVEL / 2.0
+    jobs = []
+    for dy in (-h, h):                 # motor screws, driven from INBOARD,
+        for dz in (-h, h):             # corridor stops at the plate they enter
+            for s in (-t, 0.0, t):
+                jobs.append(("M5 motor", P.TOOL_ACCESS_D, -1.0, mount.MPLATE_X0,
+                             mount.MOTOR_Y + dy, mount.MOTOR_Z + dz + s))
+    for sy in (-1, 1):                 # M6s, head on the backplate face at
+        for s in (-bt, 0.0, bt):       # X=MOUNT_T, driven from OUTBOARD
+            jobs.append(("M6 mount", P.M6_HEAD_D + 1.0, P.MOUNT_T, 70.0,
+                         sy * P.BOLT_PITCH / 2.0, P.BOLT_ABOVE + s))
     blocked = []
-    for dy in (-h, h):
-        for dz in (-h, h):
-            for slide in (-t, 0.0, t):          # both ends of the tension travel
-                y = mount.MOTOR_Y + dy
-                z = mount.MOTOR_Z + dz + slide
-                corridor = _P.makeCylinder(
-                    P.TOOL_ACCESS_D / 2.0, mount.MPLATE_X0 + 1.0,
-                    Vector(-1.0, y, z), Vector(1, 0, 0))
-                v = bracket.common(corridor).Volume
-                if v > 1e-6:
-                    blocked.append(f"Y{y:+.1f} Z{z:.1f} ({v:.0f} mm3)")
+    for what, dia, x0, x1, y, z in jobs:
+        corridor = _P.makeCylinder(dia / 2.0, x1 - x0,
+                                   Vector(x0, y, z), Vector(1, 0, 0))
+        v = bracket.common(corridor).Volume
+        if v > 1e-6:
+            blocked.append(f"{what} Y{y:+.1f} Z{z:.1f} ({v:.0f} mm3)")
     if blocked:
         raise AssertionError(
-            f"the motor cannot be bolted on: the Ø10 screw corridor is "
-            f"blocked at {', '.join(blocked)}")
-    print(f"  motor screws Ø{P.TOOL_ACCESS_D:.0f} corridor open from behind the "
-          f"backplate to the motor plate, 4 of 4, over the full "
-          f"{P.TENSION_SLOT:.0f} mm of tension travel")
+            "these screws cannot be fitted, their corridors are blocked: "
+            + ", ".join(blocked))
+    print(f"  screw access  all 6 reachable: 4 motor over the full "
+          f"{P.TENSION_SLOT:.0f} mm of tension travel, 2 M6 over the full "
+          f"{P.BOLT_SLOT_TRAVEL:.0f} mm of slot")
+    # The motor plate's inboard face is a bridge over the belt in every sane
+    # print orientation. If it sags onto the belt the drive is ruined, so the
+    # gap is a real dimension, not a by-product of where the motor landed.
+    BELT_GAP_MIN = 3.0
+    belt_outer = mount.MPUL_X1 - P.FLANGE_T
+    gap = mount.MPLATE_X0 - belt_outer
+    if gap < BELT_GAP_MIN:
+        raise AssertionError(
+            f"the motor plate's underside clears the belt by only {gap:.1f} mm; "
+            f"it is a {2 * P.WALL_Y_IN:.0f} mm bridge and will sag onto it")
+    print(f"  belt clearance  {gap:.1f} mm under the motor plate "
+          f"(bridge spans {2 * P.WALL_Y_IN:.0f})")
 
     print("")
     stack = BORE_L + 1.6 + 6.5          # washer + M8 nut

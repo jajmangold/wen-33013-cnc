@@ -13,7 +13,7 @@ M6s that already hold the plate on - just longer ones.
 | Reduction | 2:1 (40T screw / 20T motor), from `machine/wen33013.toml` |
 | Belt | 2GT, 15 mm wide, 200 mm closed loop (100T) |
 | Centre distance | 69.71 mm, motor directly above the screw |
-| Bracket | 43 × 96 × 133 mm, 144 cm³ |
+| Bracket | 45 × 96 × 133 mm, 98 cm³ |
 
 ## Status
 
@@ -95,19 +95,30 @@ could not be assembled at all. Every clash check passed, because nothing
 be. **Interference and access are different questions, and the first does
 not imply the second.**
 
-The walls are now at |Y| 29-35, and four slots carry the corridor on through
-the backplate:
+The walls are now at |Y| 29-35, and the backplate carries the corridor on
+through in a window:
 
 ```
-   behind          backplate      channel        motor plate
-   the bracket     0 .. 8         8 .. 35        35 .. 43
-   ------------->  [ slot ]  ---------------->  [ screw ]-->| motor
+   behind           backplate       channel        motor plate
+   the bracket      0 .. 8          8 .. 37        37 .. 45
+   -------------> [ window ] ----------------->  [ screw ]-->| motor
 ```
 
-Drive each screw from behind with a long key or a magnetic bit holder. The
-slots track the motor's tension slots exactly, so they stay lined up at any
-belt tension, and `build.py` asserts the corridor stays clear at both ends
-of that travel.
+The window is exactly the convex hull of the four screw corridors at both
+ends of the tension travel - four Ø10 tunnels, joined - so it concedes no
+material that was holding anything, you can see the screws you are driving
+instead of fishing down a hole, and it takes 25 cm³ out of the print.
+
+**The two M6s had the same problem**, found by the same check once it was
+generalised. An M6 cap head is Ø10 and sits on the backplate face at X=8 -
+exactly where the side walls started - so the walls lay over both heads and
+the bracket could not be bolted to the *machine* either. The walls now stop
+at Z = 30.7, above the heads at their highest slot setting. They were
+carrying nothing down there: the motor's load enters them at the motor
+plate and the backplate takes it to the bolts on its own.
+
+`build.py` now probes **all six** fasteners, at every extreme of both sets
+of slots.
 
 Order of assembly:
 
@@ -117,6 +128,28 @@ Order of assembly:
 4. Whole assembly onto the plate, two M6 x 30.
 
 Step 4 last, because the belt cannot be fitted once the bracket is on.
+
+## Printing
+
+Print it **backplate flat on the bed**, and turn supports off.
+
+| Orientation | Overhang | Why |
+|---|---|---|
+| **+X, backplate down** | 3 islands, 2784 mm² | all of it the motor plate's underside, anchored on both walls - a bridge |
+| +Z, standing on edge | 12 islands, 2734 mm² | includes a 76 mm unanchored ledge. Needs support |
+
+In +X there is exactly one thing in the air: the motor plate's inboard face,
+which bridges 58 mm between the two side walls. That face is **not a
+functional surface** - the motor seats on the opposite face, 8 mm further
+out - so sag there is cosmetic.
+
+What sag would *not* be cosmetic is dropping onto the belt, which runs 3.5 mm
+below it. `build.py` asserts that gap, and it is the reason `MOTOR_HUB_ALLOW`
+is 10 rather than the 8 the pulley hub needs: at 8 the clearance was 1.5 mm,
+less than a 58 mm bridge can sag.
+
+If your printer bridges badly, the cheap insurance is a raft of support under
+the motor plate only - not everywhere.
 
 ## Bill of materials
 
