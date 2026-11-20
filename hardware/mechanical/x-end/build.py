@@ -16,6 +16,7 @@ import FreeCAD as App
 import mount
 import params as P
 from fcutil import box, check, clearance, xcyl
+from FreeCAD import Vector
 
 OUT = os.path.join(_HERE, "wen_x_end.FCStd")
 
@@ -30,6 +31,8 @@ BODY_BOT = -(P.BEAR_OD / 2.0 + 7.0)
 # over weeks. With the washer it is 5.6 MPa. The washer is not optional.
 CB_D, CB_DEPTH = P.CB_D, 12.0
 CLIP_D, CLIP_W = 27.2, P.CLIP_W  # DIN 472 internal circlip for a 26 bore
+WEB_CLEAR_D = 22.0               # see make_housing: an overhang number,
+                                 # not a clearance one
 
 
 def make_housing():
@@ -40,7 +43,14 @@ def make_housing():
     b = b.cut(xcyl(CLIP_D, P.BORE_L, P.BORE_L + CLIP_W))
     # The web outboard of the circlip still has to let the shaft through.
     # Without this it is solid across the bore - which the clash audit caught.
-    b = b.cut(xcyl(P.SHAFT_D + 2.0, -1.0, BODY_L + 1.0))
+    #
+    # Ø22, not Ø12. Only the shaft passes here, so Ø12 would do - but the
+    # layer below this is the Ø27.2 circlip groove, so a Ø12 hole leaves a
+    # 7.6 mm annulus overhanging inward all the way round, which is what the
+    # slicer complains about. A DIN 472 ring for a 26 bore seats at Ø27.2 and
+    # still stands proud to about Ø24, so Ø22 backs it completely and cuts
+    # the overhang to 2.6 mm.
+    b = b.cut(xcyl(WEB_CLEAR_D, P.BORE_L + CLIP_W, BODY_L + 1.0))
     for s in (+1, -1):
         y = s * P.BOLT_PITCH / 2.0
         b = b.cut(xcyl(P.BOLT_CLEAR_D, -1.0, BODY_L + 1.0, y, P.BOLT_ABOVE))
@@ -131,6 +141,33 @@ def main():
             blocked.append(f"{what} Y{y:+.1f} Z{z:.1f} ({v:.0f} mm3)")
     if blocked:
         raise AssertionError("screws cannot be fitted: " + ", ".join(blocked))
+
+    # --- OVERHANG AUDIT. Printed inboard-face-down, the only thing that is
+    # allowed to be in the air is the motor plate's underside, which bridges
+    # between the two side walls and is not a functional face. Everything
+    # else must be a lip, not a ledge. A Ø12 hole under the Ø27.2 circlip
+    # groove once left a 7.6 mm annulus overhanging inward all the way round
+    # - printable, but the slicer is right to object, and nothing in the
+    # clash or access checks sees it.
+    LAYER, BUDGET = 0.4, 300.0
+    ov = housing.cut(housing.translated(Vector(LAYER, 0, 0)))
+    x0 = housing.BoundBox.XMin
+    islands = [i for i in ov.Solids if i.BoundBox.XMin > x0 + LAYER / 2.0]
+    stray = 0.0
+    print("")
+    for i in sorted(islands, key=lambda i: -i.Volume):
+        c = i.BoundBox
+        area = i.Volume / LAYER
+        plate = abs(c.XMin - mount.MPLATE_X0) < 0.01
+        if not plate:
+            stray += area
+        print(f"  overhang {area:8.1f} mm2 at X={c.XMin:6.2f}"
+              f"  {'the motor plate bridge, expected' if plate else 'stray'}")
+    if stray > BUDGET:
+        raise AssertionError(
+            f"{stray:.0f} mm2 of overhang that is not the motor plate bridge, "
+            f"budget {BUDGET:.0f}. Printed inboard-face-down, anything in the air "
+            f"that is not that bridge should be a lip, not a ledge")
 
     gap = mount.MPLATE_X0 - mount.BELT_X1
     if gap < 3.0:

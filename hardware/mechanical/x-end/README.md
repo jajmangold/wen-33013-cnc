@@ -97,6 +97,29 @@ overhang is the motor plate's underside, which bridges between the two side
 walls. That face is not functional; the motor seats on the other side of the
 plate. Supports off.
 
+### What the slicer will flag, and what to do about it
+
+Printed inboard-face-down there is **one** thing genuinely in the air: the
+motor plate's underside, bridging 58 mm between the side walls. Leave
+supports off. It is a two-sided bridge, the face is not functional - the
+motor seats on the other side of the plate - and the only thing sag would
+hurt is the belt, which runs 3.0 mm below it and is asserted.
+
+```
+overhang   2315.5 mm2 at X= 35.90  the motor plate bridge, expected
+overhang    234.0 mm2 at X= 35.90  the motor plate bridge, expected
+overhang    234.0 mm2 at X= 35.90  the motor plate bridge, expected
+overhang    200.9 mm2 at X= 22.90  stray
+```
+
+The two 234s are the plate overhanging the walls by 3 mm; the 201 is the
+annulus backing the circlip. `build.py` audits this on every build and fails
+if anything that is *not* the plate bridge exceeds 300 mm². An earlier
+version put a Ø12 hole under the Ø27.2 circlip groove, which left **7.6 mm
+of annulus overhanging inward all the way round** - printable, but the
+slicer was right to object. It is Ø22 now, which a DIN 472 ring still backs
+completely because the ring stands proud to about Ø24.
+
 **Perimeters, not infill.** The sections that carry load here are thin: 7 mm
 of wall between the bore and the bottom face, a 2 mm lip under the first
 bearing, and 12 mm of counterbore floor under each bolt. Perimeters are solid
