@@ -149,3 +149,44 @@ class TestItIdentifiesWhichBoardItIsLookingAt:
         cv2.imwrite(path, warped)
         measured, truth, _ = _corners_in_mm(path)
         assert float(np.abs(measured - truth).max()) < 0.1
+
+
+class TestTheBoardNeedNotBeAligned:
+    """Tape it on crooked and the numbers must not move.
+
+    The board supplies scale and perspective, not a datum. The work supplies
+    the datum - two bolt holes whose line is the axis - so however the board
+    sits on the surface, the measurement is identical. Without this, "align
+    the board" becomes another instruction to get wrong.
+    """
+
+    @staticmethod
+    def _measure(points, angle_deg, offset):
+        """Re-express points after rotating and shifting the board frame."""
+        a = np.radians(angle_deg)
+        rot = np.array([[np.cos(a), -np.sin(a)],
+                        [np.sin(a), np.cos(a)]])
+        moved = [tuple(rot @ np.array(p) + np.array(offset)) for p in points]
+        frame = charuco.plate_frame(moved[0], moved[1])
+        return [frame(*p) for p in moved]
+    def test_rotating_the_board_changes_nothing(self):
+        holes = [(10.0, 50.0), (82.0, 50.0)]      # 72 apart
+        screw = (46.0, 67.0)
+        base = self._measure(holes + [screw], 0.0, (0.0, 0.0))
+        for angle, off in ((37.0, (120.0, -45.0)), (-110.0, (-8.0, 300.0)),
+                           (180.0, (5.0, 5.0))):
+            got = self._measure(holes + [screw], angle, off)
+            for b, g in zip(base, got, strict=True):
+                assert abs(b[0] - g[0]) < 1e-9
+                assert abs(b[1] - g[1]) < 1e-9
+
+    def test_the_datum_span_is_the_known_pitch(self):
+        f = charuco.plate_frame((10.0, 50.0), (82.0, 50.0))
+        assert f.span == pytest.approx(72.0)
+
+    def test_the_screw_offset_reads_as_expected(self):
+        """Holes 72 apart, screw 17 below their midpoint, however it is placed."""
+        f = charuco.plate_frame((10.0, 50.0), (82.0, 50.0))
+        x, y = f(46.0, 67.0)
+        assert x == pytest.approx(0.0)
+        assert abs(y) == pytest.approx(17.0)

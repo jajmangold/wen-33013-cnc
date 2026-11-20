@@ -95,10 +95,13 @@ def make_bracket():
     # takes the moment from the motor hanging outboard - two M5s on one
     # horizontal line cannot, there is no lever arm between them.
     b = b.cut(_xcyl(P.BOSS_D + P.REGISTER_FIT, -1.0, P.MOUNT_T + 1.0))
-    # the two stock M5s, clearance - they thread into the table casting
+    # The two stock M5s, in vertical SLOTS. They thread into the table casting
+    # and only clamp - the register bore does the locating - so the slots can
+    # swallow the one dimension nobody managed to measure.
     for s in (+1, -1):
-        b = b.cut(_xcyl(P.BOLT_CLEAR_D, -1.0, P.MOUNT_T + 1.0,
-                        s * P.BOLT_PITCH / 2.0, P.BOLT_ABOVE))
+        b = b.cut(_xslot(P.BOLT_CLEAR_D, -1.0, P.MOUNT_T + 1.0,
+                         s * P.BOLT_PITCH / 2.0, P.BOLT_ABOVE,
+                         P.BOLT_SLOT_TRAVEL))
     # motor: pilot clearance, generous so the motor can slide to tension
     pilot = P.NEMA_PILOT_D + P.TENSION_SLOT + 1.0
     b = b.cut(_xcyl(pilot, MPLATE_X0 - 1.0, MOTOR_FACE_X + 1.0, MOTOR_Y, MOTOR_Z))

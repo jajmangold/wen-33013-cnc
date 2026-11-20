@@ -94,20 +94,25 @@ BOLT_CLEAR_D = 5.5       # M5 clearance in our parts
 HOLE_BELOW_TOP = 21.5    # MEASURED  hole centre below the top edge
 HOLE_FROM_SIDE = 21.5    # MEASURED  hole centre in from each side edge
 
-# The screw runs on the plate's centreline - the boss is cast in the middle of
-# it. That makes the bolt line just 1.0 mm above the screw axis, not the 26.3
-# a third-party STEP model suggested. Building on that 26.3 put the register
-# bore 25 mm out of position, which is why the first bracket did not fit.
-SCREW_BELOW_TOP = PLATE_H / 2.0                      # 22.5, screw on the centreline
-BOLT_ABOVE = SCREW_BELOW_TOP - HOLE_BELOW_TOP        # 1.0 above the screw axis
-PLATE_TOP_ABOVE = SCREW_BELOW_TOP                    # 22.5
-PLATE_BOT_BELOW = PLATE_H - SCREW_BELOW_TOP          # 22.5
+# The bolt line to screw axis offset is the ONE dimension never pinned down.
+# Four sources gave 26.3 (a third-party STEP model), 1.0 (screw on the plate
+# centreline, with a plate height called rough), ~10.5 (how the printed gauge
+# sat) and ~16-22 (a photo whose own checks say it cannot be trusted).
+#
+# Rather than pick one, the part stops caring. The Ø35 boss locates the
+# bracket to 0.15 mm through the register bore; the bolts only CLAMP. So the
+# bolt holes are vertical slots long enough to swallow the whole range, and
+# wherever the bolts actually land, they land.
+BOLT_ABOVE = 12.0        # centre of the slot, mid-range of the candidates
+BOLT_SLOT_TRAVEL = 22.0  # spans 1 to 23 above the screw axis
 
-# The boss is real and it is the register. A first photo looked as though the
-# casting was recessed behind the gauge's fingers and the register bore was
-# removed on that reading; a side-on shot showed it plainly protruding, with
-# the steel retainer on its face and the pulley hard up against it.
-# Measure, do not infer from a photograph.
+# How far the plate reaches from the screw. Only the backplate's OUTLINE
+# depends on these - nothing that has to fit - so a rough 45 mm plate with
+# the screw near the middle is good enough, and being wrong costs overhang,
+# not a part that will not go on.
+SCREW_BELOW_TOP = PLATE_H / 2.0
+PLATE_TOP_ABOVE = SCREW_BELOW_TOP
+PLATE_BOT_BELOW = PLATE_H - SCREW_BELOW_TOP
 BOSS_D = 35.0            # MEASURED  bearing boss OD - this is the REGISTER
 BOSS_PROUD = 16.0        # MEASURED  how far it stands off the plate face
 REGISTER_FIT = 0.15

@@ -52,8 +52,16 @@ Changelogs are for humans. Record what changed about the *machine* or the
   bolt pattern, the plate height and the boss OD can all be read off one
   picture rather than measured again.
 
-### Fixed
-
+### Fixed
+
+- **The bracket no longer depends on the one dimension nobody could
+  measure.** How far the bolt line sits above the screw axis had four
+  answers spanning 25 mm. The Ø35 boss already locates the bracket to
+  0.15 mm through the register bore and the bolts were only ever clamping,
+  so their holes are now vertical slots spanning 1 to 23 above the screw -
+  the bolts land wherever the truth is. `build.py` asserts the slots cover
+  every candidate rather than trusting the arithmetic. The X bracket can be
+  printed without resolving the measurement.
 - The source fingerprint hashed raw bytes, so the same machine description
   fingerprinted differently on Windows (CRLF working copy) and Linux (LF in
   git). Every generated file then looked stale on whichever machine had not

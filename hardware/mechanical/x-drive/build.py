@@ -145,6 +145,20 @@ def main():
                 f"register bore is wrong: a boss of "
                 f"Ø{P.BOSS_D + extra:.1f} {'clashes' if hits else 'passes'}, "
                 f"expected {'clash' if want_clash else 'pass'}")
+    # The bolt line to screw offset was never pinned down. Rather than pick
+    # one of the four candidate answers, the slots have to swallow all of
+    # them - so assert that, instead of trusting the arithmetic above.
+    lo = P.BOLT_ABOVE - P.BOLT_SLOT_TRAVEL / 2.0
+    hi = P.BOLT_ABOVE + P.BOLT_SLOT_TRAVEL / 2.0
+    CANDIDATES = {"plate centreline": 1.0, "printed gauge fit": 10.5,
+                  "photogrammetry": 19.0}
+    outside = {k: v for k, v in CANDIDATES.items() if not lo <= v <= hi}
+    if outside:
+        raise AssertionError(
+            f"bolt slots span {lo:.1f}..{hi:.1f} above the screw and miss {outside}")
+    print(f"  bolt slots   {lo:.1f}..{hi:.1f} above the screw axis, covering "
+          f"{', '.join(CANDIDATES)}")
+
     print(f"  register     Ø{P.BOSS_D + P.REGISTER_FIT:.2f} bore fits the Ø{P.BOSS_D:.0f}"
           f" boss, engages {P.MOUNT_T:.0f} of its {P.BOSS_PROUD:.0f} mm")
 

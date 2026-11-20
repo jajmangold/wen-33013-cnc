@@ -150,6 +150,37 @@ def to_mm(H, x: float, y: float) -> tuple[float, float]:
     return float(p[0, 0, 0]), float(p[0, 0, 1])
 
 
+def plate_frame(p1: tuple[float, float], p2: tuple[float, float],
+                flip_y: bool = False):
+    """A frame built from the WORK, so the board's placement cancels.
+
+    The board gives scale and removes perspective. It is not a datum, and it
+    does not need to be square to anything: tape it on crooked and the
+    numbers are identical. Pass two features whose line defines the work's
+    axis - the two bolt holes - and everything is reported relative to them,
+    origin at their midpoint, +x along p1 -> p2.
+
+    Returns a callable mapping board-plane mm to work-frame mm.
+    """
+    p1 = np.asarray(p1, float)
+    p2 = np.asarray(p2, float)
+    axis = p2 - p1
+    span = float(np.hypot(*axis))
+    if span < 1e-6:
+        raise SystemExit("the two datum features are at the same place")
+    ux = axis / span
+    uy = np.array([-ux[1], ux[0]])
+    if flip_y:
+        uy = -uy
+    origin = (p1 + p2) / 2.0
+
+    def to_frame(x: float, y: float) -> tuple[float, float]:
+        v = np.array([x, y], float) - origin
+        return float(v @ ux), float(v @ uy)
+
+    to_frame.span = span
+    return to_frame
+
 def rectify(image_path: str, out: str = "rectified.png", px_per_mm: float = 6.0,
             pad_mm: float = 40.0) -> str:
     """Write a square-on, metric view: one pixel is 1/px_per_mm of a mm."""

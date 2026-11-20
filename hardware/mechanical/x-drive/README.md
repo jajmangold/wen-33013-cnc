@@ -117,34 +117,47 @@ way up.
 
 ## Measured, not assumed
 
-Everything on the mounting face now has a measurement behind it:
-
 | | |
 |---|---|
 | Bolt pitch | 72.0 |
-| Hole centres | 21.5 below the top edge, 21.5 in from the left |
-| Screw axis | on the plate centreline, 1.0 below the bolt line |
+| Hole centres | 21.5 below the top edge, 21.5 in from the left; Ø10 clearance |
 | Boss | **Ø35**, standing **16** proud of the plate face |
 | Pulley inner face | seats on the boss face, so 16 from the plate |
+| Plate | 12 thick, ~45 tall |
 
-The register bore is Ø35.15 in an 8 mm backplate: the plate bears on the
-casting's face while the bore engages 8 mm of the boss. `build.py` asserts
-the fit rather than the absence of a clash - the real Ø35 boss must pass
-through the bore and a Ø35.5 one must not.
+## The one number nobody could pin down
+
+How far the bolt line sits above the screw axis got four answers:
+
+| Source | Says |
+|---|---|
+| third-party STEP model | 26.3 |
+| screw on the plate centreline | 1.0 |
+| how the printed gauge sat | ~10.5 |
+| photogrammetry | ~16-22, by a photo whose own checks fail it |
+
+So the part stops caring. **The Ø35 boss locates the bracket** through the
+register bore, to 0.15 mm. The bolts only clamp - they were never doing the
+locating - so their holes are vertical slots spanning 1 to 23 above the
+screw axis, and wherever the bolts land, they land. `build.py` asserts the
+slots cover every candidate answer rather than trusting the arithmetic.
+
+This is why the bracket can be printed now. The remaining unknown changes
+where the bolts sit in their slots and nothing else.
 
 ### What went wrong on the way here
 
-Worth recording, because the same trap is waiting on Y and Z:
+Worth recording, because the same traps are waiting on Y and Z:
 
 - The bolt line came from a third-party STEP model that put it 26.3 above
-  the screw. It is 1.0. The first bracket was printed before that surfaced.
-- The boss was briefly removed from the model entirely, on a photo that
-  looked as though the casting sat *behind* the gauge's fingers. A side-on
-  shot showed it plainly protruding. **Measure it; do not infer it from a
-  photograph.**
-- Four rounds of tape measurements disagreed with each other before the
-  numbers above settled. The ones that survived are those with two or three
-  independent routes to the same answer.
+  the screw. The first bracket was printed before that was questioned.
+- The boss was briefly deleted from the model on a photo that looked as
+  though the casting sat *behind* the gauge's fingers. A side-on shot showed
+  it plainly protruding. **Measure it; do not infer it from a photograph.**
+- Numbers that survived are the ones with two or three independent routes to
+  the same answer. Single-source numbers were wrong about half the time.
+- The eventual fix was not a better measurement. It was removing the part's
+  dependence on the measurement.
 
 ## A different belt
 
