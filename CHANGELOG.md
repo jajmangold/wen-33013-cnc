@@ -12,6 +12,20 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Fixed
 
+- **The bore clears the boss instead of registering on it.** Nothing here
+  needs locating tightly: pulley planes are set by the pulleys on their own
+  shafts, centre distance is adjustable through the motor's +-8 mm slots,
+  and lateral offset only changes the direction of belt pull. Ø42 over a
+  Ø35 boss, 3.5 clear all round. A close register bought precision nothing
+  consumes while adding the one failure mode that stops a part going on.
+- **The side walls fouled the boss**, found by the assertion written for the
+  bore. The boss stands 16 proud and pokes 8 past the backplate into the
+  U-channel, where the walls sat at |Y| 20 - only 2.5 from a Ø35 boss, less
+  than the loosened bore now lets it sit off-centre. Walls moved to 22.5.
+- Opening the bore made it break out of the backplate's bottom edge, turning
+  a closed ring into a horseshoe; the backplate now reaches far enough down
+  to keep it closed.
+
 - **The boss is Ø35 and stands 16 proud; the register bore is back.** It was
   briefly removed on a misreading of a head-on photo, in which the casting
   appeared to sit behind the gauge's fingers; a side-on shot showed it

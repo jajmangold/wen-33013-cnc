@@ -132,7 +132,14 @@ PLATE_TOP_ABOVE = SCREW_BELOW_TOP
 PLATE_BOT_BELOW = PLATE_H - SCREW_BELOW_TOP             # 8.2
 BOSS_D = 35.0            # MEASURED  bearing boss OD - this is the REGISTER
 BOSS_PROUD = 16.0        # MEASURED  how far it stands off the plate face
-REGISTER_FIT = 0.15
+# The bore CLEARS the boss, it does not register on it. Nothing about this
+# bracket needs locating tightly: the pulley planes are set by the pulleys on
+# their own shafts, centre distance is adjustable through the motor's +-8 mm
+# slots, and lateral offset only changes the direction of belt pull. A close
+# register bought precision nothing consumes, while adding the one failure
+# mode that stops a part going on at all - which is exactly what happened to
+# the first bracket.
+BORE_CLEARANCE = 3.5     # radial, so the bore is Ø42 over a Ø35 boss
 
 # The pulley seats against the BOSS face, not the plate face, so these are the
 # same number. Confirmed in the side-on photo: scaling off the pulley's known
@@ -158,7 +165,11 @@ MOUNT_T = 8.0            # backplate, bears on the mill plate
 FIT_PLATE_T = 4.0        # the fit coupon: the bracket's first 4 mm, nothing else
 WALL_T = 8.0
 MOTOR_PLATE_T = 8.0
-WALL_Y_IN = 20.0         # inner face of the side walls; the belt needs ~13
+# Inner face of the side walls. The belt needs ~13 and the 40T flange 14.2,
+# but the binding constraint is the BOSS: it stands 16 proud and so pokes 8
+# past the backplate into this channel, at Ø35 plus whatever the loose bore
+# lets it sit off-centre. 17.5 + 3.5 = 21.0, so 22.5 keeps 1.5 in hand.
+WALL_Y_IN = 22.5
 BACK_W_LOW = 96.0
 BACK_W_HIGH = 56.0
 MOTOR_PLATE_W = 70.0

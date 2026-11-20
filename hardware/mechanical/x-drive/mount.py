@@ -36,10 +36,12 @@ MOTOR_FACE_X = MPUL_X1 + P.MOTOR_HUB_ALLOW                    # motor front face
 MPLATE_X0    = MOTOR_FACE_X - P.MOTOR_PLATE_T
 WALL_X1      = MPLATE_X0
 BRACKET_TOP  = MOTOR_Z + P.MOTOR_PLATE_H / 2.0
-# Stop just past the boss lobe. The plate itself only reaches 8.2 below
-# the screw, so anything lower is hanging in free air with nothing to bear
-# on - and the lobe already hangs 9 past that edge.
-BRACKET_BOT  = -(P.BOSS_D / 2.0 + 3.0)
+# Far enough below to keep the clearance bore CLOSED. Opening the bore to
+# Ø42 made it break out of the bottom edge, turning the backplate into a
+# horseshoe. The plate itself only reaches 8.2 below the screw so this
+# material bears on nothing, but a closed ring is stiffer and the fit
+# template stays a clean set of closed outlines.
+BRACKET_BOT  = -(P.BOSS_D / 2.0 + P.BORE_CLEARANCE + 3.0)
 
 
 
@@ -93,11 +95,11 @@ def make_bracket():
     b = b.removeSplitter()
 
     # --- cuts
-    # Register bore over the Ø35 boss. The backplate is 8 thick and the boss
-    # stands 16 proud, so the plate bears on the casting's FACE while the bore
-    # takes the moment from the motor hanging outboard - two M5s on one
-    # horizontal line cannot, there is no lever arm between them.
-    b = b.cut(_xcyl(P.BOSS_D + P.REGISTER_FIT, -1.0, P.MOUNT_T + 1.0))
+    # Clearance bore over the Ø35 boss - deliberately loose. The backplate is
+    # 8 thick and the boss stands 16 proud, so the plate bears on the
+    # casting's FACE and that flat contact, over a 45 mm tall plate, takes
+    # the moment from the motor hanging outboard.
+    b = b.cut(_xcyl(P.BOSS_D + 2 * P.BORE_CLEARANCE, -1.0, P.MOUNT_T + 1.0))
     # The two stock M5s, in vertical SLOTS. They thread into the table casting
     # and only clamp - the register bore does the locating - so the slots can
     # swallow the one dimension nobody managed to measure.

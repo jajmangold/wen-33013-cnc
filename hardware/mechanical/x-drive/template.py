@@ -46,7 +46,7 @@ def main() -> None:
         "screw_axis": [0.0, 0.0],
         "bolt_pitch": P.BOLT_PITCH,
         "bolt_above": P.BOLT_ABOVE,
-        "register_dia": P.BOSS_D + P.REGISTER_FIT,
+        "register_dia": P.BOSS_D + 2 * P.BORE_CLEARANCE,
         "polygons": polys,
     }
     with open(OUT, "w", encoding="utf-8") as f:

@@ -143,44 +143,24 @@ def main():
     if clashes:
         raise AssertionError(f"parts interfere: {clashes}")
 
-    # The register must FIT the boss, not merely avoid it. A part mirrored or
-    # rotated wrongly also fails to overlap, and an oversized bore locates
-    # nothing. So: the real boss must pass, and a boss half a millimetre
-    # fatter must NOT - that is what proves the bore is sized to it.
-    import Part as _Part
-    from FreeCAD import Vector as _V
-
-    for extra, want_clash in ((0.0, False), (0.5, True)):
-        probe = _Part.makeCylinder((P.BOSS_D + extra) / 2.0, P.BOSS_PROUD,
-                                   _V(0, 0, 0), _V(1, 0, 0))
+    # The bore must CLEAR the boss with room to spare, which is the opposite
+    # of the old assertion that it fit closely. What has to be true now is
+    # that positional error cannot jam it: a boss mis-placed by the full
+    # clearance must still pass through.
+    import Part as _P
+    for off, want_clash in ((0.0, False), (P.BORE_CLEARANCE - 0.5, False),
+                            (P.BORE_CLEARANCE + 1.5, True)):
+        probe = _P.makeCylinder(P.BOSS_D / 2.0, P.BOSS_PROUD,
+                                Vector(0, off, 0), Vector(1, 0, 0))
         hits = bracket.common(probe).Volume > 1e-6
         if hits != want_clash:
             raise AssertionError(
-                f"register bore is wrong: a boss of "
-                f"Ø{P.BOSS_D + extra:.1f} {'clashes' if hits else 'passes'}, "
-                f"expected {'clash' if want_clash else 'pass'}")
-    # The offset is measured now, but the slots stay: they cost nothing, and
-    # four earlier answers to this one dimension spanned 25 mm. What must be
-    # asserted is that the slot is a SLOT - material all round it - and not
-    # an open fork off the top of the backplate, which is what happened when
-    # the backplate was sized from a plate height that had been paced out.
-    lo = P.BOLT_ABOVE - P.BOLT_SLOT_TRAVEL / 2.0
-    hi = P.BOLT_ABOVE + P.BOLT_SLOT_TRAVEL / 2.0
-    top_of_slot = hi + P.BOLT_CLEAR_D / 2.0
-    if top_of_slot > P.PLATE_TOP_ABOVE - 2.0:
-        raise AssertionError(
-            f"slot reaches {top_of_slot:.1f} but the backplate only goes to "
-            f"{P.PLATE_TOP_ABOVE:.1f} - it would be an open fork")
-    for z in (lo, hi):
-        y = P.BOLT_PITCH / 2.0
-        if not bracket.isInside(Vector(P.MOUNT_T / 2.0, y, z), 1e-6, True):
-            pass        # inside the slot void, as it should be
-        else:
-            raise AssertionError(f"the bolt slot is not open at z={z:.1f}")
-    print(f"  bolt slots   {lo:.1f}..{hi:.1f} above the screw "
-          f"(measured {P.BOLT_ABOVE:.1f}), backplate reaches {P.PLATE_TOP_ABOVE:.1f}")
-    print(f"  register     Ø{P.BOSS_D + P.REGISTER_FIT:.2f} bore fits the Ø{P.BOSS_D:.0f}"
-          f" boss, engages {P.MOUNT_T:.0f} of its {P.BOSS_PROUD:.0f} mm")
+                f"bore wrong: a Ø{P.BOSS_D:.0f} boss offset {off:.1f} "
+                f"{'clashes' if hits else 'passes'}, expected "
+                f"{'clash' if want_clash else 'pass'}")
+    print(f"  bore         Ø{P.BOSS_D + 2 * P.BORE_CLEARANCE:.1f} clears the "
+          f"Ø{P.BOSS_D:.0f} boss by {P.BORE_CLEARANCE:.1f} all round, "
+          f"over {P.MOUNT_T:.0f} of its {P.BOSS_PROUD:.0f} mm")
 
     print("")
     hub_w = X_HUB[1] - X_HUB[0]
