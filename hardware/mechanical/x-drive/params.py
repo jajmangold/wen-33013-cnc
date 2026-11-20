@@ -178,7 +178,12 @@ MOTOR_HUB_ALLOW = 10.0
 MOTOR_HUB_OD = 14.0      # reference only
 
 # ------------------------------------------------------------ the bracket
-BELT_TEETH = 100         # 200 mm closed loop. Sets the centre distance.
+# 200 mm closed loop. Sets the centre distance, and 100T is the SHORTEST
+# belt this bracket can take: the side walls must stop above the M6 heads
+# and the motor plate must land on the walls, which floors the motor axis
+# at WALL_BOT + MOTOR_PLATE_H/2 = 69.7 - the 100T centre distance to
+# within 0.01. Anything shorter blocks the M6s and build.py rejects it.
+BELT_TEETH = 100
 MOTOR_ANGLE = 0.0        # degrees from straight up, toward +Y
 MOUNT_T = 8.0            # backplate, bears on the mill plate
 FIT_PLATE_T = 4.0        # the fit coupon: the bracket's first 4 mm, nothing else

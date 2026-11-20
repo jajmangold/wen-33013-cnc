@@ -311,15 +311,49 @@ better answer if the capacity is actually needed.
 
 ## A different belt
 
-Centre distance follows the belt. `BELT_TEETH` in `params.py` is the only
-thing to change:
+Centre distance follows the belt, and `BELT_TEETH` in `params.py` is the only
+thing to change - but **only upwards**. 100T is the shortest belt this
+bracket can take:
 
-| Belt | Centre distance | Bracket height |
+| Belt | Centre distance | Bracket |
 |---|---|---|
-| 140 mm / 70T | 39.5 mm | shortest |
-| 160 mm / 80T | 49.6 mm | −20 mm on the tower |
-| **200 mm / 100T** | **69.7 mm** | as drawn, shortest commonly stocked in 15 mm |
-| 240 mm / 120T | 89.8 mm | +20 mm |
+| 160 mm / 80T | 49.6 | M6 heads blocked |
+| 180 mm / 90T | 59.7 | M6 heads blocked |
+| **200 mm / 100T** | **69.7** | **98 cm³, as drawn** |
+| 220 mm / 110T | 79.8 | 108 cm³ |
+| 240 mm / 120T | 89.8 | 117 cm³ |
+
+The floor is not the belt, it is the M6 heads. The side walls have to stop
+above them (Z = 30.7) and the motor plate has to land on the walls, so the
+motor axis cannot sit lower than
+
+```
+  WALL_BOT + MOTOR_PLATE_H / 2  =  30.7 + 39.0  =  69.7
+```
+
+which is the 100T centre distance to within 0.01 mm. That is a coincidence,
+but a useful one: **the tower is already as short as this bolt pattern
+allows**, and a shorter belt buys nothing because the bracket cannot follow
+it down. `build.py` catches the attempt rather than letting it through.
+
+### Why a tensioner idler does not change that
+
+Belt take-up by deflection is **quadratic**, so an idler trims tension; it
+does not substitute for the right belt length. To keep the 200 mm belt and
+pull the motor down, the idler has to swallow the slack:
+
+| Centre distance | Tower saved | Slack to absorb | Idler must bulge | Room to the wall |
+|---|---|---|---|---|
+| 68.0 | 1.7 mm | 3.4 | 10.9 | 16.3 |
+| 65.0 | 4.7 mm | 9.4 | 18.0 | 16.3 |
+| 60.0 | 9.7 mm | 19.3 | 25.9 | 16.3 |
+| 50.0 | 19.7 mm | 39.2 | 36.8 | 16.3 |
+
+Only the top row fits, and it saves 1.7 mm. By the time the saving is worth
+having, the idler sticks out further than the tower came down - and it would
+have to live in the motor screws' corridors. Those figures are a *lower*
+bound: they model the detour as a triangle, and a real wrapped idler cuts
+that corner, so the true bulge is larger still.
 
 ## Known concerns
 
