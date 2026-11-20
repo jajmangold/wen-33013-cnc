@@ -77,6 +77,24 @@ def ref_motor_pulley():
                 mount.MPUL_X0, mount.MPUL_X1).translated(Vector(0, 0, mount.C))
 
 
+def belt_keepout(clear):
+    """The belt, grown by `clear` in every direction. Nothing may be in here.
+
+    "Clear the belt all around" is a real constraint and not one the clash
+    audit covers: the audit only says the mount does not TOUCH the belt, and
+    a belt that is 0.3 mm from a boss will slap it.
+    """
+    R = P.PITCH * P.TEETH / math.pi / 2.0
+    x0 = mount.BELT_X0 - clear
+    x1 = mount.BELT_X0 + P.BELT_W + clear
+    def stadium(r):
+        t = xcyl(2 * r, x0, x1, 0, 0)
+        t = t.fuse(xcyl(2 * r, x0, x1, 0, mount.C))
+        t = t.fuse(box(x0, x1, -r, r, 0, mount.C))
+        return t.removeSplitter()
+    return stadium(R + 0.9 + clear).cut(stadium(R - 0.5 - clear)).removeSplitter()
+
+
 def ref_belt():
     """The 200 mm loop, as a racetrack round two equal pulleys."""
     R = P.PITCH * P.TEETH / math.pi / 2.0
@@ -241,8 +259,16 @@ def main():
     # groove once left a 7.6 mm annulus overhanging inward all the way round
     # - printable, but the slicer is right to object, and nothing in the
     # clash or access checks sees it.
+    # 45 degrees is printable, so the test has to be angle-aware: material is
+    # supported if the layer below has anything within one layer-width
+    # sideways, not only directly underneath. Testing "directly underneath"
+    # flags every 45 degree ramp - it reported the pad's flare as 99 mm2 a
+    # side, which is exactly 0.4 x its height x the number of layers.
     LAYER, BUDGET = 0.4, 300.0
-    ov = housing.cut(housing.translated(Vector(LAYER, 0, 0)))
+    below = housing.translated(Vector(LAYER, 0, 0))
+    for dy, dz in ((LAYER, 0), (-LAYER, 0), (0, LAYER), (0, -LAYER)):
+        below = below.fuse(housing.translated(Vector(LAYER, dy, dz)))
+    ov = housing.cut(below.removeSplitter())
     x0 = housing.BoundBox.XMin
     islands = [i for i in ov.Solids if i.BoundBox.XMin > x0 + LAYER / 2.0]
     stray = 0.0
@@ -264,6 +290,15 @@ def main():
     # The belt has to be fully on BOTH sets of teeth. Only ~7 of each
     # pulley's 17 mm is teeth, so this is tighter than it looks and it moves
     # with which way round each pulley goes on its shaft.
+    BELT_CLEAR = 2.0
+    v = housing.common(belt_keepout(BELT_CLEAR)).Volume
+    if v > 1e-6:
+        raise AssertionError(
+            f"{v:.0f} mm3 of the mount is within {BELT_CLEAR:.1f} mm of the "
+            f"belt - it will slap it")
+    print(f"  belt clearance  nothing within {BELT_CLEAR:.1f} mm of the belt, "
+          f"all the way round")
+
     if mount.TEETH_OVERLAP < P.BELT_W:
         raise AssertionError(
             f"the pulleys share only {mount.TEETH_OVERLAP:.1f} mm of teeth "
@@ -278,7 +313,7 @@ def main():
     # --- the bosses must clear the pulley, and the tapped holes must have
     # wall. Both are governed by the pulley's largest diameter, which is a
     # parameter precisely because it has not been measured.
-    _bolts, _both = mount.bolt_positions()
+    _bolts = mount.bolt_positions()
     if not P.PRINTED_TOWER:
         import Part as _Pt
         # A keep-out TUBE around the pulley, over the pulley's own length.
@@ -294,8 +329,7 @@ def main():
                 f"{v:.0f} mm3 of the mount intrudes within {P.BOSS_CLEAR:.1f} mm "
                 f"of a Ø{P.PULLEY_MAX_OD:.0f} pulley")
         print(f"  mount clears a Ø{P.PULLEY_MAX_OD:.0f} pulley by "
-              f"{P.BOSS_CLEAR:.1f}+, {len(_bolts)} bolts usable"
-              f"{'' if _both else ' (upper slots only)'}")
+              f"{P.BOSS_CLEAR:.1f}+, {len(_bolts)} bolts")
         if mount.PLATE_X0 - P.PULLEY_X1 < 1.0:
             raise AssertionError("the plate would foul the screw pulley")
 
@@ -335,8 +369,10 @@ def main():
         f" motor face X {mount.AL_MOTOR_FACE_X:.1f}",
         f"tension travel                   Z {mount.SLOT_Z_LO:.2f}"
         f"..{mount.SLOT_Z_HI:.2f}, the plate's own slots",
-        f"bolts                            {len(_bolts)} x M5 into the bosses"
-        f"{'' if _both else '  (upper slots only - the pulley blocks the lower pair)'}",
+        f"bolts                            {len(_bolts)} x M5 - "
+        f"3 across the top, 2 at the bottom of the outer slots",
+        f"tension travel left              {mount.TENSION_TRAVEL:.1f} mm of the"
+        f" slot's {mount.SLOT_TRAVEL:.1f}, after the rows' spread",
         f"bearing block                    {BODY_L:.1f} x {BODY_W:.0f} x"
         f" {BODY_TOP-BODY_BOT:.1f}",
         f"whole part                       {housing.BoundBox.XLength:.1f} x"

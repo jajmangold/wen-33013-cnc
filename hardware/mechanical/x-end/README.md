@@ -232,7 +232,34 @@ the motor pulley in the belt plane would run that base 21 mm inside the
 table casting. Push it out far enough to clear and the pulley is 20 mm out
 of plane.
 
-### How many bolts depends on one unmeasured diameter
+### Five bolts, and what they cost
+
+```
+3 across the top   Y -20, 0, +20   at Z 21.10
+2 at the bottom    Y -20, +20      at Z  5.00
+tension travel     5.4 mm of the slot's 21.5
+```
+
+The **centre slot** is usable because the belt's two runs sit at Y ±12.73 and
+there is nothing between them at that height - the pulley tops out below. The
+**±10 slots are not**: a tapped M5 there reaches Y 12.1, which is 0.6 mm from
+the belt.
+
+The **lower pair** works because the bosses are a narrow web where they pass
+the pulley and flare to a full pad outboard of it, so the tapped holes sit in
+material that never had to squeeze past a flange. That flare is a 45° ramp,
+not a step - as a step it was a 4 mm ledge hanging in the air and the overhang
+audit rejected it.
+
+**Two rows cost tension travel.** Bolts at different heights lock the plate
+unless every one stays inside its own slot, so the 16 mm spread comes out of
+the slot's 21.5 and leaves 5.4 mm of slide. That is ample for a 200 mm belt,
+and the moment resistance a second row buys is worth far more than travel
+nobody uses.
+
+### The pulley's flange diameter no longer decides anything
+
+### (it used to)
 
 The plate's outer slots sit at Y = ±20 and the 40T pulley is in the way:
 

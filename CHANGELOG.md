@@ -12,6 +12,16 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Added
 
+- **Five mounting bolts instead of two.** Three across the top (including
+  the centre slot, which is usable because the belt's runs are at Y +-12.73
+  and nothing sits between them at that height) and two at the bottom of the
+  outer slots. The bosses are a narrow web where they pass the pulley and
+  flare to a full pad outboard of it, so the lower holes sit in material
+  that never had to squeeze past a flange.
+- A **belt keep-out** check: nothing within 2 mm of the belt anywhere round
+  the loop. The clash audit only says the mount does not touch the belt, and
+  a belt 0.3 mm off a boss will slap it.
+
 - **The bore fit is confirmed.** Printed the BoreGauge coupon and pressed a
   real 6000ZZ in: firm, square on the lip, no rock, first try. `BORE_FIT`
   stays 0.05 - but it is now recorded as a PRINTER number, not a part one.
@@ -60,6 +70,13 @@ Changelogs are for humans. Record what changed about the *machine* or the
   than fitted - the coupon is only the bracket's first 4 mm.
 
 ### Fixed
+
+- **The overhang audit flagged every 45° ramp.** It tested whether material
+  had anything DIRECTLY beneath it, which a 45° ramp never does - one layer
+  width per layer is exactly what 45° means. It reported the pad's flare as
+  99 mm² a side, which is 0.4 x its height x its layer count. Now it counts
+  material supported if the layer below has anything within one layer-width
+  sideways.
 
 - **The screw ran through the motor plate.** The M8 nut is the outermost
   thing on the screw - it is what clamps the bearing stack - and at Y 0,

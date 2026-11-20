@@ -8,10 +8,12 @@ housing instead of on the stock plate.
 import math
 
 import params as P
+import Part
 from fcutil import box as _box
 from fcutil import xcyl as _xcyl
 from fcutil import xslot as _xslot
 from fcutil import xwindow as _xwindow
+from FreeCAD import Vector
 
 
 def centre_distance():
@@ -103,40 +105,6 @@ PLATE_TOP_Z = C + P.PLATE_PILOT_FROM_TOP
 SLOT_Z_HI = PLATE_TOP_Z - P.PLATE_SLOT_FROM_TOP[0]      # upper end of travel
 SLOT_Z_LO = PLATE_TOP_Z - P.PLATE_SLOT_FROM_TOP[1]
 
-BOSS_Y_IN = P.PULLEY_MAX_OD / 2.0 + P.BOSS_CLEAR
-BOSS_Y_OUT = 20.0 + P.M5_TAP_D / 2.0 + P.BOSS_WALL + 2.0
-
-
-def bolt_positions():
-    """Which of the plate's slots we can actually bolt into.
-
-    The outer slots sit at Y = +-20. A tapped M5 there needs the boss face
-    to be at most 20 - M5/2 - wall; the pulley says it must be at least
-    its own radius plus clearance. Whether both ends of the slot are usable
-    therefore depends on the pulley's largest diameter, which is why that is
-    a parameter and not a constant.
-    """
-    beside_pulley_ok = BOSS_Y_IN <= 20.0 - P.M5_TAP_D / 2.0 - P.BOSS_WALL
-    zs = [SLOT_Z_HI - 3.0]
-    if beside_pulley_ok:
-        zs.append(SLOT_Z_LO + 3.0)
-    return [(sy * 20.0, z) for sy in (1, -1) for z in zs], beside_pulley_ok
-
-
-def add_plate_mount(b):
-    """Two bosses standing off the housing face to carry the plate."""
-    bolts, both = bolt_positions()
-    z_lo = (SLOT_Z_LO - 2.0) if both else (SLOT_Z_HI - 8.0)
-    z_hi = SLOT_Z_HI + 3.0
-    for sy in (+1, -1):
-        b = b.fuse(_box(P.BODY_L_CLEAR - 2.0, PLATE_X0,
-                        sy * BOSS_Y_IN, sy * BOSS_Y_OUT, z_lo, z_hi))
-    b = b.removeSplitter()
-    for y, z in bolts:
-        b = b.cut(_xcyl(P.M5_TAP_D, PLATE_X0 - 12.0, PLATE_X0 + 1.0, y, z))
-    return b.removeSplitter()
-
-
 # Where the motor pulley lands, given the shaft it has to sit on.
 MOTOR_SHAFT_X0 = AL_MOTOR_FACE_X - NEMA_SHAFT_L
 # The motor pulley goes on the other way round - hub OUTBOARD - so its teeth
@@ -147,3 +115,67 @@ MPUL_X1 = MPUL_X0 + P.PULLEY_W
 MOTOR_TEETH_X0 = MPUL_X0 + P.PULLEY_FLANGE_T
 MOTOR_TEETH_X1 = MOTOR_TEETH_X0 + P.PULLEY_TEETH_W
 TEETH_OVERLAP = min(BELT_X1, MOTOR_TEETH_X1) - max(BELT_X0, MOTOR_TEETH_X0)
+
+
+BOSS_Y_IN = P.PULLEY_MAX_OD / 2.0 + P.BOSS_CLEAR
+BOSS_Y_OUT = 27.0
+PAD_X0 = P.PULLEY_X1 + 0.5        # outboard of the pulley, so the pad is free
+TAP_DEPTH = 8.0
+
+# Bolt heights. The upper row has to clear the pulley AND leave wall round
+# the tapped hole; the lower row only has to stay inside the slot.
+BOLT_Z_HI = (P.PULLEY_MAX_OD / 2.0 + P.BOSS_CLEAR + P.BOSS_WALL
+             + P.M5_TAP_D / 2.0)
+BOLT_Z_LO = SLOT_Z_LO + 3.75
+# Travel left for tensioning: the slot's length less how far apart the rows
+# are. Two bolts at different heights lock the plate unless both stay inside
+# their own slots, so the spread is paid for out of the adjustment.
+SLOT_TRAVEL = P.PLATE_SLOT_FROM_TOP[1] - P.PLATE_SLOT_FROM_TOP[0]
+TENSION_TRAVEL = SLOT_TRAVEL - (BOLT_Z_HI - BOLT_Z_LO)
+
+
+def bolt_positions():
+    """Five: three across the top, two at the bottom of the outer slots.
+
+    The centre slot is usable because the belt's two runs are at Y = +-12.73
+    and there is nothing between them at this height - the pulley tops out
+    below. The +-10 slots are NOT usable: a tapped M5 there reaches Y 12.1,
+    which is 0.6 from the belt.
+    """
+    return ([(y, BOLT_Z_HI) for y in (-20.0, 0.0, 20.0)]
+            + [(y, BOLT_Z_LO) for y in (-20.0, 20.0)])
+
+
+def add_plate_mount(b):
+    """Bosses standing off the housing face to carry the plate.
+
+    The outer ones are a narrow web where they pass the pulley, flaring to a
+    full pad outboard of it - so the tapped holes sit in material that never
+    had to squeeze past a flange, and the lower row works whatever the
+    pulley's flange diameter turns out to be.
+    """
+    z_lo, z_hi = SLOT_Z_LO - 2.0, BOLT_Z_HI + 3.0
+    for sy in (+1, -1):
+        b = b.fuse(_box(P.BODY_L_CLEAR - 2.0, PAD_X0,
+                        sy * BOSS_Y_IN, sy * BOSS_Y_OUT, z_lo, z_hi))
+        # The pad flares inward past the pulley. As a step it was a 4 mm
+        # ledge hanging in the air, which the overhang audit rejected; at
+        # 45 degrees it carries itself.
+        flare = BOSS_Y_IN - 13.0
+        pts = [(PAD_X0, BOSS_Y_IN), (PAD_X0 + flare, 13.0),
+               (PLATE_X0, 13.0), (PLATE_X0, BOSS_Y_OUT),
+               (PAD_X0, BOSS_Y_OUT), (PAD_X0, BOSS_Y_IN)]
+        wire = Part.makePolygon([Vector(x, sy * y, z_lo) for x, y in pts])
+        b = b.fuse(Part.Face(wire).extrude(Vector(0, 0, z_hi - z_lo)))
+    # the centre boss lives between the belt's two runs
+    # Its underside is the closest thing to the pulley anywhere on the part:
+    # at Y = 0 the distance from the screw axis IS the height, so the boss
+    # has to start at the pulley's radius plus clearance, not at whatever
+    # the bolt's wall happens to need.
+    cy = P.M5_TAP_D / 2.0 + P.BOSS_WALL + 1.0
+    b = b.fuse(_box(P.BODY_L_CLEAR - 2.0, PLATE_X0, -cy, cy,
+                    BOSS_Y_IN, z_hi))
+    b = b.removeSplitter()
+    for y, z in bolt_positions():
+        b = b.cut(_xcyl(P.M5_TAP_D, PLATE_X0 - TAP_DEPTH, PLATE_X0 + 1.0, y, z))
+    return b.removeSplitter()
