@@ -10,6 +10,13 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ## [Unreleased]
 
+### Added
+
+- **The X fit coupon fits the machine** (2026-11-19), confirming the 72 mm
+  bolt pitch, the 15.7 mm bolt-line offset, the bore clearing the boss and
+  the backplate sitting flat. Side-wall clearance remains asserted rather
+  than fitted - the coupon is only the bracket's first 4 mm.
+
 ### Fixed
 
 - **The bore clears the boss instead of registering on it.** Nothing here

@@ -15,6 +15,17 @@ M5s that already hold the plate on - just longer ones.
 | Centre distance | 69.71 mm, motor directly above the screw |
 | Bracket | 37 × 96 × 129 mm, 131 cm³ |
 
+## Status
+
+**The fit coupon fits the machine** (2026-11-19). That confirms, physically:
+the 72 mm bolt pitch, the 15.7 mm bolt-line offset, the bore clearing the
+boss, and the backplate sitting flat on the plate face.
+
+It does **not** confirm the side walls clear the boss. The coupon is only
+the bracket's first 4 mm; the walls start at 8 and the boss stands 16 proud,
+so that clearance is asserted in `build.py` and not yet fitted. Watch it
+when the full bracket goes on.
+
 ## The screw end it fits
 
 Measured 2026-11-19, and corroborated by the WEN parts list in three places:
