@@ -12,6 +12,16 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Added
 
+- **`hardware/mechanical/x-belt`** - back onto the stock plate, with printed
+  pulleys and the keyway. Bracket 38.3 cm3 plus two pulleys at 5.7 and 7.4,
+  against 104 for the x-end housing and 144 for the first bracket. No bore,
+  no bearings, no spacers, no circlip.
+- The screw pulley is 14 mm wide and the 6 mm belt is not what decides it:
+  the washer and nut must finish before the thread runs out at 39, and the
+  motor plate must clear the thread's END, which sticks 3.9 mm past the nut.
+  That fixes the shaft tip at 22 and makes the overlap seat - 4.5, so a
+  6 mm belt needs a seat of 10.5 or more.
+
 - **Five mounting bolts instead of two.** Three across the top (including
   the centre slot, which is usable because the belt's runs are at Y +-12.73
   and nothing sits between them at that height) and two at the bottom of the
