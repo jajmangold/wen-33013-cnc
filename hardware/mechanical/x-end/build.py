@@ -16,6 +16,7 @@ sys.path.insert(0, os.path.join(_HERE, "..", "lib"))
 import FreeCAD as App
 import mount
 import params as P
+import Part
 from fcutil import box, check, xcyl
 from FreeCAD import Vector
 
@@ -32,8 +33,6 @@ BODY_BOT = -(P.BEAR_OD / 2.0 + 7.0)
 # over weeks. With the washer it is 5.6 MPa. The washer is not optional.
 CB_D, CB_DEPTH = P.CB_D, 12.0
 CLIP_D, CLIP_W = 27.2, P.CLIP_W  # DIN 472 internal circlip for a 26 bore
-WEB_CLEAR_D = 22.0               # see make_housing: an overhang number,
-                                 # not a clearance one
 
 
 def make_housing():
@@ -45,13 +44,15 @@ def make_housing():
     # The web outboard of the circlip still has to let the shaft through.
     # Without this it is solid across the bore - which the clash audit caught.
     #
-    # Ø22, not Ø12. Only the shaft passes here, so Ø12 would do - but the
-    # layer below this is the Ø27.2 circlip groove, so a Ø12 hole leaves a
-    # 7.6 mm annulus overhanging inward all the way round, which is what the
-    # slicer complains about. A DIN 472 ring for a 26 bore seats at Ø27.2 and
-    # still stands proud to about Ø24, so Ø22 backs it completely and cuts
-    # the overhang to 2.6 mm.
-    b = b.cut(xcyl(WEB_CLEAR_D, P.BORE_L + CLIP_W, BODY_L + 1.0))
+    # The bore stays Ø26 ALL THE WAY to the outboard face. There is no web.
+    #
+    # There was one, Ø22, added to kill an overhang - and it sealed the bore.
+    # With a Ø20 lip at the inboard end and Ø22 at the outboard, a Ø26
+    # bearing could not be inserted from either direction. It printed before
+    # anyone noticed. A circlip groove has to be open to the end face: the
+    # bearing drops in through a full-diameter bore and the clip goes in
+    # behind it. Material outboard of the groove is exactly the mistake.
+    b = b.cut(xcyl(P.BORE_D + P.BORE_FIT, P.LIP_L, BODY_L + 1.0))
     for s in (+1, -1):
         y = s * P.BOLT_PITCH / 2.0
         b = b.cut(xcyl(P.BOLT_CLEAR_D, -1.0, BODY_L + 1.0, y, P.BOLT_ABOVE))
@@ -251,6 +252,28 @@ def main():
             blocked.append(f"{what} Y{y:+.1f} Z{z:.1f} ({v:.0f} mm3)")
     if blocked:
         raise AssertionError("screws cannot be fitted: " + ", ".join(blocked))
+
+    # --- CAN THE BEARINGS GET IN? Same family as the screw-access check,
+    # and it should have been written at the same time. A bore can be
+    # perfectly dimensioned, clash-free and printable while being sealed at
+    # both ends, and nothing else here would say a word.
+    free = []
+    for x in [P.LIP_L + 0.2 + i * 0.5 for i in range(int((BODY_L - P.LIP_L) / 0.5))]:
+        d = 0.0
+        for t in [v / 10.0 for v in range(200, 300, 2)]:
+            probe = Part.makeCylinder(t / 2.0, 0.3, Vector(x, 0, 0), Vector(1, 0, 0))
+            if housing.common(probe).Volume > 1e-6:
+                break
+            d = t
+        free.append(d)
+    narrowest = min(free)
+    if narrowest < P.BEAR_OD:
+        raise AssertionError(
+            f"the bore necks to Ø{narrowest:.1f} somewhere between the seat "
+            f"and the outboard face - a Ø{P.BEAR_OD:.0f} bearing cannot be "
+            f"inserted")
+    print(f"  bearing access  bore is Ø{narrowest:.1f} or wider from the seat "
+          f"to the open face, so a Ø{P.BEAR_OD:.0f} goes in")
 
     # --- OVERHANG AUDIT. Printed inboard-face-down, the only thing that is
     # allowed to be in the air is the motor plate's underside, which bridges

@@ -71,6 +71,20 @@ Changelogs are for humans. Record what changed about the *machine* or the
 
 ### Fixed
 
+- **The bore was sealed at both ends and the part was printed before anyone
+  noticed.** Ø20 at the inboard lip, Ø22 at the outboard web: a Ø26 bearing
+  could not be inserted from either direction. A circlip groove has to be
+  open to the end face - the bearing drops in through a full-diameter bore
+  and the clip goes in behind it - so material outboard of the groove is
+  exactly the mistake. The web was added to kill an overhang and sealed the
+  part doing it. The bore now runs Ø26 to the face; the overhang it was
+  there to fix went away with it, 170 mm² down to 18.
+- `build.py` now asks **whether the bearings can get in**, by walking the
+  bore and finding its narrowest free diameter. It is the same family as
+  the screw-access check and should have been written beside it: a bore can
+  be correctly dimensioned, clash-free, printable and still sealed, and
+  nothing else here would say a word.
+
 - **The overhang audit flagged every 45° ramp.** It tested whether material
   had anything DIRECTLY beneath it, which a 45° ramp never does - one layer
   width per layer is exactly what 45° means. It reported the pad's flare as
